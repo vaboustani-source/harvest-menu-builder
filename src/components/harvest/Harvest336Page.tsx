@@ -16,7 +16,9 @@ export function Harvest336Page() {
   const [activeTab, setActiveTab] = useState('basics');
   const [activeFilter, setActiveFilter] = useState<'all' | DietTag>('all');
   const [scrolled, setScrolled] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
+  const mobileDropdownRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   // Sticky nav shadow on scroll
