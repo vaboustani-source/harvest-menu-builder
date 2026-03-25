@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { menuSections } from '@/data/menuData';
 import type { DietTag } from '@/data/menuData';
 import { DIET_FILTER_OPTIONS } from './DietTag';
 import { MenuItemCard } from './MenuItemCard';
 import { PackageCardBlock } from './PackageCardBlock';
 import { AccordionBlock } from './AccordionBlock';
+
 
 // Cross SVG pattern for hero
 const CROSS_PATTERN =
