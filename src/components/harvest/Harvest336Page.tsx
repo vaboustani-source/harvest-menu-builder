@@ -28,11 +28,29 @@ export function Harvest336Page() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Scroll active tab into view
+  // Close mobile dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (mobileDropdownRef.current && !mobileDropdownRef.current.contains(e.target as Node)) {
+        setMobileNavOpen(false);
+      }
+    };
+    if (mobileNavOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [mobileNavOpen]);
+
+  // Scroll active tab into view (desktop)
   useEffect(() => {
     const btn = tabRefs.current[activeTab];
     if (btn) btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   }, [activeTab]);
+
+  const handleTabSelect = (id: string) => {
+    setActiveTab(id);
+    setActiveFilter('all');
+    setMobileNavOpen(false);
+  };
+
 
   const currentSection = menuSections.find((s) => s.id === activeTab);
 
