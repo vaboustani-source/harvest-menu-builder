@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { menuSections } from '@/data/menuData';
 import type { DietTag } from '@/data/menuData';
 import { DIET_FILTER_OPTIONS } from './DietTag';
 import { MenuItemCard } from './MenuItemCard';
 import { PackageCardBlock } from './PackageCardBlock';
 import { AccordionBlock } from './AccordionBlock';
+
 
 // Cross SVG pattern for hero
 const CROSS_PATTERN =
@@ -14,7 +16,9 @@ export function Harvest336Page() {
   const [activeTab, setActiveTab] = useState('basics');
   const [activeFilter, setActiveFilter] = useState<'all' | DietTag>('all');
   const [scrolled, setScrolled] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
+  const mobileDropdownRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   // Sticky nav shadow on scroll
@@ -24,11 +28,29 @@ export function Harvest336Page() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Scroll active tab into view
+  // Close mobile dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (mobileDropdownRef.current && !mobileDropdownRef.current.contains(e.target as Node)) {
+        setMobileNavOpen(false);
+      }
+    };
+    if (mobileNavOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [mobileNavOpen]);
+
+  // Scroll active tab into view (desktop)
   useEffect(() => {
     const btn = tabRefs.current[activeTab];
     if (btn) btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   }, [activeTab]);
+
+  const handleTabSelect = (id: string) => {
+    setActiveTab(id);
+    setActiveFilter('all');
+    setMobileNavOpen(false);
+  };
+
 
   const currentSection = menuSections.find((s) => s.id === activeTab);
 
@@ -91,16 +113,58 @@ export function Harvest336Page() {
           scrolled ? 'shadow-nav' : ''
         }`}
       >
-        <div className="max-w-[1100px] mx-auto px-6">
+        {/* ── MOBILE DROPDOWN (< md) ── */}
+        <div className="md:hidden" ref={mobileDropdownRef}>
+          <button
+            onClick={() => setMobileNavOpen((o) => !o)}
+            className="w-full flex items-center justify-between px-5 py-4 cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <span className="font-sans text-[10px] tracking-[0.25em] uppercase text-text-muted-brand">
+                Menu
+              </span>
+              <span className="w-px h-3 bg-cream-dark" />
+              <span className="font-sans text-[11px] font-semibold tracking-[0.1em] uppercase text-grove">
+                {currentSection?.label}
+              </span>
+            </div>
+            <ChevronDown
+              size={16}
+              className={`text-sage transition-transform duration-200 ${mobileNavOpen ? 'rotate-180' : ''}`}
+            />
+          </button>
+
+          {/* Dropdown panel */}
+          {mobileNavOpen && (
+            <div className="absolute left-0 right-0 bg-white border-b border-cream-dark shadow-nav z-50">
+              {menuSections.map((section, i) => (
+                <button
+                  key={section.id}
+                  onClick={() => handleTabSelect(section.id)}
+                  className={`w-full flex items-center justify-between px-5 py-3 font-sans text-[11px] font-medium tracking-[0.1em] uppercase cursor-pointer transition-colors duration-150 border-b border-cream-dark last:border-b-0 ${
+                    activeTab === section.id
+                      ? 'text-grove bg-cream'
+                      : 'text-text-muted-brand hover:bg-cream hover:text-grove'
+                  }`}
+                >
+                  <span>{section.label}</span>
+                  {activeTab === section.id && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-sage shrink-0" />
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* ── DESKTOP TAB BAR (≥ md) ── */}
+        <div className="hidden md:block max-w-[1100px] mx-auto px-6">
           <div className="flex overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {menuSections.map((section) => (
               <button
                 key={section.id}
                 ref={(el) => { tabRefs.current[section.id] = el; }}
-                onClick={() => {
-                  setActiveTab(section.id);
-                  setActiveFilter('all');
-                }}
+                onClick={() => handleTabSelect(section.id)}
                 className={`flex-shrink-0 px-5 py-4 border-b-2 font-sans text-[11px] font-medium tracking-[0.1em] uppercase whitespace-nowrap transition-all duration-200 cursor-pointer ${
                   activeTab === section.id
                     ? 'text-grove border-sage font-semibold'
@@ -113,6 +177,7 @@ export function Harvest336Page() {
           </div>
         </div>
       </div>
+
 
       {/* ── DIET FILTER BAR ──────────────────────────────────────────── */}
       <div className="bg-cream border-b border-cream-dark px-6 py-[14px]">
