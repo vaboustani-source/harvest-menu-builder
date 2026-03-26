@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useMenuData, type DbMenuItem, type DbMenuPackage, type DbMenuAccordion, type FullMenuSection } from '@/hooks/useMenuData';
 import { useBasicsCards, type BasicsCard } from '@/hooks/useBasicsCards';
@@ -8,6 +10,7 @@ import { PackageFormModal } from '@/components/admin/PackageFormModal';
 import { AccordionFormModal } from '@/components/admin/AccordionFormModal';
 import { BasicsCardFormModal } from '@/components/admin/BasicsCardFormModal';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Pencil, Trash2, LogOut, ChevronDown, GripVertical, Diamond } from 'lucide-react';
 import {
@@ -66,6 +69,32 @@ export default function AdminDashboard() {
   const { data: basicsGroups } = useBasicsCards();
   const [activeSectionId, setActiveSectionId] = useState<string>('');
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Ownership lock for Basics tab
+  const [basicsUnlocked, setBasicsUnlocked] = useState(false);
+  const [ownershipPrompt, setOwnershipPrompt] = useState(false);
+  const [ownershipPw, setOwnershipPw] = useState('');
+  const [ownershipError, setOwnershipError] = useState('');
+
+  const handleSelectSection = (id: string) => {
+    if (id === 'basics' && !basicsUnlocked) {
+      setOwnershipPw('');
+      setOwnershipError('');
+      setOwnershipPrompt(true);
+      return;
+    }
+    setActiveSectionId(id);
+  };
+
+  const handleOwnershipSubmit = () => {
+    if (ownershipPw === 'Boustani6') {
+      setBasicsUnlocked(true);
+      setOwnershipPrompt(false);
+      setActiveSectionId('basics');
+    } else {
+      setOwnershipError('Incorrect password.');
+    }
+  };
 
   // Modals
   const [itemModal, setItemModal] = useState<{ open: boolean; item?: DbMenuItem | null }>({ open: false });
@@ -191,7 +220,7 @@ export default function AdminDashboard() {
               {sections?.map((s) => (
                 <button
                   key={s.id}
-                  onClick={() => { setActiveSectionId(s.id); setMobileOpen(false); }}
+                  onClick={() => { handleSelectSection(s.id); setMobileOpen(false); }}
                   className={`w-full text-left px-4 py-3 font-sans text-sm border-b border-cream-dark last:border-0 transition-colors ${
                     s.id === activeSectionId ? 'bg-sage/10 text-green font-medium' : 'text-charcoal hover:bg-cream'
                   }`}
@@ -211,7 +240,7 @@ export default function AdminDashboard() {
               {sections?.map((s) => (
                 <button
                   key={s.id}
-                  onClick={() => setActiveSectionId(s.id)}
+                  onClick={() => handleSelectSection(s.id)}
                   className={`w-full text-left px-3 py-2.5 rounded-lg font-sans text-[13px] transition-colors ${
                     s.id === activeSectionId
                       ? 'bg-green text-white'
@@ -350,6 +379,35 @@ export default function AdminDashboard() {
         card={basicsCardModal.card}
         existingGroups={basicsGroups?.map((g) => g.label) ?? []}
       />
+
+      {/* Ownership password dialog for Basics tab */}
+      <Dialog open={ownershipPrompt} onOpenChange={(v) => !v && setOwnershipPrompt(false)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-serif italic text-xl text-green">Ownership Access</DialogTitle>
+          </DialogHeader>
+          <p className="font-sans text-sm text-muted-foreground">The Basics tab is restricted to ownership. Enter the ownership password to continue.</p>
+          <div className="space-y-2 mt-2">
+            <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Password</Label>
+            <Input
+              type="password"
+              value={ownershipPw}
+              onChange={(e) => { setOwnershipPw(e.target.value); setOwnershipError(''); }}
+              onKeyDown={(e) => e.key === 'Enter' && handleOwnershipSubmit()}
+              placeholder="Enter ownership password"
+            />
+            {ownershipError && <p className="text-xs text-red-600 font-sans">{ownershipError}</p>}
+          </div>
+          <div className="flex gap-3 mt-3">
+            <Button onClick={handleOwnershipSubmit} className="flex-1 bg-green hover:bg-green/90 text-white font-sans text-xs tracking-widest uppercase">
+              Unlock
+            </Button>
+            <Button variant="outline" onClick={() => setOwnershipPrompt(false)} className="font-sans text-xs tracking-widest uppercase">
+              Cancel
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
