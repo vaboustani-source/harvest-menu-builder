@@ -5,6 +5,7 @@ import { DIET_FILTER_OPTIONS } from './DietTag';
 import { MenuItemCard } from './MenuItemCard';
 import { PackageCardBlock } from './PackageCardBlock';
 import { AccordionBlock } from './AccordionBlock';
+import { BasicsContent } from './BasicsContent';
 import { useMenuData, type FullMenuSection } from '@/hooks/useMenuData';
 
 // Cross SVG pattern for hero
@@ -124,14 +125,15 @@ export function Harvest336Page() {
       </header>
 
       {/* ── INTRO BAND ───────────────────────────────────────────────── */}
-      <div className="bg-white border-b border-cream-dark px-10 py-7 text-center">
+      <div className="bg-cream border-b border-cream-dark px-10 py-7 text-center">
         <p className="font-serif text-[18px] font-light italic text-text-muted-brand leading-[1.75] mx-auto max-w-[760px]">
-          Every menu is built in conversation with you —{' '}
-          <strong className="text-grove not-italic font-medium">your tastes</strong>,{' '}
-          <strong className="text-grove not-italic font-medium">your guests</strong>,{' '}
-          <strong className="text-grove not-italic font-medium">your weekend</strong>. Nothing here
-          is templated. Nothing is rushed. What you see below is a living menu: our current seasonal
-          offerings, updated as the kitchen evolves.
+          Our culinary team handles{' '}
+          <strong className="text-grove not-italic font-medium">every meal of your weekend</strong>{' '}
+          — from Friday's rehearsal dinner to Sunday's farewell brunch. All menus are customized
+          with you, built around your taste, and executed from our on-site kitchen.{' '}
+          <span className="not-italic font-medium text-grove">
+            No outside caterers. No banquet trays. No compromises.
+          </span>
         </p>
       </div>
 
@@ -235,52 +237,77 @@ export function Harvest336Page() {
       <main className="max-w-[1100px] mx-auto px-6 pt-11 pb-20">
         {currentSection && (
           <div key={currentSection.id}>
-            {/* Section Header */}
-            <div className="mb-8">
-              <p className="font-sans text-[10px] tracking-[0.35em] uppercase text-sage mb-[10px]">
-                {currentSection.label}
-              </p>
-              <h2
-                className="font-serif font-light text-grove leading-[1.15] mb-3"
-                style={{ fontSize: 'clamp(28px, 4vw, 42px)' }}
-              >
-                {currentSection.section_title}
-              </h2>
-              {currentSection.description && (
-                <p className="font-serif text-[15px] italic text-text-muted-brand max-w-[640px] leading-[1.75]">
-                  {currentSection.description}
-                </p>
-              )}
-              <div className="w-[60px] h-px bg-sage-light mt-5 mb-9" />
-            </div>
+            {/* Basics tab gets custom layout */}
+            {currentSection.id === 'basics' ? (
+              <BasicsContent />
+            ) : (
+              <>
+                {/* Section Header */}
+                <div className="mb-8">
+                  <p className="font-sans text-[10px] tracking-[0.35em] uppercase text-sage mb-[10px]">
+                    {currentSection.label}
+                  </p>
+                  <h2
+                    className="font-serif font-light text-grove leading-[1.15] mb-3"
+                    style={{ fontSize: 'clamp(28px, 4vw, 42px)' }}
+                  >
+                    {currentSection.section_title}
+                  </h2>
+                  {currentSection.description && (
+                    <p className="font-serif text-[15px] italic text-text-muted-brand max-w-[640px] leading-[1.75]">
+                      {currentSection.description}
+                    </p>
+                  )}
+                  <div className="w-[60px] h-px bg-sage-light mt-5 mb-9" />
+                </div>
 
-            {/* Packages */}
-            {currentSection.packages.length > 0 && (
-              <div className="flex flex-col gap-4 mb-12">
-                {currentSection.packages.map((pkg) => (
-                  <PackageCardBlock key={pkg.id} card={{ title: pkg.title, price: pkg.price, description: pkg.description }} />
-                ))}
-              </div>
-            )}
+                {/* Packages */}
+                {currentSection.packages.length > 0 && (
+                  <div className="flex flex-col gap-4 mb-12">
+                    {currentSection.packages.map((pkg) => (
+                      <PackageCardBlock key={pkg.id} card={{ title: pkg.title, price: pkg.price, description: pkg.description }} />
+                    ))}
+                  </div>
+                )}
 
-            {/* Items — grouped or flat */}
-            {currentSection.items.length > 0 && (
-              hasGroups(currentSection) ? (
-                Object.entries(getGroupedItems(currentSection)).map(([group, items]) => {
-                  const visibleItems = items.filter((item) => isItemVisible(item.diet));
-                  if (visibleItems.length === 0) return null;
-                  return (
-                    <div key={group} className="mb-8">
-                      {group !== '__ungrouped__' && (
-                        <div className="flex items-center gap-3 mb-[14px] mt-9 first:mt-0">
-                          <span className="font-sans text-[10px] tracking-[0.3em] uppercase text-sage">
-                            {group}
-                          </span>
-                          <div className="flex-1 h-px bg-cream-dark" />
+                {/* Items — grouped or flat */}
+                {currentSection.items.length > 0 && (
+                  hasGroups(currentSection) ? (
+                    Object.entries(getGroupedItems(currentSection)).map(([group, items]) => {
+                      const visibleItems = items.filter((item) => isItemVisible(item.diet));
+                      if (visibleItems.length === 0) return null;
+                      return (
+                        <div key={group} className="mb-8">
+                          {group !== '__ungrouped__' && (
+                            <div className="flex items-center gap-3 mb-[14px] mt-9 first:mt-0">
+                              <span className="font-sans text-[10px] tracking-[0.3em] uppercase text-sage">
+                                {group}
+                              </span>
+                              <div className="flex-1 h-px bg-cream-dark" />
+                            </div>
+                          )}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px]">
+                            {visibleItems.map((item) => (
+                              <MenuItemCard
+                                key={item.id}
+                                item={{
+                                  name: item.name,
+                                  description: item.description ?? undefined,
+                                  price: item.price ?? undefined,
+                                  diet: (item.diet as DietTag[] | undefined) ?? undefined,
+                                  note: item.note ?? undefined,
+                                }}
+                              />
+                            ))}
+                          </div>
                         </div>
-                      )}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px]">
-                        {visibleItems.map((item) => (
+                      );
+                    })
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px] mb-12">
+                      {currentSection.items.map((item) => {
+                        if (!isItemVisible(item.diet)) return null;
+                        return (
                           <MenuItemCard
                             key={item.id}
                             item={{
@@ -291,43 +318,25 @@ export function Harvest336Page() {
                               note: item.note ?? undefined,
                             }}
                           />
-                        ))}
-                      </div>
+                        );
+                      })}
                     </div>
-                  );
-                })
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px] mb-12">
-                  {currentSection.items.map((item) => {
-                    if (!isItemVisible(item.diet)) return null;
-                    return (
-                      <MenuItemCard
-                        key={item.id}
-                        item={{
-                          name: item.name,
-                          description: item.description ?? undefined,
-                          price: item.price ?? undefined,
-                          diet: (item.diet as DietTag[] | undefined) ?? undefined,
-                          note: item.note ?? undefined,
-                        }}
-                      />
-                    );
-                  })}
-                </div>
-              )
-            )}
+                  )
+                )}
 
-            {/* Accordion (Bar section) */}
-            {currentSection.accordions.length > 0 && (
-              <AccordionBlock
-                groups={currentSection.accordions.map((a) => ({
-                  title: a.title,
-                  subtitle: a.subtitle ?? undefined,
-                  price: a.price ?? undefined,
-                  emoji: a.emoji ?? undefined,
-                  body: a.body,
-                }))}
-              />
+                {/* Accordion (Bar section) */}
+                {currentSection.accordions.length > 0 && (
+                  <AccordionBlock
+                    groups={currentSection.accordions.map((a) => ({
+                      title: a.title,
+                      subtitle: a.subtitle ?? undefined,
+                      price: a.price ?? undefined,
+                      emoji: a.emoji ?? undefined,
+                      body: a.body,
+                    }))}
+                  />
+                )}
+              </>
             )}
           </div>
         )}
