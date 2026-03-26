@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useMenuData, type DbMenuItem, type DbMenuPackage, type DbMenuAccordion, type FullMenuSection } from '@/hooks/useMenuData';
 import { useBasicsCards, type BasicsCard } from '@/hooks/useBasicsCards';
@@ -8,6 +10,7 @@ import { PackageFormModal } from '@/components/admin/PackageFormModal';
 import { AccordionFormModal } from '@/components/admin/AccordionFormModal';
 import { BasicsCardFormModal } from '@/components/admin/BasicsCardFormModal';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Pencil, Trash2, LogOut, ChevronDown, GripVertical, Diamond } from 'lucide-react';
 import {
@@ -66,6 +69,32 @@ export default function AdminDashboard() {
   const { data: basicsGroups } = useBasicsCards();
   const [activeSectionId, setActiveSectionId] = useState<string>('');
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Ownership lock for Basics tab
+  const [basicsUnlocked, setBasicsUnlocked] = useState(false);
+  const [ownershipPrompt, setOwnershipPrompt] = useState(false);
+  const [ownershipPw, setOwnershipPw] = useState('');
+  const [ownershipError, setOwnershipError] = useState('');
+
+  const handleSelectSection = (id: string) => {
+    if (id === 'basics' && !basicsUnlocked) {
+      setOwnershipPw('');
+      setOwnershipError('');
+      setOwnershipPrompt(true);
+      return;
+    }
+    setActiveSectionId(id);
+  };
+
+  const handleOwnershipSubmit = () => {
+    if (ownershipPw === 'Boustani6') {
+      setBasicsUnlocked(true);
+      setOwnershipPrompt(false);
+      setActiveSectionId('basics');
+    } else {
+      setOwnershipError('Incorrect password.');
+    }
+  };
 
   // Modals
   const [itemModal, setItemModal] = useState<{ open: boolean; item?: DbMenuItem | null }>({ open: false });
