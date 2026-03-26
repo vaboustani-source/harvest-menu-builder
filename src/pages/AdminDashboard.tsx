@@ -102,6 +102,12 @@ export default function AdminDashboard() {
     qc.invalidateQueries({ queryKey: ['menu-data'] });
   };
 
+  const handleDeleteBasicsCard = async (id: string) => {
+    if (!confirm('Delete this basics card?')) return;
+    await supabase.from('basics_cards').delete().eq('id', id);
+    qc.invalidateQueries({ queryKey: ['basics-cards'] });
+  };
+
   // Reorder handlers — optimistic update then persist
   const handleReorderItems = async (sectionId: string, oldIndex: number, newIndex: number, items: DbMenuItem[]) => {
     const reordered = arrayMove(items, oldIndex, newIndex);
@@ -220,7 +226,85 @@ export default function AdminDashboard() {
 
           {/* Main content */}
           <main className="flex-1 min-w-0">
-            {activeSection && (
+            {activeSection && activeSectionId === 'basics' ? (
+              /* ── Basics Card Editor ── */
+              <div className="space-y-8">
+                <div className="border-b border-cream-dark pb-4">
+                  <h2 className="font-serif italic text-2xl text-green">{activeSection.section_title}</h2>
+                  <p className="font-sans text-xs text-muted-foreground mt-1 leading-relaxed max-w-xl">
+                    Edit the "What's Included" cards shown on the Basics tab. Cards are grouped by category and displayed as paired cards.
+                  </p>
+                </div>
+
+                {/* Existing packages (Site Fee, Catering, Lodging) */}
+                <SectionEditor
+                  section={activeSection}
+                  onAddItem={() => setItemModal({ open: true, item: null })}
+                  onEditItem={(item) => setItemModal({ open: true, item })}
+                  onDeleteItem={handleDeleteItem}
+                  onReorderItems={handleReorderItems}
+                  onAddPackage={() => setPkgModal({ open: true, pkg: null })}
+                  onEditPackage={(pkg) => setPkgModal({ open: true, pkg })}
+                  onDeletePackage={handleDeletePackage}
+                  onReorderPackages={handleReorderPackages}
+                  onAddAccordion={() => setAccModal({ open: true, accordion: null })}
+                  onEditAccordion={(acc) => setAccModal({ open: true, accordion: acc })}
+                  onDeleteAccordion={handleDeleteAccordion}
+                  onReorderAccordions={handleReorderAccordions}
+                />
+
+                {/* Basics Cards (included/addon groups) */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Included / Add-On Cards</h3>
+                    <Button onClick={() => setBasicsCardModal({ open: true, card: null })} size="sm" variant="outline" className="font-sans text-xs gap-1.5 h-8">
+                      <Plus size={13} /> Add Card
+                    </Button>
+                  </div>
+
+                  {basicsGroups?.map((group) => (
+                    <div key={group.label} className="mb-5">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="font-sans text-[10px] tracking-[0.2em] uppercase text-sage font-medium">{group.label}</span>
+                        <div className="flex-1 h-px bg-cream-dark" />
+                      </div>
+                      <div className="space-y-2">
+                        {group.cards.map((card) => (
+                          <div key={card.id} className="bg-white border border-cream-dark rounded-lg px-4 py-3 group">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <Diamond size={10} className={card.card_type === 'included' ? 'text-sage fill-sage' : 'text-warm'} />
+                                  <p className="font-serif text-[14px] text-charcoal">{card.title}</p>
+                                  <span className="font-sans text-[10px] uppercase tracking-widest text-muted-foreground">
+                                    {card.card_type}
+                                  </span>
+                                </div>
+                                <p className="font-sans text-xs text-muted-foreground leading-relaxed">
+                                  {card.bullets.length} bullet{card.bullets.length !== 1 ? 's' : ''}: {card.bullets.map((b) => b.text).join(' · ').slice(0, 80)}…
+                                </p>
+                              </div>
+                              <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onClick={() => setBasicsCardModal({ open: true, card })} className="p-1.5 rounded hover:bg-cream-dark text-muted-foreground hover:text-charcoal transition-colors">
+                                  <Pencil size={13} />
+                                </button>
+                                <button onClick={() => handleDeleteBasicsCard(card.id)} className="p-1.5 rounded hover:bg-red-50 text-muted-foreground hover:text-red-600 transition-colors">
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+
+                  {(!basicsGroups || basicsGroups.length === 0) && (
+                    <p className="font-sans text-xs text-muted-foreground italic">No basics cards yet.</p>
+                  )}
+                </div>
+              </div>
+            ) : activeSection ? (
               <SectionEditor
                 section={activeSection}
                 onAddItem={() => setItemModal({ open: true, item: null })}
@@ -236,7 +320,7 @@ export default function AdminDashboard() {
                 onDeleteAccordion={handleDeleteAccordion}
                 onReorderAccordions={handleReorderAccordions}
               />
-            )}
+            ) : null}
           </main>
         </div>
       </div>
