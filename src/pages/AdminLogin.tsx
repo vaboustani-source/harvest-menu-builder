@@ -29,14 +29,14 @@ export default function AdminLogin() {
     <div className="min-h-screen bg-cream flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-10">
-          <p className="font-sans text-[10px] tracking-[0.25em] uppercase text-muted mb-2">Gilbertsville Farmhouse</p>
+          <p className="font-sans text-[10px] tracking-[0.25em] uppercase text-muted-foreground mb-2">Gilbertsville Farmhouse</p>
           <h1 className="font-serif text-3xl text-green italic">Harvest 336</h1>
-          <p className="font-sans text-xs tracking-widest uppercase text-muted mt-1">Admin Portal</p>
+          <p className="font-sans text-xs tracking-widest uppercase text-muted-foreground mt-1">Admin Portal</p>
         </div>
 
         <form onSubmit={handleLogin} className="bg-white rounded-xl border border-cream-dark p-8 shadow-card space-y-5">
           <div className="space-y-1.5">
-            <Label htmlFor="email" className="font-sans text-[11px] uppercase tracking-widest text-muted">Email</Label>
+            <Label htmlFor="email" className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Email</Label>
             <Input
               id="email"
               type="email"
@@ -47,7 +47,7 @@ export default function AdminLogin() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="password" className="font-sans text-[11px] uppercase tracking-widest text-muted">Password</Label>
+            <Label htmlFor="password" className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Password</Label>
             <Input
               id="password"
               type="password"
@@ -69,7 +69,7 @@ export default function AdminLogin() {
           </Button>
         </form>
 
-        <p className="text-center mt-6 font-sans text-[11px] text-muted">
+        <p className="text-center mt-6 font-sans text-[11px] text-muted-foreground">
           <a href="/" className="hover:text-green transition-colors">← Back to menu</a>
         </p>
       </div>

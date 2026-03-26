@@ -82,29 +82,29 @@ export function ItemFormModal({ open, onClose, sectionId, item }: Props) {
 
         <div className="space-y-4 mt-2">
           <div className="space-y-1">
-            <Label className="font-sans text-[11px] uppercase tracking-widest text-muted">Name *</Label>
+            <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Name *</Label>
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Grilled NY Strip with Herb Butter" />
           </div>
           <div className="space-y-1">
-            <Label className="font-sans text-[11px] uppercase tracking-widest text-muted">Description</Label>
+            <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Description</Label>
             <Input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional short description" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label className="font-sans text-[11px] uppercase tracking-widest text-muted">Price</Label>
+              <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Price</Label>
               <Input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. $38pp" />
             </div>
             <div className="space-y-1">
-              <Label className="font-sans text-[11px] uppercase tracking-widest text-muted">Note</Label>
+              <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Note</Label>
               <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. passed, stationed" />
             </div>
           </div>
           <div className="space-y-1">
-            <Label className="font-sans text-[11px] uppercase tracking-widest text-muted">Group Label</Label>
+            <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Group Label</Label>
             <Input value={groupLabel} onChange={(e) => setGroupLabel(e.target.value)} placeholder="e.g. Salads, Entrées, Starches & Sides" />
           </div>
           <div className="space-y-2">
-            <Label className="font-sans text-[11px] uppercase tracking-widest text-muted">Dietary Tags</Label>
+            <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Dietary Tags</Label>
             <div className="flex gap-2 flex-wrap">
               {DIET_OPTIONS.map((tag) => (
                 <button

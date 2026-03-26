@@ -53,15 +53,15 @@ export function PackageFormModal({ open, onClose, sectionId, pkg }: Props) {
         </DialogHeader>
         <div className="space-y-4 mt-2">
           <div className="space-y-1">
-            <Label className="font-sans text-[11px] uppercase tracking-widest text-muted">Title *</Label>
+            <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Title *</Label>
             <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Essential Weekend" />
           </div>
           <div className="space-y-1">
-            <Label className="font-sans text-[11px] uppercase tracking-widest text-muted">Price *</Label>
+            <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Price *</Label>
             <Input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. $95pp" />
           </div>
           <div className="space-y-1">
-            <Label className="font-sans text-[11px] uppercase tracking-widest text-muted">Description *</Label>
+            <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Description *</Label>
             <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder="What's included…" />
           </div>
           {error && <p className="text-xs text-red-600 font-sans">{error}</p>}

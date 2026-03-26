@@ -58,26 +58,26 @@ export function AccordionFormModal({ open, onClose, sectionId, accordion }: Prop
         <div className="space-y-4 mt-2">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label className="font-sans text-[11px] uppercase tracking-widest text-muted">Title *</Label>
+              <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Title *</Label>
               <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Premium Open Bar" />
             </div>
             <div className="space-y-1">
-              <Label className="font-sans text-[11px] uppercase tracking-widest text-muted">Price</Label>
+              <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Price</Label>
               <Input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. $58pp" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label className="font-sans text-[11px] uppercase tracking-widest text-muted">Subtitle</Label>
+              <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Subtitle</Label>
               <Input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} placeholder="e.g. Full spirits" />
             </div>
             <div className="space-y-1">
-              <Label className="font-sans text-[11px] uppercase tracking-widest text-muted">Emoji</Label>
+              <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Emoji</Label>
               <Input value={emoji} onChange={(e) => setEmoji(e.target.value)} placeholder="e.g. 🥃" />
             </div>
           </div>
           <div className="space-y-1">
-            <Label className="font-sans text-[11px] uppercase tracking-widest text-muted">Body *</Label>
+            <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Body *</Label>
             <Textarea value={body} onChange={(e) => setBody(e.target.value)} rows={4} placeholder="Full description of what's included…" />
           </div>
           {error && <p className="text-xs text-red-600 font-sans">{error}</p>}
