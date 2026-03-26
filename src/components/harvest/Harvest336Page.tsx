@@ -296,7 +296,7 @@ export function Harvest336Page() {
                 {currentSection.items.length > 0 && (
                   hasGroups(currentSection) ? (
                     Object.entries(getGroupedItems(currentSection)).map(([group, items]) => {
-                      const visibleItems = items.filter((item) => isItemVisible(item.diet));
+                      const visibleItems = items.filter((item) => isItemVisible(item.diet, item.season));
                       if (visibleItems.length === 0) return null;
                       return (
                         <div key={group} className="mb-8">
