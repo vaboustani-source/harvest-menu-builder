@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      basics_cards: {
+        Row: {
+          bullets: Json
+          card_type: string
+          created_at: string
+          group_label: string
+          id: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          bullets?: Json
+          card_type?: string
+          created_at?: string
+          group_label: string
+          id?: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          bullets?: Json
+          card_type?: string
+          created_at?: string
+          group_label?: string
+          id?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       menu_accordions: {
         Row: {
           body: string
