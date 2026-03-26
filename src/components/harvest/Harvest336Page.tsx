@@ -1,18 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { menuSections } from '@/data/menuData';
 import type { DietTag } from '@/data/menuData';
 import { DIET_FILTER_OPTIONS } from './DietTag';
 import { MenuItemCard } from './MenuItemCard';
 import { PackageCardBlock } from './PackageCardBlock';
 import { AccordionBlock } from './AccordionBlock';
-
+import { useMenuData, type FullMenuSection } from '@/hooks/useMenuData';
 
 // Cross SVG pattern for hero
 const CROSS_PATTERN =
   "data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%237A9E7E' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E";
 
 export function Harvest336Page() {
+  const { data: sections, isLoading } = useMenuData();
   const [activeTab, setActiveTab] = useState('basics');
   const [activeFilter, setActiveFilter] = useState<'all' | DietTag>('all');
   const [scrolled, setScrolled] = useState(false);
@@ -51,13 +51,36 @@ export function Harvest336Page() {
     setMobileNavOpen(false);
   };
 
+  const currentSection = sections?.find((s) => s.id === activeTab);
 
-  const currentSection = menuSections.find((s) => s.id === activeTab);
-
-  const isItemVisible = (diet?: DietTag[]) => {
+  const isItemVisible = (diet?: string[] | null) => {
     if (activeFilter === 'all') return true;
     return diet?.includes(activeFilter) ?? false;
   };
+
+  // Group items by group_label for sections like Reception
+  const getGroupedItems = (section: FullMenuSection) => {
+    const grouped: Record<string, typeof section.items> = {};
+    for (const item of section.items) {
+      const key = item.group_label ?? '__ungrouped__';
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(item);
+    }
+    return grouped;
+  };
+
+  const hasGroups = (section: FullMenuSection) =>
+    section.items.some((i) => i.group_label != null);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center">
+        <p className="font-sans text-xs uppercase tracking-widest text-muted animate-pulse">
+          Loading menu…
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-cream">
@@ -134,10 +157,9 @@ export function Harvest336Page() {
             />
           </button>
 
-          {/* Dropdown panel */}
           {mobileNavOpen && (
             <div className="absolute left-0 right-0 bg-white border-b border-cream-dark shadow-nav z-50">
-              {menuSections.map((section, i) => (
+              {sections?.map((section) => (
                 <button
                   key={section.id}
                   onClick={() => handleTabSelect(section.id)}
@@ -160,7 +182,7 @@ export function Harvest336Page() {
         {/* ── DESKTOP TAB BAR (≥ md) ── */}
         <div className="hidden md:block max-w-[1100px] mx-auto px-6">
           <div className="flex overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-            {menuSections.map((section) => (
+            {sections?.map((section) => (
               <button
                 key={section.id}
                 ref={(el) => { tabRefs.current[section.id] = el; }}
@@ -177,7 +199,6 @@ export function Harvest336Page() {
           </div>
         </div>
       </div>
-
 
       {/* ── DIET FILTER BAR ──────────────────────────────────────────── */}
       <div className="bg-cream border-b border-cream-dark px-6 py-[14px]">
@@ -217,7 +238,7 @@ export function Harvest336Page() {
                 className="font-serif font-light text-grove leading-[1.15] mb-3"
                 style={{ fontSize: 'clamp(28px, 4vw, 42px)' }}
               >
-                {currentSection.sectionTitle}
+                {currentSection.section_title}
               </h2>
               {currentSection.description && (
                 <p className="font-serif text-[15px] italic text-text-muted-brand max-w-[640px] leading-[1.75]">
@@ -227,58 +248,80 @@ export function Harvest336Page() {
               <div className="w-[60px] h-px bg-sage-light mt-5 mb-9" />
             </div>
 
-            {/* Packages (top — for Basics, Packages) */}
-            {currentSection.packages && currentSection.id !== 'desserts' && (
+            {/* Packages */}
+            {currentSection.packages.length > 0 && (
               <div className="flex flex-col gap-4 mb-12">
-                {currentSection.packages.map((pkg, i) => (
-                  <PackageCardBlock key={i} card={pkg} />
+                {currentSection.packages.map((pkg) => (
+                  <PackageCardBlock key={pkg.id} card={{ title: pkg.title, price: pkg.price, description: pkg.description }} />
                 ))}
               </div>
             )}
 
-            {/* Dessert packages (shown above items) */}
-            {currentSection.id === 'desserts' && currentSection.packages && (
-              <div className="flex flex-col gap-4 mb-10">
-                {currentSection.packages.map((pkg, i) => (
-                  <PackageCardBlock key={i} card={pkg} />
-                ))}
-              </div>
-            )}
-
-            {/* Flat items list */}
-            {currentSection.items && currentSection.items.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px] mb-12">
-                {currentSection.items.map((item, i) => {
-                  const hidden = !isItemVisible(item.diet);
-                  return <MenuItemCard key={i} item={item} hidden={hidden} />;
-                })}
-              </div>
-            )}
-
-            {/* Grouped items (Reception) */}
-            {currentSection.itemGroups?.map((group) => {
-              const visibleItems = group.items.filter((item) => isItemVisible(item.diet));
-              if (visibleItems.length === 0) return null;
-              return (
-                <div key={group.label}>
-                  <div className="flex items-center gap-3 mb-[14px] mt-9 first:mt-0">
-                    <span className="font-sans text-[10px] tracking-[0.3em] uppercase text-sage">
-                      {group.label}
-                    </span>
-                    <div className="flex-1 h-px bg-cream-dark" />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px] mb-2">
-                    {visibleItems.map((item, i) => (
-                      <MenuItemCard key={i} item={item} />
-                    ))}
-                  </div>
+            {/* Items — grouped or flat */}
+            {currentSection.items.length > 0 && (
+              hasGroups(currentSection) ? (
+                Object.entries(getGroupedItems(currentSection)).map(([group, items]) => {
+                  const visibleItems = items.filter((item) => isItemVisible(item.diet));
+                  if (visibleItems.length === 0) return null;
+                  return (
+                    <div key={group} className="mb-8">
+                      {group !== '__ungrouped__' && (
+                        <div className="flex items-center gap-3 mb-[14px] mt-9 first:mt-0">
+                          <span className="font-sans text-[10px] tracking-[0.3em] uppercase text-sage">
+                            {group}
+                          </span>
+                          <div className="flex-1 h-px bg-cream-dark" />
+                        </div>
+                      )}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px]">
+                        {visibleItems.map((item) => (
+                          <MenuItemCard
+                            key={item.id}
+                            item={{
+                              name: item.name,
+                              description: item.description ?? undefined,
+                              price: item.price ?? undefined,
+                              diet: (item.diet as DietTag[] | undefined) ?? undefined,
+                              note: item.note ?? undefined,
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px] mb-12">
+                  {currentSection.items.map((item) => {
+                    if (!isItemVisible(item.diet)) return null;
+                    return (
+                      <MenuItemCard
+                        key={item.id}
+                        item={{
+                          name: item.name,
+                          description: item.description ?? undefined,
+                          price: item.price ?? undefined,
+                          diet: (item.diet as DietTag[] | undefined) ?? undefined,
+                          note: item.note ?? undefined,
+                        }}
+                      />
+                    );
+                  })}
                 </div>
-              );
-            })}
+              )
+            )}
 
             {/* Accordion (Bar section) */}
-            {currentSection.accordions && (
-              <AccordionBlock groups={currentSection.accordions} />
+            {currentSection.accordions.length > 0 && (
+              <AccordionBlock
+                groups={currentSection.accordions.map((a) => ({
+                  title: a.title,
+                  subtitle: a.subtitle ?? undefined,
+                  price: a.price ?? undefined,
+                  emoji: a.emoji ?? undefined,
+                  body: a.body,
+                }))}
+              />
             )}
           </div>
         )}
