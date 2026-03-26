@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useMenuData, type DbMenuItem, type DbMenuPackage, type DbMenuAccordion, type FullMenuSection } from '@/hooks/useMenuData';
+import { useBasicsCards, type BasicsCard } from '@/hooks/useBasicsCards';
 import { ItemFormModal } from '@/components/admin/ItemFormModal';
 import { PackageFormModal } from '@/components/admin/PackageFormModal';
 import { AccordionFormModal } from '@/components/admin/AccordionFormModal';
+import { BasicsCardFormModal } from '@/components/admin/BasicsCardFormModal';
 import { Button } from '@/components/ui/button';
 import { useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil, Trash2, LogOut, ChevronDown, GripVertical } from 'lucide-react';
+import { Plus, Pencil, Trash2, LogOut, ChevronDown, GripVertical, Diamond } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
