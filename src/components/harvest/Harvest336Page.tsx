@@ -211,7 +211,7 @@ export function Harvest336Page() {
         </div>
       </div>
 
-      {/* ── DIET FILTER BAR ──────────────────────────────────────────── */}
+      {/* ── FILTER BAR ────────────────────────────────────────────── */}
       <div className="bg-cream border-b border-cream-dark px-6 py-[14px]">
         <div className="max-w-[1100px] mx-auto flex items-center gap-[10px] flex-wrap">
           <span className="font-sans text-[10px] tracking-[0.2em] uppercase text-text-muted-brand mr-1">
@@ -231,6 +231,25 @@ export function Harvest336Page() {
                 <span className="w-[6px] h-[6px] rounded-full bg-current opacity-70" />
               )}
               {opt.label}
+            </button>
+          ))}
+
+          <span className="w-px h-4 bg-cream-dark mx-1" />
+
+          <span className="font-sans text-[10px] tracking-[0.2em] uppercase text-text-muted-brand mr-1">
+            Season:
+          </span>
+          {(['all', 'spring', 'summer', 'fall'] as const).map((s) => (
+            <button
+              key={s}
+              onClick={() => setActiveSeason(s)}
+              className={`flex items-center gap-[5px] px-[13px] py-[5px] rounded-full border font-sans text-[11px] transition-all duration-150 cursor-pointer ${
+                activeSeason === s
+                  ? 'bg-warm border-warm text-white'
+                  : 'bg-white border-[#D5CFC8] text-text-muted-brand hover:border-warm hover:text-warm'
+              }`}
+            >
+              {s === 'all' ? 'All Seasons' : s.charAt(0).toUpperCase() + s.slice(1)}
             </button>
           ))}
         </div>
