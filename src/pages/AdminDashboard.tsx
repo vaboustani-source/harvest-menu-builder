@@ -500,6 +500,19 @@ export default function AdminDashboard() {
         card={basicsCardModal.card}
         existingGroups={basicsGroups?.map((g) => g.label) ?? []}
       />
+      <CoupleFormModal
+        open={coupleModal}
+        onClose={() => setCoupleModal(false)}
+      />
+      {limitModal && (
+        <GroupLimitModal
+          open={!!limitModal}
+          onClose={() => setLimitModal(null)}
+          sectionId={limitModal.sectionId}
+          groupLabel={limitModal.groupLabel}
+          currentLimit={groupLimits?.find(l => l.section_id === limitModal.sectionId && l.group_label === limitModal.groupLabel) ?? null}
+        />
+      )}
 
       {/* Ownership password dialog for Basics tab */}
       <Dialog open={ownershipPrompt} onOpenChange={(v) => !v && setOwnershipPrompt(false)}>
