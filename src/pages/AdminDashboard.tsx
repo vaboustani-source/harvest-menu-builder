@@ -310,7 +310,72 @@ export default function AdminDashboard() {
 
           {/* Main content */}
           <main className="flex-1 min-w-0">
-            {activeSection && activeSectionId === 'basics' ? (
+            {adminView === 'couples' ? (
+              /* ── Couples Management ── */
+              <div className="space-y-6">
+                <div className="border-b border-cream-dark pb-4">
+                  <h2 className="font-serif italic text-2xl text-green">Couple Accounts</h2>
+                  <p className="font-sans text-xs text-muted-foreground mt-1 leading-relaxed max-w-xl">
+                    Create and manage accounts for couples to build their custom menus. Each couple gets a login to select items from your menu.
+                  </p>
+                </div>
+
+                <div className="md:hidden mb-4">
+                  <Button onClick={() => setCoupleModal(true)} size="sm" className="w-full bg-green hover:bg-green/90 text-white font-sans text-xs gap-1.5">
+                    <Plus size={13} /> Add Couple
+                  </Button>
+                </div>
+
+                {(!couples || couples.length === 0) ? (
+                  <div className="text-center py-16 bg-white rounded-lg border border-cream-dark">
+                    <Users size={32} className="mx-auto text-sage-light mb-3" />
+                    <p className="font-serif italic text-lg text-charcoal mb-1">No couples yet</p>
+                    <p className="font-sans text-xs text-muted-foreground mb-4">Create accounts for your couples to start building their menus.</p>
+                    <Button onClick={() => setCoupleModal(true)} size="sm" className="bg-green hover:bg-green/90 text-white font-sans text-xs gap-1.5">
+                      <Plus size={13} /> Add First Couple
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {couples.map((couple) => (
+                      <div key={couple.id} className="bg-white border border-cream-dark rounded-lg px-5 py-4 group">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <UserCheck size={14} className="text-sage shrink-0" />
+                              <p className="font-serif text-[15px] text-charcoal">
+                                {couple.partner1_name} & {couple.partner2_name}
+                              </p>
+                              <span className={`font-sans text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-full ${
+                                couple.status === 'active' ? 'bg-sage/10 text-sage' : 'bg-cream-dark text-muted-foreground'
+                              }`}>
+                                {couple.status}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4 mt-1">
+                              <span className="font-sans text-xs text-muted-foreground">{couple.email}</span>
+                              {couple.wedding_date && (
+                                <span className="flex items-center gap-1 font-sans text-xs text-muted-foreground">
+                                  <Calendar size={11} /> {new Date(couple.wedding_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                </span>
+                              )}
+                              {couple.guest_count && (
+                                <span className="font-sans text-xs text-muted-foreground">{couple.guest_count} guests</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => handleDeleteCouple(couple.id)} className="p-1.5 rounded hover:bg-red-50 text-muted-foreground hover:text-red-600 transition-colors">
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) :
               /* ── Basics Card Editor ── */
               <div className="space-y-8">
                 <div className="border-b border-cream-dark pb-4">
