@@ -376,6 +376,7 @@ export default function AdminDashboard() {
                 )}
               </div>
             ) :
+            activeSection && activeSectionId === 'basics' ? (
               /* ── Basics Card Editor ── */
               <div className="space-y-8">
                 <div className="border-b border-cream-dark pb-4">
