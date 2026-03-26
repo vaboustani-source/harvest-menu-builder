@@ -328,7 +328,7 @@ export function Harvest336Page() {
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-[14px] mb-12">
                       {currentSection.items.map((item) => {
-                        if (!isItemVisible(item.diet)) return null;
+                        if (!isItemVisible(item.diet, item.season)) return null;
                         return (
                           <MenuItemCard
                             key={item.id}
