@@ -379,6 +379,35 @@ export default function AdminDashboard() {
         card={basicsCardModal.card}
         existingGroups={basicsGroups?.map((g) => g.label) ?? []}
       />
+
+      {/* Ownership password dialog for Basics tab */}
+      <Dialog open={ownershipPrompt} onOpenChange={(v) => !v && setOwnershipPrompt(false)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-serif italic text-xl text-green">Ownership Access</DialogTitle>
+          </DialogHeader>
+          <p className="font-sans text-sm text-muted-foreground">The Basics tab is restricted to ownership. Enter the ownership password to continue.</p>
+          <div className="space-y-2 mt-2">
+            <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Password</Label>
+            <Input
+              type="password"
+              value={ownershipPw}
+              onChange={(e) => { setOwnershipPw(e.target.value); setOwnershipError(''); }}
+              onKeyDown={(e) => e.key === 'Enter' && handleOwnershipSubmit()}
+              placeholder="Enter ownership password"
+            />
+            {ownershipError && <p className="text-xs text-red-600 font-sans">{ownershipError}</p>}
+          </div>
+          <div className="flex gap-3 mt-3">
+            <Button onClick={handleOwnershipSubmit} className="flex-1 bg-green hover:bg-green/90 text-white font-sans text-xs tracking-widest uppercase">
+              Unlock
+            </Button>
+            <Button variant="outline" onClick={() => setOwnershipPrompt(false)} className="font-sans text-xs tracking-widest uppercase">
+              Cancel
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
