@@ -16,6 +16,7 @@ type Props = {
 };
 
 const DIET_OPTIONS = ['veg', 'vegan', 'gf', 'df'] as const;
+const SEASON_OPTIONS = ['spring', 'summer', 'fall'] as const;
 
 export function ItemFormModal({ open, onClose, sectionId, item }: Props) {
   const qc = useQueryClient();
@@ -27,6 +28,7 @@ export function ItemFormModal({ open, onClose, sectionId, item }: Props) {
   const [note, setNote] = useState('');
   const [groupLabel, setGroupLabel] = useState('');
   const [diet, setDiet] = useState<string[]>([]);
+  const [season, setSeason] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -38,14 +40,19 @@ export function ItemFormModal({ open, onClose, sectionId, item }: Props) {
       setNote(item.note ?? '');
       setGroupLabel(item.group_label ?? '');
       setDiet(item.diet ?? []);
+      setSeason(item.season ?? []);
     } else {
-      setName(''); setDescription(''); setPrice(''); setNote(''); setGroupLabel(''); setDiet([]);
+      setName(''); setDescription(''); setPrice(''); setNote(''); setGroupLabel(''); setDiet([]); setSeason([]);
     }
     setError('');
   }, [item, open]);
 
   const toggleDiet = (tag: string) => {
     setDiet((prev) => prev.includes(tag) ? prev.filter((d) => d !== tag) : [...prev, tag]);
+  };
+
+  const toggleSeason = (tag: string) => {
+    setSeason((prev) => prev.includes(tag) ? prev.filter((s) => s !== tag) : [...prev, tag]);
   };
 
   const handleSave = async () => {
@@ -61,6 +68,7 @@ export function ItemFormModal({ open, onClose, sectionId, item }: Props) {
       note: note.trim() || null,
       group_label: groupLabel.trim() || null,
       diet: diet.length > 0 ? diet : [],
+      season: season.length > 0 ? season : [],
     };
 
     const { error: err } = isEdit
@@ -119,6 +127,25 @@ export function ItemFormModal({ open, onClose, sectionId, item }: Props) {
                   }`}
                 >
                   {tag === 'veg' ? 'Vegetarian' : tag === 'vegan' ? 'Vegan' : tag === 'gf' ? 'GF' : 'Dairy-Free'}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Season</Label>
+            <div className="flex gap-2 flex-wrap">
+              {SEASON_OPTIONS.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => toggleSeason(tag)}
+                  className={`px-3 py-1 rounded-full border text-[11px] font-sans uppercase tracking-widest transition-colors ${
+                    season.includes(tag)
+                      ? 'bg-warm text-white border-warm'
+                      : 'bg-white text-muted-foreground border-cream-dark hover:border-warm'
+                  }`}
+                >
+                  {tag.charAt(0).toUpperCase() + tag.slice(1)}
                 </button>
               ))}
             </div>

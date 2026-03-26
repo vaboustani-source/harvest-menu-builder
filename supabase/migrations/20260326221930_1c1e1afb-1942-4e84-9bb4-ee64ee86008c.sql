@@ -1,0 +1,1 @@
+ALTER TABLE public.menu_items ADD COLUMN season text[] DEFAULT '{}'::text[];

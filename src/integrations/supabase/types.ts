@@ -104,6 +104,7 @@ export type Database = {
           name: string
           note: string | null
           price: string | null
+          season: string[] | null
           section_id: string
           sort_order: number
           updated_at: string
@@ -117,6 +118,7 @@ export type Database = {
           name: string
           note?: string | null
           price?: string | null
+          season?: string[] | null
           section_id: string
           sort_order?: number
           updated_at?: string
@@ -130,6 +132,7 @@ export type Database = {
           name?: string
           note?: string | null
           price?: string | null
+          season?: string[] | null
           section_id?: string
           sort_order?: number
           updated_at?: string
