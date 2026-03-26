@@ -8,6 +8,7 @@ export type DbMenuItem = {
   description: string | null;
   price: string | null;
   diet: string[] | null;
+  season: string[] | null;
   note: string | null;
   group_label: string | null;
   sort_order: number;

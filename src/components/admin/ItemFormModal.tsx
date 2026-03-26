@@ -16,6 +16,7 @@ type Props = {
 };
 
 const DIET_OPTIONS = ['veg', 'vegan', 'gf', 'df'] as const;
+const SEASON_OPTIONS = ['spring', 'summer', 'fall'] as const;
 
 export function ItemFormModal({ open, onClose, sectionId, item }: Props) {
   const qc = useQueryClient();
@@ -27,6 +28,7 @@ export function ItemFormModal({ open, onClose, sectionId, item }: Props) {
   const [note, setNote] = useState('');
   const [groupLabel, setGroupLabel] = useState('');
   const [diet, setDiet] = useState<string[]>([]);
+  const [season, setSeason] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -38,14 +40,19 @@ export function ItemFormModal({ open, onClose, sectionId, item }: Props) {
       setNote(item.note ?? '');
       setGroupLabel(item.group_label ?? '');
       setDiet(item.diet ?? []);
+      setSeason(item.season ?? []);
     } else {
-      setName(''); setDescription(''); setPrice(''); setNote(''); setGroupLabel(''); setDiet([]);
+      setName(''); setDescription(''); setPrice(''); setNote(''); setGroupLabel(''); setDiet([]); setSeason([]);
     }
     setError('');
   }, [item, open]);
 
   const toggleDiet = (tag: string) => {
     setDiet((prev) => prev.includes(tag) ? prev.filter((d) => d !== tag) : [...prev, tag]);
+  };
+
+  const toggleSeason = (tag: string) => {
+    setSeason((prev) => prev.includes(tag) ? prev.filter((s) => s !== tag) : [...prev, tag]);
   };
 
   const handleSave = async () => {
@@ -61,6 +68,7 @@ export function ItemFormModal({ open, onClose, sectionId, item }: Props) {
       note: note.trim() || null,
       group_label: groupLabel.trim() || null,
       diet: diet.length > 0 ? diet : [],
+      season: season.length > 0 ? season : [],
     };
 
     const { error: err } = isEdit
