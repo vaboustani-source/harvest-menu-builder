@@ -117,6 +117,12 @@ export default function AdminDashboard() {
     }
   }, [sections, activeSectionId]);
 
+  const handleDeleteCouple = async (id: string) => {
+    if (!confirm('Delete this couple and their selections?')) return;
+    await supabase.from('couples').delete().eq('id', id);
+    qc.invalidateQueries({ queryKey: ['couples'] });
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/admin/login');
