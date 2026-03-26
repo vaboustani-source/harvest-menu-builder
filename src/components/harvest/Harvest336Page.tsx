@@ -399,6 +399,8 @@ export function Harvest336Page() {
           </p>
         </div>
       </footer>
+
+      <CoupleLoginModal open={coupleLoginOpen} onClose={() => setCoupleLoginOpen(false)} />
     </div>
   );
 }
