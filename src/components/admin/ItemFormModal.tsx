@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PriceInput, stripPrice, formatPrice } from '@/components/admin/PriceInput';
 import type { DbMenuItem } from '@/hooks/useMenuData';
 
 type Props = {
@@ -33,7 +34,7 @@ export function ItemFormModal({ open, onClose, sectionId, item }: Props) {
     if (item) {
       setName(item.name);
       setDescription(item.description ?? '');
-      setPrice(item.price ?? '');
+      setPrice(stripPrice(item.price ?? ''));
       setNote(item.note ?? '');
       setGroupLabel(item.group_label ?? '');
       setDiet(item.diet ?? []);
@@ -56,7 +57,7 @@ export function ItemFormModal({ open, onClose, sectionId, item }: Props) {
       section_id: sectionId,
       name: name.trim(),
       description: description.trim() || null,
-      price: price.trim() || null,
+      price: price.trim() ? formatPrice(price.trim()) : null,
       note: note.trim() || null,
       group_label: groupLabel.trim() || null,
       diet: diet.length > 0 ? diet : [],
@@ -92,7 +93,7 @@ export function ItemFormModal({ open, onClose, sectionId, item }: Props) {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Price</Label>
-              <Input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. $38pp" />
+              <PriceInput value={price} onChange={setPrice} />
             </div>
             <div className="space-y-1">
               <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Note</Label>

@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2 } from 'lucide-react';
+import { PriceInput, stripPrice, formatPrice } from '@/components/admin/PriceInput';
 import type { BasicsCard, BulletItem } from '@/hooks/useBasicsCards';
 
 type Props = {
@@ -48,6 +49,13 @@ export function BasicsCardFormModal({ open, onClose, card, existingGroups }: Pro
     setBullets((prev) => prev.map((b, i) => i === index ? { ...b, [field]: value || undefined } : b));
   };
 
+  // When loading bullets for edit, strip price formatting
+  useEffect(() => {
+    if (card && card.bullets.length > 0) {
+      setBullets(card.bullets.map(b => ({ ...b, price: b.price ? stripPrice(b.price) : undefined })));
+    }
+  }, [card, open]);
+
   const addBullet = () => setBullets((prev) => [...prev, { text: '' }]);
   const removeBullet = (index: number) => setBullets((prev) => prev.filter((_, i) => i !== index));
 
@@ -56,7 +64,10 @@ export function BasicsCardFormModal({ open, onClose, card, existingGroups }: Pro
     if (!finalGroup || !title.trim()) return;
 
     setSaving(true);
-    const cleanBullets = bullets.filter((b) => b.text.trim());
+    const cleanBullets = bullets.filter((b) => b.text.trim()).map(b => ({
+      text: b.text,
+      price: b.price ? formatPrice(b.price) : undefined,
+    }));
 
     const payload = {
       group_label: finalGroup,
@@ -155,11 +166,11 @@ export function BasicsCardFormModal({ open, onClose, card, existingGroups }: Pro
                     placeholder="Bullet text"
                     className="flex-1 bg-white border-cream-dark text-charcoal text-sm"
                   />
-                  <Input
+                  <PriceInput
                     value={bullet.price ?? ''}
-                    onChange={(e) => handleBulletChange(i, 'price', e.target.value)}
-                    placeholder="Price (optional)"
-                    className="w-28 bg-white border-cream-dark text-charcoal text-sm"
+                    onChange={(val) => handleBulletChange(i, 'price', val)}
+                    placeholder="20"
+                    className="w-32"
                   />
                   {bullets.length > 1 && (
                     <button onClick={() => removeBullet(i)} className="p-1.5 text-muted-foreground hover:text-red-600 shrink-0">
