@@ -47,6 +47,83 @@ export type Database = {
         }
         Relationships: []
       }
+      couple_selections: {
+        Row: {
+          couple_id: string
+          created_at: string
+          group_label: string | null
+          id: string
+          menu_item_id: string
+          notes: string | null
+          section_id: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          group_label?: string | null
+          id?: string
+          menu_item_id: string
+          notes?: string | null
+          section_id: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          group_label?: string | null
+          id?: string
+          menu_item_id?: string
+          notes?: string | null
+          section_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "couple_selections_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      couples: {
+        Row: {
+          created_at: string
+          email: string
+          guest_count: number | null
+          id: string
+          partner1_name: string
+          partner2_name: string
+          status: string
+          updated_at: string
+          user_id: string
+          wedding_date: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          guest_count?: number | null
+          id?: string
+          partner1_name: string
+          partner2_name: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          wedding_date?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          guest_count?: number | null
+          id?: string
+          partner1_name?: string
+          partner2_name?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          wedding_date?: string | null
+        }
+        Relationships: []
+      }
       menu_accordions: {
         Row: {
           body: string
@@ -220,6 +297,36 @@ export type Database = {
           section_subtitle?: string | null
           section_title?: string
           sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      section_group_limits: {
+        Row: {
+          created_at: string
+          extra_price_note: string | null
+          group_label: string
+          id: string
+          included_count: number
+          section_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          extra_price_note?: string | null
+          group_label: string
+          id?: string
+          included_count?: number
+          section_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          extra_price_note?: string | null
+          group_label?: string
+          id?: string
+          included_count?: number
+          section_id?: string
           updated_at?: string
         }
         Relationships: []

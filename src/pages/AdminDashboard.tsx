@@ -5,14 +5,18 @@ import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useMenuData, type DbMenuItem, type DbMenuPackage, type DbMenuAccordion, type FullMenuSection } from '@/hooks/useMenuData';
 import { useBasicsCards, type BasicsCard } from '@/hooks/useBasicsCards';
+import { useCouples, type Couple } from '@/hooks/useCouples';
+import { useGroupLimits } from '@/hooks/useGroupLimits';
 import { ItemFormModal } from '@/components/admin/ItemFormModal';
 import { PackageFormModal } from '@/components/admin/PackageFormModal';
 import { AccordionFormModal } from '@/components/admin/AccordionFormModal';
 import { BasicsCardFormModal } from '@/components/admin/BasicsCardFormModal';
+import { CoupleFormModal } from '@/components/admin/CoupleFormModal';
+import { GroupLimitModal } from '@/components/admin/GroupLimitModal';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil, Trash2, LogOut, ChevronDown, GripVertical, Diamond, Lock, LockOpen } from 'lucide-react';
+import { Plus, Pencil, Trash2, LogOut, ChevronDown, GripVertical, Diamond, Lock, LockOpen, Users, Settings2, Calendar, UserCheck } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -67,7 +71,10 @@ export default function AdminDashboard() {
   const qc = useQueryClient();
   const { data: sections, isLoading, error } = useMenuData();
   const { data: basicsGroups } = useBasicsCards();
+  const { data: couples } = useCouples();
+  const { data: groupLimits } = useGroupLimits();
   const [activeSectionId, setActiveSectionId] = useState<string>('');
+  const [adminView, setAdminView] = useState<'menu' | 'couples' | 'limits'>('menu');
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Ownership lock for Basics tab
@@ -101,12 +108,20 @@ export default function AdminDashboard() {
   const [pkgModal, setPkgModal] = useState<{ open: boolean; pkg?: DbMenuPackage | null }>({ open: false });
   const [accModal, setAccModal] = useState<{ open: boolean; accordion?: DbMenuAccordion | null }>({ open: false });
   const [basicsCardModal, setBasicsCardModal] = useState<{ open: boolean; card?: BasicsCard | null }>({ open: false });
+  const [coupleModal, setCoupleModal] = useState(false);
+  const [limitModal, setLimitModal] = useState<{ open: boolean; sectionId: string; groupLabel: string } | null>(null);
 
   useEffect(() => {
     if (sections && sections.length > 0 && !activeSectionId) {
       setActiveSectionId(sections[0].id);
     }
   }, [sections, activeSectionId]);
+
+  const handleDeleteCouple = async (id: string) => {
+    if (!confirm('Delete this couple and their selections?')) return;
+    await supabase.from('couples').delete().eq('id', id);
+    qc.invalidateQueries({ queryKey: ['couples'] });
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -238,30 +253,130 @@ export default function AdminDashboard() {
         <div className="flex gap-6">
           {/* Section sidebar - desktop */}
           <aside className="hidden md:block w-48 shrink-0">
-            <p className="font-sans text-[10px] uppercase tracking-widest text-muted-foreground mb-3 px-2">Sections</p>
-            <nav className="space-y-0.5">
-              {sections?.map((s) => (
-                <button
-                  key={s.id}
-                  onClick={() => handleSelectSection(s.id)}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg font-sans text-[13px] transition-colors ${
-                    s.id === activeSectionId
-                      ? 'bg-green text-white'
-                      : 'text-charcoal hover:bg-cream-dark'
-                  }`}
-                >
-                  <span className="flex items-center gap-2">
-                    {s.label}
-                    {s.id === 'basics' && (basicsUnlocked ? <LockOpen size={11} className="text-sage-light" /> : <Lock size={11} className="text-warm" />)}
-                  </span>
-                </button>
-              ))}
-            </nav>
+            {/* Admin view switcher */}
+            <div className="flex gap-1 mb-4 bg-cream-dark rounded-lg p-1">
+              <button
+                onClick={() => setAdminView('menu')}
+                className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-md font-sans text-[10px] uppercase tracking-widest transition-colors ${
+                  adminView === 'menu' ? 'bg-green text-white' : 'text-charcoal hover:bg-white'
+                }`}
+              >
+                Menu
+              </button>
+              <button
+                onClick={() => setAdminView('couples')}
+                className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-md font-sans text-[10px] uppercase tracking-widest transition-colors ${
+                  adminView === 'couples' ? 'bg-green text-white' : 'text-charcoal hover:bg-white'
+                }`}
+              >
+                <Users size={11} /> Couples
+              </button>
+            </div>
+
+            {adminView === 'menu' && (
+              <>
+                <p className="font-sans text-[10px] uppercase tracking-widest text-muted-foreground mb-3 px-2">Sections</p>
+                <nav className="space-y-0.5">
+                  {sections?.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => handleSelectSection(s.id)}
+                      className={`w-full text-left px-3 py-2.5 rounded-lg font-sans text-[13px] transition-colors ${
+                        s.id === activeSectionId
+                          ? 'bg-green text-white'
+                          : 'text-charcoal hover:bg-cream-dark'
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        {s.label}
+                        {s.id === 'basics' && (basicsUnlocked ? <LockOpen size={11} className="text-sage-light" /> : <Lock size={11} className="text-warm" />)}
+                      </span>
+                    </button>
+                  ))}
+                </nav>
+              </>
+            )}
+
+            {adminView === 'couples' && (
+              <div>
+                <p className="font-sans text-[10px] uppercase tracking-widest text-muted-foreground mb-3 px-2">Couple Accounts</p>
+                <Button onClick={() => setCoupleModal(true)} size="sm" className="w-full bg-green hover:bg-green/90 text-white font-sans text-xs gap-1.5 mb-3">
+                  <Plus size={13} /> Add Couple
+                </Button>
+                <p className="font-sans text-[10px] text-muted-foreground px-2">{couples?.length ?? 0} couple{(couples?.length ?? 0) !== 1 ? 's' : ''} registered</p>
+              </div>
+            )}
           </aside>
 
           {/* Main content */}
           <main className="flex-1 min-w-0">
-            {activeSection && activeSectionId === 'basics' ? (
+            {adminView === 'couples' ? (
+              /* ── Couples Management ── */
+              <div className="space-y-6">
+                <div className="border-b border-cream-dark pb-4">
+                  <h2 className="font-serif italic text-2xl text-green">Couple Accounts</h2>
+                  <p className="font-sans text-xs text-muted-foreground mt-1 leading-relaxed max-w-xl">
+                    Create and manage accounts for couples to build their custom menus. Each couple gets a login to select items from your menu.
+                  </p>
+                </div>
+
+                <div className="md:hidden mb-4">
+                  <Button onClick={() => setCoupleModal(true)} size="sm" className="w-full bg-green hover:bg-green/90 text-white font-sans text-xs gap-1.5">
+                    <Plus size={13} /> Add Couple
+                  </Button>
+                </div>
+
+                {(!couples || couples.length === 0) ? (
+                  <div className="text-center py-16 bg-white rounded-lg border border-cream-dark">
+                    <Users size={32} className="mx-auto text-sage-light mb-3" />
+                    <p className="font-serif italic text-lg text-charcoal mb-1">No couples yet</p>
+                    <p className="font-sans text-xs text-muted-foreground mb-4">Create accounts for your couples to start building their menus.</p>
+                    <Button onClick={() => setCoupleModal(true)} size="sm" className="bg-green hover:bg-green/90 text-white font-sans text-xs gap-1.5">
+                      <Plus size={13} /> Add First Couple
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {couples.map((couple) => (
+                      <div key={couple.id} className="bg-white border border-cream-dark rounded-lg px-5 py-4 group">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <UserCheck size={14} className="text-sage shrink-0" />
+                              <p className="font-serif text-[15px] text-charcoal">
+                                {couple.partner1_name} & {couple.partner2_name}
+                              </p>
+                              <span className={`font-sans text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-full ${
+                                couple.status === 'active' ? 'bg-sage/10 text-sage' : 'bg-cream-dark text-muted-foreground'
+                              }`}>
+                                {couple.status}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4 mt-1">
+                              <span className="font-sans text-xs text-muted-foreground">{couple.email}</span>
+                              {couple.wedding_date && (
+                                <span className="flex items-center gap-1 font-sans text-xs text-muted-foreground">
+                                  <Calendar size={11} /> {new Date(couple.wedding_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                </span>
+                              )}
+                              {couple.guest_count && (
+                                <span className="font-sans text-xs text-muted-foreground">{couple.guest_count} guests</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => handleDeleteCouple(couple.id)} className="p-1.5 rounded hover:bg-red-50 text-muted-foreground hover:text-red-600 transition-colors">
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) :
+            activeSection && activeSectionId === 'basics' ? (
               /* ── Basics Card Editor ── */
               <div className="space-y-8">
                 <div className="border-b border-cream-dark pb-4">
@@ -385,6 +500,19 @@ export default function AdminDashboard() {
         card={basicsCardModal.card}
         existingGroups={basicsGroups?.map((g) => g.label) ?? []}
       />
+      <CoupleFormModal
+        open={coupleModal}
+        onClose={() => setCoupleModal(false)}
+      />
+      {limitModal && (
+        <GroupLimitModal
+          open={!!limitModal}
+          onClose={() => setLimitModal(null)}
+          sectionId={limitModal.sectionId}
+          groupLabel={limitModal.groupLabel}
+          currentLimit={groupLimits?.find(l => l.section_id === limitModal.sectionId && l.group_label === limitModal.groupLabel) ?? null}
+        />
+      )}
 
       {/* Ownership password dialog for Basics tab */}
       <Dialog open={ownershipPrompt} onOpenChange={(v) => !v && setOwnershipPrompt(false)}>

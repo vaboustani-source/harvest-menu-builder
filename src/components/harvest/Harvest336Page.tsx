@@ -6,6 +6,7 @@ import { MenuItemCard } from './MenuItemCard';
 import { PackageCardBlock } from './PackageCardBlock';
 import { AccordionBlock } from './AccordionBlock';
 import { BasicsContent } from './BasicsContent';
+import { CoupleLoginModal } from './CoupleLoginModal';
 import { useMenuData, type FullMenuSection } from '@/hooks/useMenuData';
 
 // Cross SVG pattern for hero
@@ -19,6 +20,7 @@ export function Harvest336Page() {
   const [activeSeason, setActiveSeason] = useState<'all' | 'spring' | 'summer' | 'fall'>('all');
   const [scrolled, setScrolled] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [coupleLoginOpen, setCoupleLoginOpen] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
   const mobileDropdownRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -374,7 +376,16 @@ export function Harvest336Page() {
           "Nothing here is templated. Nothing is rushed."
         </blockquote>
         <p className="font-sans text-[11px] tracking-[0.25em] uppercase text-sage-light/60 mb-6">
-          Ready to start the conversation?
+          Ready to build your menu?
+        </p>
+        <button
+          onClick={() => setCoupleLoginOpen(true)}
+          className="inline-block font-sans text-[11px] font-medium tracking-[0.2em] uppercase text-cream border border-sage/50 rounded-sm px-8 py-3 hover:bg-sage/20 transition-colors duration-200 mb-4 cursor-pointer"
+        >
+          Build Your Menu →
+        </button>
+        <p className="font-sans text-[10px] tracking-[0.15em] text-white/30 mb-6">
+          Couples: sign in with credentials from your venue coordinator
         </p>
         <a
           href="mailto:hello@gilbertsvillefarmhouse.com"
@@ -388,6 +399,8 @@ export function Harvest336Page() {
           </p>
         </div>
       </footer>
+
+      <CoupleLoginModal open={coupleLoginOpen} onClose={() => setCoupleLoginOpen(false)} />
     </div>
   );
 }
