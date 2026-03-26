@@ -71,7 +71,10 @@ export default function AdminDashboard() {
   const qc = useQueryClient();
   const { data: sections, isLoading, error } = useMenuData();
   const { data: basicsGroups } = useBasicsCards();
+  const { data: couples } = useCouples();
+  const { data: groupLimits } = useGroupLimits();
   const [activeSectionId, setActiveSectionId] = useState<string>('');
+  const [adminView, setAdminView] = useState<'menu' | 'couples' | 'limits'>('menu');
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Ownership lock for Basics tab
@@ -105,6 +108,8 @@ export default function AdminDashboard() {
   const [pkgModal, setPkgModal] = useState<{ open: boolean; pkg?: DbMenuPackage | null }>({ open: false });
   const [accModal, setAccModal] = useState<{ open: boolean; accordion?: DbMenuAccordion | null }>({ open: false });
   const [basicsCardModal, setBasicsCardModal] = useState<{ open: boolean; card?: BasicsCard | null }>({ open: false });
+  const [coupleModal, setCoupleModal] = useState(false);
+  const [limitModal, setLimitModal] = useState<{ open: boolean; sectionId: string; groupLabel: string } | null>(null);
 
   useEffect(() => {
     if (sections && sections.length > 0 && !activeSectionId) {
