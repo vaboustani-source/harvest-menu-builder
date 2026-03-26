@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { PriceInput, stripPrice, formatPrice } from '@/components/admin/PriceInput';
 import type { DbMenuPackage } from '@/hooks/useMenuData';
 
 type Props = {
@@ -25,7 +26,7 @@ export function PackageFormModal({ open, onClose, sectionId, pkg }: Props) {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (pkg) { setTitle(pkg.title); setPrice(pkg.price); setDescription(pkg.description); }
+    if (pkg) { setTitle(pkg.title); setPrice(stripPrice(pkg.price)); setDescription(pkg.description); }
     else { setTitle(''); setPrice(''); setDescription(''); }
     setError('');
   }, [pkg, open]);
@@ -36,7 +37,7 @@ export function PackageFormModal({ open, onClose, sectionId, pkg }: Props) {
     }
     setSaving(true);
     setError('');
-    const payload = { section_id: sectionId, title: title.trim(), price: price.trim(), description: description.trim() };
+    const payload = { section_id: sectionId, title: title.trim(), price: formatPrice(price.trim()), description: description.trim() };
     const { error: err } = isEdit
       ? await supabase.from('menu_packages').update(payload).eq('id', pkg!.id)
       : await supabase.from('menu_packages').insert({ ...payload, sort_order: 999 });
@@ -58,7 +59,7 @@ export function PackageFormModal({ open, onClose, sectionId, pkg }: Props) {
           </div>
           <div className="space-y-1">
             <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Price *</Label>
-            <Input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. $95pp" />
+            <PriceInput value={price} onChange={setPrice} />
           </div>
           <div className="space-y-1">
             <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Description *</Label>
