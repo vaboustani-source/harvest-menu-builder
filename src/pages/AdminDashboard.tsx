@@ -12,7 +12,7 @@ import { BasicsCardFormModal } from '@/components/admin/BasicsCardFormModal';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil, Trash2, LogOut, ChevronDown, GripVertical, Diamond } from 'lucide-react';
+import { Plus, Pencil, Trash2, LogOut, ChevronDown, GripVertical, Diamond, Lock, LockOpen } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
