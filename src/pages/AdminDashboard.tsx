@@ -344,7 +344,7 @@ function SectionEditor({
       {(section.packages.length > 0 || ['basics', 'desserts', 'packages'].includes(section.id)) && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-sans text-[11px] uppercase tracking-widest text-muted">Package Cards</h3>
+            <h3 className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Package Cards</h3>
             <Button onClick={onAddPackage} size="sm" variant="outline" className="font-sans text-xs gap-1.5 h-8">
               <Plus size={13} /> Add Package
             </Button>
@@ -389,7 +389,7 @@ function SectionEditor({
       {(section.items.length > 0 || !['bar'].includes(section.id)) && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-sans text-[11px] uppercase tracking-widest text-muted">Menu Items</h3>
+            <h3 className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Menu Items</h3>
             <Button onClick={onAddItem} size="sm" variant="outline" className="font-sans text-xs gap-1.5 h-8">
               <Plus size={13} /> Add Item
             </Button>
@@ -450,7 +450,7 @@ function SectionEditor({
       {(section.accordions.length > 0 || section.id === 'bar') && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-sans text-[11px] uppercase tracking-widest text-muted">Accordion Entries</h3>
+            <h3 className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Accordion Entries</h3>
             <Button onClick={onAddAccordion} size="sm" variant="outline" className="font-sans text-xs gap-1.5 h-8">
               <Plus size={13} /> Add Entry
             </Button>
