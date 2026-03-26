@@ -225,7 +225,10 @@ export default function AdminDashboard() {
                     s.id === activeSectionId ? 'bg-sage/10 text-green font-medium' : 'text-charcoal hover:bg-cream'
                   }`}
                 >
-                  {s.label}
+                  <span className="flex items-center gap-2">
+                    {s.label}
+                    {s.id === 'basics' && (basicsUnlocked ? <LockOpen size={12} className="text-sage" /> : <Lock size={12} className="text-warm" />)}
+                  </span>
                 </button>
               ))}
             </div>
@@ -247,7 +250,10 @@ export default function AdminDashboard() {
                       : 'text-charcoal hover:bg-cream-dark'
                   }`}
                 >
-                  {s.label}
+                  <span className="flex items-center gap-2">
+                    {s.label}
+                    {s.id === 'basics' && (basicsUnlocked ? <LockOpen size={11} className="text-sage-light" /> : <Lock size={11} className="text-warm" />)}
+                  </span>
                 </button>
               ))}
             </nav>
