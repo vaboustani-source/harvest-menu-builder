@@ -14,7 +14,180 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      menu_accordions: {
+        Row: {
+          body: string
+          created_at: string
+          emoji: string | null
+          id: string
+          price: string | null
+          section_id: string
+          sort_order: number
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          emoji?: string | null
+          id?: string
+          price?: string | null
+          section_id: string
+          sort_order?: number
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          emoji?: string | null
+          id?: string
+          price?: string | null
+          section_id?: string
+          sort_order?: number
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_accordions_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "menu_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      menu_items: {
+        Row: {
+          created_at: string
+          description: string | null
+          diet: string[] | null
+          group_label: string | null
+          id: string
+          name: string
+          note: string | null
+          price: string | null
+          section_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          diet?: string[] | null
+          group_label?: string | null
+          id?: string
+          name: string
+          note?: string | null
+          price?: string | null
+          section_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          diet?: string[] | null
+          group_label?: string | null
+          id?: string
+          name?: string
+          note?: string | null
+          price?: string | null
+          section_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_items_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "menu_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      menu_packages: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          price: string
+          section_id: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          price: string
+          section_id: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          price?: string
+          section_id?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_packages_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "menu_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      menu_sections: {
+        Row: {
+          created_at: string
+          description: string | null
+          emoji: string | null
+          id: string
+          label: string
+          section_subtitle: string | null
+          section_title: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          emoji?: string | null
+          id: string
+          label: string
+          section_subtitle?: string | null
+          section_title: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          emoji?: string | null
+          id?: string
+          label?: string
+          section_subtitle?: string | null
+          section_title?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
