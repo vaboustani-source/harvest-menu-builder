@@ -16,6 +16,7 @@ export function Harvest336Page() {
   const { data: sections, isLoading } = useMenuData();
   const [activeTab, setActiveTab] = useState('basics');
   const [activeFilter, setActiveFilter] = useState<'all' | DietTag>('all');
+  const [activeSeason, setActiveSeason] = useState<'all' | 'spring' | 'summer' | 'fall'>('all');
   const [scrolled, setScrolled] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
@@ -49,14 +50,16 @@ export function Harvest336Page() {
   const handleTabSelect = (id: string) => {
     setActiveTab(id);
     setActiveFilter('all');
+    setActiveSeason('all');
     setMobileNavOpen(false);
   };
 
   const currentSection = sections?.find((s) => s.id === activeTab);
 
-  const isItemVisible = (diet?: string[] | null) => {
-    if (activeFilter === 'all') return true;
-    return diet?.includes(activeFilter) ?? false;
+  const isItemVisible = (diet?: string[] | null, season?: string[] | null) => {
+    const dietMatch = activeFilter === 'all' || (diet?.includes(activeFilter) ?? false);
+    const seasonMatch = activeSeason === 'all' || (season?.includes(activeSeason) ?? false);
+    return dietMatch && seasonMatch;
   };
 
   // Group items by group_label for sections like Reception
