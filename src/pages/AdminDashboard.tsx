@@ -7,7 +7,55 @@ import { PackageFormModal } from '@/components/admin/PackageFormModal';
 import { AccordionFormModal } from '@/components/admin/AccordionFormModal';
 import { Button } from '@/components/ui/button';
 import { useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil, Trash2, LogOut, ChevronDown } from 'lucide-react';
+import { Plus, Pencil, Trash2, LogOut, ChevronDown, GripVertical } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+// ── Sortable Row Wrapper ──────────────────────────────────────────────────────
+
+function SortableRow({ id, children }: { id: string; children: (dragHandle: React.ReactNode) => React.ReactNode }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 50 : undefined,
+    position: 'relative',
+  };
+
+  const handle = (
+    <span
+      {...attributes}
+      {...listeners}
+      className="cursor-grab active:cursor-grabbing p-1.5 rounded text-muted hover:text-charcoal transition-colors touch-none"
+      title="Drag to reorder"
+    >
+      <GripVertical size={13} />
+    </span>
+  );
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      {children(handle)}
+    </div>
+  );
+}
+
+// ── Main Dashboard ────────────────────────────────────────────────────────────
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -48,6 +96,38 @@ export default function AdminDashboard() {
     if (!confirm('Delete this accordion entry?')) return;
     await supabase.from('menu_accordions').delete().eq('id', id);
     qc.invalidateQueries({ queryKey: ['menu-data'] });
+  };
+
+  // Reorder handlers — optimistic update then persist
+  const handleReorderItems = async (sectionId: string, oldIndex: number, newIndex: number, items: DbMenuItem[]) => {
+    const reordered = arrayMove(items, oldIndex, newIndex);
+    // Optimistic update via query cache
+    qc.setQueryData<FullMenuSection[]>(['menu-data'], (prev) =>
+      prev?.map((s) => s.id === sectionId ? { ...s, items: reordered.map((it, i) => ({ ...it, sort_order: i })) } : s)
+    );
+    await Promise.all(
+      reordered.map((item, i) => supabase.from('menu_items').update({ sort_order: i }).eq('id', item.id))
+    );
+  };
+
+  const handleReorderPackages = async (sectionId: string, oldIndex: number, newIndex: number, pkgs: DbMenuPackage[]) => {
+    const reordered = arrayMove(pkgs, oldIndex, newIndex);
+    qc.setQueryData<FullMenuSection[]>(['menu-data'], (prev) =>
+      prev?.map((s) => s.id === sectionId ? { ...s, packages: reordered.map((p, i) => ({ ...p, sort_order: i })) } : s)
+    );
+    await Promise.all(
+      reordered.map((pkg, i) => supabase.from('menu_packages').update({ sort_order: i }).eq('id', pkg.id))
+    );
+  };
+
+  const handleReorderAccordions = async (sectionId: string, oldIndex: number, newIndex: number, accs: DbMenuAccordion[]) => {
+    const reordered = arrayMove(accs, oldIndex, newIndex);
+    qc.setQueryData<FullMenuSection[]>(['menu-data'], (prev) =>
+      prev?.map((s) => s.id === sectionId ? { ...s, accordions: reordered.map((a, i) => ({ ...a, sort_order: i })) } : s)
+    );
+    await Promise.all(
+      reordered.map((acc, i) => supabase.from('menu_accordions').update({ sort_order: i }).eq('id', acc.id))
+    );
   };
 
   const activeSection = sections?.find((s) => s.id === activeSectionId);
@@ -136,18 +216,23 @@ export default function AdminDashboard() {
 
           {/* Main content */}
           <main className="flex-1 min-w-0">
-            {activeSection && <SectionEditor
-              section={activeSection}
-              onAddItem={() => setItemModal({ open: true, item: null })}
-              onEditItem={(item) => setItemModal({ open: true, item })}
-              onDeleteItem={handleDeleteItem}
-              onAddPackage={() => setPkgModal({ open: true, pkg: null })}
-              onEditPackage={(pkg) => setPkgModal({ open: true, pkg })}
-              onDeletePackage={handleDeletePackage}
-              onAddAccordion={() => setAccModal({ open: true, accordion: null })}
-              onEditAccordion={(acc) => setAccModal({ open: true, accordion: acc })}
-              onDeleteAccordion={handleDeleteAccordion}
-            />}
+            {activeSection && (
+              <SectionEditor
+                section={activeSection}
+                onAddItem={() => setItemModal({ open: true, item: null })}
+                onEditItem={(item) => setItemModal({ open: true, item })}
+                onDeleteItem={handleDeleteItem}
+                onReorderItems={handleReorderItems}
+                onAddPackage={() => setPkgModal({ open: true, pkg: null })}
+                onEditPackage={(pkg) => setPkgModal({ open: true, pkg })}
+                onDeletePackage={handleDeletePackage}
+                onReorderPackages={handleReorderPackages}
+                onAddAccordion={() => setAccModal({ open: true, accordion: null })}
+                onEditAccordion={(acc) => setAccModal({ open: true, accordion: acc })}
+                onDeleteAccordion={handleDeleteAccordion}
+                onReorderAccordions={handleReorderAccordions}
+              />
+            )}
           </main>
         </div>
       </div>
@@ -175,26 +260,73 @@ export default function AdminDashboard() {
   );
 }
 
-// ── Section Editor ───────────────────────────────────────────────────────────
+// ── Section Editor ────────────────────────────────────────────────────────────
 
 type SectionEditorProps = {
   section: FullMenuSection;
   onAddItem: () => void;
   onEditItem: (item: DbMenuItem) => void;
   onDeleteItem: (id: string) => void;
+  onReorderItems: (sectionId: string, oldIndex: number, newIndex: number, items: DbMenuItem[]) => void;
   onAddPackage: () => void;
   onEditPackage: (pkg: DbMenuPackage) => void;
   onDeletePackage: (id: string) => void;
+  onReorderPackages: (sectionId: string, oldIndex: number, newIndex: number, pkgs: DbMenuPackage[]) => void;
   onAddAccordion: () => void;
   onEditAccordion: (acc: DbMenuAccordion) => void;
   onDeleteAccordion: (id: string) => void;
+  onReorderAccordions: (sectionId: string, oldIndex: number, newIndex: number, accs: DbMenuAccordion[]) => void;
 };
 
 function SectionEditor({
-  section, onAddItem, onEditItem, onDeleteItem,
-  onAddPackage, onEditPackage, onDeletePackage,
-  onAddAccordion, onEditAccordion, onDeleteAccordion,
+  section,
+  onAddItem, onEditItem, onDeleteItem, onReorderItems,
+  onAddPackage, onEditPackage, onDeletePackage, onReorderPackages,
+  onAddAccordion, onEditAccordion, onDeleteAccordion, onReorderAccordions,
 }: SectionEditorProps) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
+  );
+
+  const handleItemDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = section.items.findIndex((i) => i.id === active.id);
+    const newIndex = section.items.findIndex((i) => i.id === over.id);
+    if (oldIndex !== -1 && newIndex !== -1) {
+      onReorderItems(section.id, oldIndex, newIndex, section.items);
+    }
+  };
+
+  const handlePackageDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = section.packages.findIndex((p) => p.id === active.id);
+    const newIndex = section.packages.findIndex((p) => p.id === over.id);
+    if (oldIndex !== -1 && newIndex !== -1) {
+      onReorderPackages(section.id, oldIndex, newIndex, section.packages);
+    }
+  };
+
+  const handleAccordionDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = section.accordions.findIndex((a) => a.id === active.id);
+    const newIndex = section.accordions.findIndex((a) => a.id === over.id);
+    if (oldIndex !== -1 && newIndex !== -1) {
+      onReorderAccordions(section.id, oldIndex, newIndex, section.accordions);
+    }
+  };
+
+  // Group items for display (flat list for DnD, grouped only visually)
+  const grouped = section.items.reduce<Record<string, DbMenuItem[]>>((acc, item) => {
+    const key = item.group_label ?? '__ungrouped__';
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(item);
+    return acc;
+  }, {});
+  const hasGroups = Object.keys(grouped).some((k) => k !== '__ungrouped__');
+
   return (
     <div className="space-y-8">
       {/* Section header */}
@@ -203,10 +335,13 @@ function SectionEditor({
         {section.description && (
           <p className="font-sans text-xs text-muted mt-1 leading-relaxed max-w-xl">{section.description}</p>
         )}
+        <p className="font-sans text-[10px] text-muted/60 mt-2 flex items-center gap-1">
+          <GripVertical size={10} /> Drag the grip handle to reorder entries
+        </p>
       </div>
 
       {/* Packages */}
-      {(section.packages.length > 0 || ['basics','desserts','packages'].includes(section.id)) && (
+      {(section.packages.length > 0 || ['basics', 'desserts', 'packages'].includes(section.id)) && (
         <div>
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-sans text-[11px] uppercase tracking-widest text-muted">Package Cards</h3>
@@ -214,30 +349,39 @@ function SectionEditor({
               <Plus size={13} /> Add Package
             </Button>
           </div>
-          <div className="space-y-2">
-            {section.packages.map((pkg) => (
-              <div key={pkg.id} className="bg-white border border-cream-dark rounded-lg px-4 py-3 flex items-start justify-between gap-4 group">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-3">
-                    <p className="font-serif text-[14px] text-charcoal">{pkg.title}</p>
-                    <span className="font-sans text-[11px] font-medium text-warm">{pkg.price}</span>
-                  </div>
-                  <p className="font-sans text-xs text-muted mt-0.5 leading-relaxed">{pkg.description}</p>
-                </div>
-                <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => onEditPackage(pkg)} className="p-1.5 rounded hover:bg-cream-dark text-muted hover:text-charcoal transition-colors">
-                    <Pencil size={13} />
-                  </button>
-                  <button onClick={() => onDeletePackage(pkg.id)} className="p-1.5 rounded hover:bg-red-50 text-muted hover:text-red-600 transition-colors">
-                    <Trash2 size={13} />
-                  </button>
-                </div>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handlePackageDragEnd}>
+            <SortableContext items={section.packages.map((p) => p.id)} strategy={verticalListSortingStrategy}>
+              <div className="space-y-2">
+                {section.packages.map((pkg) => (
+                  <SortableRow key={pkg.id} id={pkg.id}>
+                    {(handle) => (
+                      <div className="bg-white border border-cream-dark rounded-lg px-4 py-3 flex items-start gap-2 group">
+                        <div className="shrink-0 mt-0.5 opacity-40 group-hover:opacity-100 transition-opacity">{handle}</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-3">
+                            <p className="font-serif text-[14px] text-charcoal">{pkg.title}</p>
+                            <span className="font-sans text-[11px] font-medium text-warm">{pkg.price}</span>
+                          </div>
+                          <p className="font-sans text-xs text-muted mt-0.5 leading-relaxed">{pkg.description}</p>
+                        </div>
+                        <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => onEditPackage(pkg)} className="p-1.5 rounded hover:bg-cream-dark text-muted hover:text-charcoal transition-colors">
+                            <Pencil size={13} />
+                          </button>
+                          <button onClick={() => onDeletePackage(pkg.id)} className="p-1.5 rounded hover:bg-red-50 text-muted hover:text-red-600 transition-colors">
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </SortableRow>
+                ))}
+                {section.packages.length === 0 && (
+                  <p className="font-sans text-xs text-muted italic">No packages yet.</p>
+                )}
               </div>
-            ))}
-            {section.packages.length === 0 && (
-              <p className="font-sans text-xs text-muted italic">No packages yet.</p>
-            )}
-          </div>
+            </SortableContext>
+          </DndContext>
         </div>
       )}
 
@@ -250,60 +394,55 @@ function SectionEditor({
               <Plus size={13} /> Add Item
             </Button>
           </div>
-
-          {/* Group by group_label if present */}
-          {(() => {
-            const grouped = section.items.reduce<Record<string, DbMenuItem[]>>((acc, item) => {
-              const key = item.group_label ?? '__ungrouped__';
-              if (!acc[key]) acc[key] = [];
-              acc[key].push(item);
-              return acc;
-            }, {});
-
-            const hasGroups = Object.keys(grouped).some((k) => k !== '__ungrouped__');
-
-            return Object.entries(grouped).map(([group, items]) => (
-              <div key={group} className="mb-5">
-                {hasGroups && group !== '__ungrouped__' && (
-                  <p className="font-sans text-[10px] uppercase tracking-widest text-muted mb-2 mt-3">{group}</p>
-                )}
-                <div className="space-y-1.5">
-                  {items.map((item) => (
-                    <div key={item.id} className="bg-white border border-cream-dark rounded-lg px-4 py-3 flex items-center justify-between gap-4 group">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-serif text-[13.5px] text-charcoal leading-snug">{item.name}</p>
-                          {item.price && <span className="font-sans text-[11px] font-medium text-warm">{item.price}</span>}
-                          {item.note && <span className="font-sans text-[10px] uppercase tracking-widest text-muted opacity-60">{item.note}</span>}
-                        </div>
-                        {item.diet && item.diet.length > 0 && (
-                          <div className="flex gap-1 mt-1 flex-wrap">
-                            {item.diet.map((tag) => (
-                              <span key={tag} className="font-sans text-[9px] uppercase tracking-widest border rounded-sm px-1.5 py-0.5 text-sage border-sage">
-                                {tag}
-                              </span>
-                            ))}
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleItemDragEnd}>
+            <SortableContext items={section.items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+              {Object.entries(grouped).map(([group, items]) => (
+                <div key={group} className="mb-5">
+                  {hasGroups && group !== '__ungrouped__' && (
+                    <p className="font-sans text-[10px] uppercase tracking-widest text-muted mb-2 mt-3">{group}</p>
+                  )}
+                  <div className="space-y-1.5">
+                    {items.map((item) => (
+                      <SortableRow key={item.id} id={item.id}>
+                        {(handle) => (
+                          <div className="bg-white border border-cream-dark rounded-lg px-4 py-3 flex items-center gap-2 group">
+                            <div className="shrink-0 opacity-40 group-hover:opacity-100 transition-opacity">{handle}</div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <p className="font-serif text-[13.5px] text-charcoal leading-snug">{item.name}</p>
+                                {item.price && <span className="font-sans text-[11px] font-medium text-warm">{item.price}</span>}
+                                {item.note && <span className="font-sans text-[10px] uppercase tracking-widest text-muted opacity-60">{item.note}</span>}
+                              </div>
+                              {item.diet && item.diet.length > 0 && (
+                                <div className="flex gap-1 mt-1 flex-wrap">
+                                  {item.diet.map((tag) => (
+                                    <span key={tag} className="font-sans text-[9px] uppercase tracking-widest border rounded-sm px-1.5 py-0.5 text-sage border-sage">
+                                      {tag}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button onClick={() => onEditItem(item)} className="p-1.5 rounded hover:bg-cream-dark text-muted hover:text-charcoal transition-colors">
+                                <Pencil size={13} />
+                              </button>
+                              <button onClick={() => onDeleteItem(item.id)} className="p-1.5 rounded hover:bg-red-50 text-muted hover:text-red-600 transition-colors">
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
                           </div>
                         )}
-                      </div>
-                      <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => onEditItem(item)} className="p-1.5 rounded hover:bg-cream-dark text-muted hover:text-charcoal transition-colors">
-                          <Pencil size={13} />
-                        </button>
-                        <button onClick={() => onDeleteItem(item.id)} className="p-1.5 rounded hover:bg-red-50 text-muted hover:text-red-600 transition-colors">
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                      </SortableRow>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ));
-          })()}
-
-          {section.items.length === 0 && (
-            <p className="font-sans text-xs text-muted italic">No items yet. Add your first item above.</p>
-          )}
+              ))}
+              {section.items.length === 0 && (
+                <p className="font-sans text-xs text-muted italic">No items yet. Add your first item above.</p>
+              )}
+            </SortableContext>
+          </DndContext>
         </div>
       )}
 
@@ -316,31 +455,40 @@ function SectionEditor({
               <Plus size={13} /> Add Entry
             </Button>
           </div>
-          <div className="space-y-2">
-            {section.accordions.map((acc) => (
-              <div key={acc.id} className="bg-white border border-cream-dark rounded-lg px-4 py-3 flex items-start justify-between gap-4 group">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    {acc.emoji && <span>{acc.emoji}</span>}
-                    <p className="font-serif text-[14px] text-charcoal">{acc.title}</p>
-                    {acc.price && <span className="font-sans text-[11px] font-medium text-warm">{acc.price}</span>}
-                  </div>
-                  <p className="font-sans text-xs text-muted mt-0.5 line-clamp-2">{acc.body}</p>
-                </div>
-                <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => onEditAccordion(acc)} className="p-1.5 rounded hover:bg-cream-dark text-muted hover:text-charcoal transition-colors">
-                    <Pencil size={13} />
-                  </button>
-                  <button onClick={() => onDeleteAccordion(acc.id)} className="p-1.5 rounded hover:bg-red-50 text-muted hover:text-red-600 transition-colors">
-                    <Trash2 size={13} />
-                  </button>
-                </div>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleAccordionDragEnd}>
+            <SortableContext items={section.accordions.map((a) => a.id)} strategy={verticalListSortingStrategy}>
+              <div className="space-y-2">
+                {section.accordions.map((acc) => (
+                  <SortableRow key={acc.id} id={acc.id}>
+                    {(handle) => (
+                      <div className="bg-white border border-cream-dark rounded-lg px-4 py-3 flex items-start gap-2 group">
+                        <div className="shrink-0 mt-0.5 opacity-40 group-hover:opacity-100 transition-opacity">{handle}</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            {acc.emoji && <span>{acc.emoji}</span>}
+                            <p className="font-serif text-[14px] text-charcoal">{acc.title}</p>
+                            {acc.price && <span className="font-sans text-[11px] font-medium text-warm">{acc.price}</span>}
+                          </div>
+                          <p className="font-sans text-xs text-muted mt-0.5 line-clamp-2">{acc.body}</p>
+                        </div>
+                        <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => onEditAccordion(acc)} className="p-1.5 rounded hover:bg-cream-dark text-muted hover:text-charcoal transition-colors">
+                            <Pencil size={13} />
+                          </button>
+                          <button onClick={() => onDeleteAccordion(acc.id)} className="p-1.5 rounded hover:bg-red-50 text-muted hover:text-red-600 transition-colors">
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </SortableRow>
+                ))}
+                {section.accordions.length === 0 && (
+                  <p className="font-sans text-xs text-muted italic">No accordion entries yet.</p>
+                )}
               </div>
-            ))}
-            {section.accordions.length === 0 && (
-              <p className="font-sans text-xs text-muted italic">No accordion entries yet.</p>
-            )}
-          </div>
+            </SortableContext>
+          </DndContext>
         </div>
       )}
     </div>
