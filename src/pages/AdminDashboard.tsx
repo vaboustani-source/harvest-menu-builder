@@ -344,6 +344,12 @@ export default function AdminDashboard() {
         sectionId={activeSectionId}
         accordion={accModal.accordion}
       />
+      <BasicsCardFormModal
+        open={basicsCardModal.open}
+        onClose={() => setBasicsCardModal({ open: false })}
+        card={basicsCardModal.card}
+        existingGroups={basicsGroups?.map((g) => g.label) ?? []}
+      />
     </div>
   );
 }
