@@ -131,6 +131,25 @@ export function ItemFormModal({ open, onClose, sectionId, item }: Props) {
               ))}
             </div>
           </div>
+          <div className="space-y-2">
+            <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Season</Label>
+            <div className="flex gap-2 flex-wrap">
+              {SEASON_OPTIONS.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => toggleSeason(tag)}
+                  className={`px-3 py-1 rounded-full border text-[11px] font-sans uppercase tracking-widest transition-colors ${
+                    season.includes(tag)
+                      ? 'bg-warm text-white border-warm'
+                      : 'bg-white text-muted-foreground border-cream-dark hover:border-warm'
+                  }`}
+                >
+                  {tag.charAt(0).toUpperCase() + tag.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {error && <p className="text-xs text-red-600 font-sans">{error}</p>}
 
