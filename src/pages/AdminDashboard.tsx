@@ -41,7 +41,7 @@ function SortableRow({ id, children }: { id: string; children: (dragHandle: Reac
     <span
       {...attributes}
       {...listeners}
-      className="cursor-grab active:cursor-grabbing p-1.5 rounded text-muted hover:text-charcoal transition-colors touch-none"
+      className="cursor-grab active:cursor-grabbing p-1.5 rounded text-muted-foreground hover:text-charcoal transition-colors touch-none"
       title="Drag to reorder"
     >
       <GripVertical size={13} />
@@ -135,7 +135,7 @@ export default function AdminDashboard() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">
-        <p className="font-sans text-xs uppercase tracking-widest text-muted animate-pulse">Loading menu data…</p>
+        <p className="font-sans text-xs uppercase tracking-widest text-muted-foreground animate-pulse">Loading menu data…</p>
       </div>
     );
   }
@@ -196,7 +196,7 @@ export default function AdminDashboard() {
         <div className="flex gap-6">
           {/* Section sidebar - desktop */}
           <aside className="hidden md:block w-48 shrink-0">
-            <p className="font-sans text-[10px] uppercase tracking-widest text-muted mb-3 px-2">Sections</p>
+            <p className="font-sans text-[10px] uppercase tracking-widest text-muted-foreground mb-3 px-2">Sections</p>
             <nav className="space-y-0.5">
               {sections?.map((s) => (
                 <button
@@ -333,9 +333,9 @@ function SectionEditor({
       <div className="border-b border-cream-dark pb-4">
         <h2 className="font-serif italic text-2xl text-green">{section.section_title}</h2>
         {section.description && (
-          <p className="font-sans text-xs text-muted mt-1 leading-relaxed max-w-xl">{section.description}</p>
+          <p className="font-sans text-xs text-muted-foreground mt-1 leading-relaxed max-w-xl">{section.description}</p>
         )}
-        <p className="font-sans text-[10px] text-muted/60 mt-2 flex items-center gap-1">
+        <p className="font-sans text-[10px] text-muted-foreground/60 mt-2 flex items-center gap-1">
           <GripVertical size={10} /> Drag the grip handle to reorder entries
         </p>
       </div>
@@ -344,7 +344,7 @@ function SectionEditor({
       {(section.packages.length > 0 || ['basics', 'desserts', 'packages'].includes(section.id)) && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-sans text-[11px] uppercase tracking-widest text-muted">Package Cards</h3>
+            <h3 className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Package Cards</h3>
             <Button onClick={onAddPackage} size="sm" variant="outline" className="font-sans text-xs gap-1.5 h-8">
               <Plus size={13} /> Add Package
             </Button>
@@ -362,13 +362,13 @@ function SectionEditor({
                             <p className="font-serif text-[14px] text-charcoal">{pkg.title}</p>
                             <span className="font-sans text-[11px] font-medium text-warm">{pkg.price}</span>
                           </div>
-                          <p className="font-sans text-xs text-muted mt-0.5 leading-relaxed">{pkg.description}</p>
+                          <p className="font-sans text-xs text-muted-foreground mt-0.5 leading-relaxed">{pkg.description}</p>
                         </div>
                         <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => onEditPackage(pkg)} className="p-1.5 rounded hover:bg-cream-dark text-muted hover:text-charcoal transition-colors">
+                          <button onClick={() => onEditPackage(pkg)} className="p-1.5 rounded hover:bg-cream-dark text-muted-foreground hover:text-charcoal transition-colors">
                             <Pencil size={13} />
                           </button>
-                          <button onClick={() => onDeletePackage(pkg.id)} className="p-1.5 rounded hover:bg-red-50 text-muted hover:text-red-600 transition-colors">
+                          <button onClick={() => onDeletePackage(pkg.id)} className="p-1.5 rounded hover:bg-red-50 text-muted-foreground hover:text-red-600 transition-colors">
                             <Trash2 size={13} />
                           </button>
                         </div>
@@ -377,7 +377,7 @@ function SectionEditor({
                   </SortableRow>
                 ))}
                 {section.packages.length === 0 && (
-                  <p className="font-sans text-xs text-muted italic">No packages yet.</p>
+                  <p className="font-sans text-xs text-muted-foreground italic">No packages yet.</p>
                 )}
               </div>
             </SortableContext>
@@ -389,7 +389,7 @@ function SectionEditor({
       {(section.items.length > 0 || !['bar'].includes(section.id)) && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-sans text-[11px] uppercase tracking-widest text-muted">Menu Items</h3>
+            <h3 className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Menu Items</h3>
             <Button onClick={onAddItem} size="sm" variant="outline" className="font-sans text-xs gap-1.5 h-8">
               <Plus size={13} /> Add Item
             </Button>
@@ -399,7 +399,7 @@ function SectionEditor({
               {Object.entries(grouped).map(([group, items]) => (
                 <div key={group} className="mb-5">
                   {hasGroups && group !== '__ungrouped__' && (
-                    <p className="font-sans text-[10px] uppercase tracking-widest text-muted mb-2 mt-3">{group}</p>
+                    <p className="font-sans text-[10px] uppercase tracking-widest text-muted-foreground mb-2 mt-3">{group}</p>
                   )}
                   <div className="space-y-1.5">
                     {items.map((item) => (
@@ -411,7 +411,7 @@ function SectionEditor({
                               <div className="flex items-center gap-2 flex-wrap">
                                 <p className="font-serif text-[13.5px] text-charcoal leading-snug">{item.name}</p>
                                 {item.price && <span className="font-sans text-[11px] font-medium text-warm">{item.price}</span>}
-                                {item.note && <span className="font-sans text-[10px] uppercase tracking-widest text-muted opacity-60">{item.note}</span>}
+                                {item.note && <span className="font-sans text-[10px] uppercase tracking-widest text-muted-foreground opacity-60">{item.note}</span>}
                               </div>
                               {item.diet && item.diet.length > 0 && (
                                 <div className="flex gap-1 mt-1 flex-wrap">
@@ -424,10 +424,10 @@ function SectionEditor({
                               )}
                             </div>
                             <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button onClick={() => onEditItem(item)} className="p-1.5 rounded hover:bg-cream-dark text-muted hover:text-charcoal transition-colors">
+                              <button onClick={() => onEditItem(item)} className="p-1.5 rounded hover:bg-cream-dark text-muted-foreground hover:text-charcoal transition-colors">
                                 <Pencil size={13} />
                               </button>
-                              <button onClick={() => onDeleteItem(item.id)} className="p-1.5 rounded hover:bg-red-50 text-muted hover:text-red-600 transition-colors">
+                              <button onClick={() => onDeleteItem(item.id)} className="p-1.5 rounded hover:bg-red-50 text-muted-foreground hover:text-red-600 transition-colors">
                                 <Trash2 size={13} />
                               </button>
                             </div>
@@ -439,7 +439,7 @@ function SectionEditor({
                 </div>
               ))}
               {section.items.length === 0 && (
-                <p className="font-sans text-xs text-muted italic">No items yet. Add your first item above.</p>
+                <p className="font-sans text-xs text-muted-foreground italic">No items yet. Add your first item above.</p>
               )}
             </SortableContext>
           </DndContext>
@@ -450,7 +450,7 @@ function SectionEditor({
       {(section.accordions.length > 0 || section.id === 'bar') && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-sans text-[11px] uppercase tracking-widest text-muted">Accordion Entries</h3>
+            <h3 className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Accordion Entries</h3>
             <Button onClick={onAddAccordion} size="sm" variant="outline" className="font-sans text-xs gap-1.5 h-8">
               <Plus size={13} /> Add Entry
             </Button>
@@ -469,13 +469,13 @@ function SectionEditor({
                             <p className="font-serif text-[14px] text-charcoal">{acc.title}</p>
                             {acc.price && <span className="font-sans text-[11px] font-medium text-warm">{acc.price}</span>}
                           </div>
-                          <p className="font-sans text-xs text-muted mt-0.5 line-clamp-2">{acc.body}</p>
+                          <p className="font-sans text-xs text-muted-foreground mt-0.5 line-clamp-2">{acc.body}</p>
                         </div>
                         <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => onEditAccordion(acc)} className="p-1.5 rounded hover:bg-cream-dark text-muted hover:text-charcoal transition-colors">
+                          <button onClick={() => onEditAccordion(acc)} className="p-1.5 rounded hover:bg-cream-dark text-muted-foreground hover:text-charcoal transition-colors">
                             <Pencil size={13} />
                           </button>
-                          <button onClick={() => onDeleteAccordion(acc.id)} className="p-1.5 rounded hover:bg-red-50 text-muted hover:text-red-600 transition-colors">
+                          <button onClick={() => onDeleteAccordion(acc.id)} className="p-1.5 rounded hover:bg-red-50 text-muted-foreground hover:text-red-600 transition-colors">
                             <Trash2 size={13} />
                           </button>
                         </div>
@@ -484,7 +484,7 @@ function SectionEditor({
                   </SortableRow>
                 ))}
                 {section.accordions.length === 0 && (
-                  <p className="font-sans text-xs text-muted italic">No accordion entries yet.</p>
+                  <p className="font-sans text-xs text-muted-foreground italic">No accordion entries yet.</p>
                 )}
               </div>
             </SortableContext>
