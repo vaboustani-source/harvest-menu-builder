@@ -220,7 +220,7 @@ export default function AdminDashboard() {
               {sections?.map((s) => (
                 <button
                   key={s.id}
-                  onClick={() => { setActiveSectionId(s.id); setMobileOpen(false); }}
+                  onClick={() => { handleSelectSection(s.id); setMobileOpen(false); }}
                   className={`w-full text-left px-4 py-3 font-sans text-sm border-b border-cream-dark last:border-0 transition-colors ${
                     s.id === activeSectionId ? 'bg-sage/10 text-green font-medium' : 'text-charcoal hover:bg-cream'
                   }`}
@@ -240,7 +240,7 @@ export default function AdminDashboard() {
               {sections?.map((s) => (
                 <button
                   key={s.id}
-                  onClick={() => setActiveSectionId(s.id)}
+                  onClick={() => handleSelectSection(s.id)}
                   className={`w-full text-left px-3 py-2.5 rounded-lg font-sans text-[13px] transition-colors ${
                     s.id === activeSectionId
                       ? 'bg-green text-white'
