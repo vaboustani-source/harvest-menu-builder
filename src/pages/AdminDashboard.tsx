@@ -63,6 +63,7 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { data: sections, isLoading, error } = useMenuData();
+  const { data: basicsGroups } = useBasicsCards();
   const [activeSectionId, setActiveSectionId] = useState<string>('');
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -70,6 +71,7 @@ export default function AdminDashboard() {
   const [itemModal, setItemModal] = useState<{ open: boolean; item?: DbMenuItem | null }>({ open: false });
   const [pkgModal, setPkgModal] = useState<{ open: boolean; pkg?: DbMenuPackage | null }>({ open: false });
   const [accModal, setAccModal] = useState<{ open: boolean; accordion?: DbMenuAccordion | null }>({ open: false });
+  const [basicsCardModal, setBasicsCardModal] = useState<{ open: boolean; card?: BasicsCard | null }>({ open: false });
 
   useEffect(() => {
     if (sections && sections.length > 0 && !activeSectionId) {
