@@ -89,6 +89,12 @@ export function Harvest336Page() {
         className="relative overflow-hidden text-center"
         style={{ background: '#2C3E2D', padding: '72px 40px 60px' }}
       >
+        <a
+          href="/admin/login"
+          className="absolute top-4 right-5 font-sans text-[10px] uppercase tracking-[0.2em] text-white/30 hover:text-white/70 transition-colors z-10"
+        >
+          Admin
+        </a>
         <div
           className="absolute inset-0 opacity-100 pointer-events-none"
           style={{ backgroundImage: `url("${CROSS_PATTERN}")` }}
