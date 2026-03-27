@@ -63,7 +63,7 @@ export default function AdminLogin() {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-green hover:bg-green/90 text-white font-sans text-xs tracking-widest uppercase"
+            className="w-full border border-primary bg-primary-foreground text-primary font-sans text-xs tracking-widest uppercase hover:bg-primary-foreground/90"
           >
             {loading ? 'Signing in…' : 'Sign In'}
           </Button>
