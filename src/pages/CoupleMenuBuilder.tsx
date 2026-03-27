@@ -86,6 +86,23 @@ export default function CoupleMenuBuilder() {
     return selections?.filter(s => s.section_id === sectionId && s.group_label === groupLabel).length ?? 0;
   };
 
+  // Map section IDs to basics card group labels
+  const sectionToBasicsMap: Record<string, string[]> = {
+    'cocktail': ['Cocktail Hour'],
+    'reception': ['Reception Dinner (Family Style)'],
+    'bar': ['Bar Service (All Events)'],
+    'desserts': [],
+    'rehearsal': [],
+    'welcome': ['After-Party & Welcome Party'],
+    'packages': ['Breakfast, Brunch & Lunch Events'],
+  };
+
+  const getBasicsCardsForSection = (sectionId: string) => {
+    const groupLabels = sectionToBasicsMap[sectionId];
+    if (!groupLabels || groupLabels.length === 0 || !basicsGroups) return [];
+    return basicsGroups.filter(g => groupLabels.includes(g.label));
+  };
+
   const currentSection = sections?.find(s => s.id === activeTab);
   // Filter out basics for couple view
   const menuSections = sections?.filter(s => s.id !== 'basics') ?? [];
