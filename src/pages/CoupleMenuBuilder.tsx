@@ -8,7 +8,6 @@ import { useGroupLimits } from '@/hooks/useGroupLimits';
 import { useBasicsCards } from '@/hooks/useBasicsCards';
 import { MenuItemCard } from '@/components/harvest/MenuItemCard';
 import { DietTagBadge } from '@/components/harvest/DietTag';
-import { DietTagBadge } from '@/components/harvest/DietTag';
 import { Button } from '@/components/ui/button';
 import { LogOut, Check, Plus, Minus, Diamond } from 'lucide-react';
 import type { DietTag } from '@/data/menuData';
