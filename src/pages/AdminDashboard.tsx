@@ -17,6 +17,8 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Pencil, Trash2, LogOut, ChevronDown, GripVertical, Diamond, Lock, LockOpen, Users, Settings2, Calendar, UserCheck } from 'lucide-react';
+import { CoupleSelectionsViewer } from '@/components/admin/CoupleSelectionsViewer';
+import { useAllCoupleSelectionCounts } from '@/hooks/useAllCoupleSelectionCounts';
 import {
   DndContext,
   closestCenter,
@@ -73,6 +75,7 @@ export default function AdminDashboard() {
   const { data: basicsGroups } = useBasicsCards();
   const { data: couples } = useCouples();
   const { data: groupLimits } = useGroupLimits();
+  const { data: selectionCounts } = useAllCoupleSelectionCounts();
   const [activeSectionId, setActiveSectionId] = useState<string>('');
   const [adminView, setAdminView] = useState<'menu' | 'couples' | 'limits'>('menu');
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -351,6 +354,14 @@ export default function AdminDashboard() {
                               }`}>
                                 {couple.status}
                               </span>
+                              {(() => {
+                                const count = selectionCounts?.get(couple.id) ?? 0;
+                                return count > 0 ? (
+                                  <span className="font-sans text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-green/10 text-green">
+                                    {count} item{count !== 1 ? 's' : ''} selected
+                                  </span>
+                                ) : null;
+                              })()}
                             </div>
                             <div className="flex items-center gap-4 mt-1">
                               <span className="font-sans text-xs text-muted-foreground">{couple.email}</span>
@@ -370,6 +381,10 @@ export default function AdminDashboard() {
                             </button>
                           </div>
                         </div>
+                        <CoupleSelectionsViewer
+                          coupleId={couple.id}
+                          coupleName={`${couple.partner1_name} & ${couple.partner2_name}`}
+                        />
                       </div>
                     ))}
                   </div>
