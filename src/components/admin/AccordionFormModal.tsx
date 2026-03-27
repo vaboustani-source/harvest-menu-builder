@@ -82,7 +82,7 @@ export function AccordionFormModal({ open, onClose, sectionId, accordion }: Prop
           </div>
           {error && <p className="text-xs text-red-600 font-sans">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <Button onClick={handleSave} disabled={saving} className="flex-1 bg-green hover:bg-green/90 text-white font-sans text-xs tracking-widest uppercase">
+            <Button onClick={handleSave} disabled={saving} className="flex-1 bg-primary-foreground text-primary font-sans text-xs tracking-widest uppercase hover:bg-primary-foreground/90">
               {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Add Entry'}
             </Button>
             <Button variant="outline" onClick={onClose} className="font-sans text-xs tracking-widest uppercase">Cancel</Button>
