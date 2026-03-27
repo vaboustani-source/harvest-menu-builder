@@ -60,7 +60,7 @@ export function GroupLimitModal({ open, onClose, sectionId, groupLabel, currentL
             <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Extra Item Price Note</Label>
             <Input value={priceNote} onChange={(e) => setPriceNote(e.target.value)} placeholder="e.g. +$8pp per extra" />
           </div>
-          <Button onClick={handleSave} disabled={saving} className="w-full bg-green hover:bg-green/90 text-white font-sans text-xs tracking-widest uppercase">
+          <Button onClick={handleSave} disabled={saving} className="w-full border border-primary bg-primary-foreground text-primary font-sans text-xs tracking-widest uppercase hover:bg-primary-foreground/90">
             {saving ? 'Saving…' : 'Save Limit'}
           </Button>
         </div>

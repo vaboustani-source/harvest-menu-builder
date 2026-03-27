@@ -533,7 +533,7 @@ export default function AdminDashboard() {
             {ownershipError && <p className="text-xs text-red-600 font-sans">{ownershipError}</p>}
           </div>
           <div className="flex gap-3 mt-3">
-            <Button onClick={handleOwnershipSubmit} className="flex-1 bg-green hover:bg-green/90 text-white font-sans text-xs tracking-widest uppercase">
+            <Button onClick={handleOwnershipSubmit} className="flex-1 border border-primary bg-primary-foreground text-primary font-sans text-xs tracking-widest uppercase hover:bg-primary-foreground/90">
               Unlock
             </Button>
             <Button variant="outline" onClick={() => setOwnershipPrompt(false)} className="font-sans text-xs tracking-widest uppercase">

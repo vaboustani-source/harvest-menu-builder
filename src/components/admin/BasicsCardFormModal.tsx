@@ -185,7 +185,7 @@ export function BasicsCardFormModal({ open, onClose, card, existingGroups }: Pro
             </Button>
           </div>
 
-          <Button onClick={handleSave} disabled={saving} className="w-full bg-green text-white hover:bg-green/90">
+          <Button onClick={handleSave} disabled={saving} className="w-full border border-primary bg-primary-foreground text-primary font-sans text-xs tracking-widest uppercase hover:bg-primary-foreground/90">
             {saving ? 'Saving…' : card ? 'Update Card' : 'Add Card'}
           </Button>
         </div>
