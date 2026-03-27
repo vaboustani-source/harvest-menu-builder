@@ -380,7 +380,7 @@ export function Harvest336Page() {
         </p>
         <button
           onClick={() => setCoupleLoginOpen(true)}
-          className="inline-block font-sans text-[11px] font-medium tracking-[0.2em] uppercase text-white bg-grove border border-grove rounded-sm px-8 py-3 hover:bg-grove/90 transition-colors duration-200 mb-4 cursor-pointer"
+          className="inline-block font-sans text-[11px] font-medium tracking-[0.2em] uppercase text-cream bg-transparent border border-sage/50 rounded-sm px-8 py-3 hover:bg-sage/20 transition-colors duration-200 mb-4 cursor-pointer"
         >
           Build Your Menu →
         </button>
