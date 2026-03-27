@@ -385,6 +385,7 @@ export default function AdminDashboard() {
                         <CoupleSelectionsViewer
                           coupleId={couple.id}
                           coupleName={`${couple.partner1_name} & ${couple.partner2_name}`}
+                          guestCount={couple.guest_count}
                         />
                       </div>
                     ))}
