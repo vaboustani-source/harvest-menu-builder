@@ -113,10 +113,10 @@ export function CoupleFormModal({ open, onClose }: Props) {
           {success && <p className="text-xs text-sage font-sans">{success}</p>}
 
           <div className="flex gap-3 pt-2">
-            <Button onClick={handleSave} disabled={saving} className="flex-1 bg-green hover:bg-green/90 text-white font-sans text-xs tracking-widest uppercase">
+            <Button onClick={handleSave} disabled={saving} className="flex-1 bg-[#3d4c3f] hover:bg-[#3d4c3f]/90 text-primary-foreground font-sans text-xs tracking-widest uppercase">
               {saving ? 'Creating…' : 'Create Account'}
             </Button>
-            <Button variant="outline" onClick={handleClose} className="font-sans text-xs tracking-widest uppercase">
+            <Button onClick={handleClose} className="bg-[#3d4c3f] hover:bg-[#3d4c3f]/90 text-primary-foreground font-sans text-xs tracking-widest uppercase">
               Close
             </Button>
           </div>
