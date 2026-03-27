@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -14,6 +14,7 @@ import { BasicsCardFormModal } from '@/components/admin/BasicsCardFormModal';
 import { CoupleFormModal } from '@/components/admin/CoupleFormModal';
 import { GroupLimitModal } from '@/components/admin/GroupLimitModal';
 import { Button } from '@/components/ui/button';
+import { PriceInput } from '@/components/admin/PriceInput';
 import { Label } from '@/components/ui/label';
 import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Pencil, Trash2, LogOut, ChevronDown, GripVertical, Diamond, Lock, LockOpen, Users, Settings2, Calendar, UserCheck } from 'lucide-react';
@@ -639,6 +640,7 @@ function SectionEditor({
         <p className="font-sans text-[10px] text-muted-foreground/60 mt-2 flex items-center gap-1">
           <GripVertical size={10} /> Drag the grip handle to reorder entries
         </p>
+        <SectionBasePriceEditor sectionId={section.id} currentPrice={section.base_price_pp ?? null} />
       </div>
 
       {/* Packages */}
