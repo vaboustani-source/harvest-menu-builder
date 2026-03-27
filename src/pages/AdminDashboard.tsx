@@ -75,6 +75,7 @@ export default function AdminDashboard() {
   const { data: basicsGroups } = useBasicsCards();
   const { data: couples } = useCouples();
   const { data: groupLimits } = useGroupLimits();
+  const { data: selectionCounts } = useAllCoupleSelectionCounts();
   const [activeSectionId, setActiveSectionId] = useState<string>('');
   const [adminView, setAdminView] = useState<'menu' | 'couples' | 'limits'>('menu');
   const [mobileOpen, setMobileOpen] = useState(false);
