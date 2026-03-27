@@ -20,6 +20,7 @@ export default function CoupleMenuBuilder() {
   const { data: profile, isLoading: profileLoading } = useCoupleProfile();
   const { data: sections } = useMenuData();
   const { data: groupLimits } = useGroupLimits();
+  const { data: basicsGroups } = useBasicsCards();
   const { data: selections } = useCoupleSelections(profile?.id ?? null);
   const [activeTab, setActiveTab] = useState('');
   const [saving, setSaving] = useState<string | null>(null);
