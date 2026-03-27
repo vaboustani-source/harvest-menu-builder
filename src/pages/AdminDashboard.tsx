@@ -207,11 +207,11 @@ export default function AdminDashboard() {
       {/* Top bar */}
       <header className="bg-green text-white px-6 py-4 flex items-center justify-between sticky top-0 z-50 shadow-nav">
         <div>
-          <p className="font-sans text-[10px] tracking-[0.25em] uppercase opacity-80">Gilbertsville Farmhouse</p>
-          <h1 className="font-serif italic text-xl leading-none">Harvest 336 <span className="font-sans text-xs tracking-widest not-italic opacity-80 ml-1">Admin</span></h1>
+          <p className="font-sans text-[10px] tracking-[0.25em] uppercase opacity-80 text-primary">Gilbertsville Farmhouse</p>
+          <h1 className="font-serif italic text-xl leading-none text-secondary-foreground">Harvest 336 <span className="font-sans text-xs tracking-widest not-italic opacity-80 ml-1">Admin</span></h1>
         </div>
         <div className="flex items-center gap-4">
-          <a href="/" target="_blank" className="font-sans text-[11px] uppercase tracking-widest opacity-70 hover:opacity-100 transition-opacity">
+          <a href="/" target="_blank" className="font-sans text-[11px] uppercase tracking-widest opacity-70 hover:opacity-100 transition-opacity text-secondary-foreground">
             View Menu ↗
           </a>
           <Button variant="ghost" onClick={handleLogout} className="text-white hover:text-white/80 hover:bg-white/10 font-sans text-xs uppercase tracking-widest px-3 gap-1.5">
