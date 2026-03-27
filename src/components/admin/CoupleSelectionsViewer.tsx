@@ -11,6 +11,17 @@ type Props = {
   coupleName: string;
 };
 
+type GroupedSection = {
+  section: { id: string; emoji: string | null; section_title: string };
+  totalItems: number;
+  groups: Array<{
+    label: string | null;
+    selections: CoupleSelection[];
+    includedCount: number;
+    extraPriceNote: string | null;
+  }>;
+};
+
 export function CoupleSelectionsViewer({ coupleId, coupleName }: Props) {
   const [expanded, setExpanded] = useState(false);
   const { data: selections, isLoading } = useCoupleSelections(expanded ? coupleId : null);
@@ -19,15 +30,13 @@ export function CoupleSelectionsViewer({ coupleId, coupleName }: Props) {
 
   const selectionCount = selections?.length ?? 0;
 
-  // Group selections by section → group_label
-  const grouped = (() => {
+  const grouped: GroupedSection[] = (() => {
     if (!selections || !sections) return [];
     return sections
       .map((sec) => {
         const sectionSelections = selections.filter((s) => s.section_id === sec.id);
         if (sectionSelections.length === 0) return null;
 
-        // Group by group_label
         const byGroup = new Map<string, CoupleSelection[]>();
         sectionSelections.forEach((sel) => {
           const key = sel.group_label || '_ungrouped';
@@ -36,7 +45,8 @@ export function CoupleSelectionsViewer({ coupleId, coupleName }: Props) {
         });
 
         return {
-          section: sec,
+          section: { id: sec.id, emoji: sec.emoji, section_title: sec.section_title },
+          totalItems: sectionSelections.length,
           groups: Array.from(byGroup.entries()).map(([label, sels]) => {
             const limit = groupLimits?.find(
               (gl) => gl.section_id === sec.id && gl.group_label === label
@@ -50,15 +60,7 @@ export function CoupleSelectionsViewer({ coupleId, coupleName }: Props) {
           }),
         };
       })
-      .filter(Boolean) as Array<{
-      section: (typeof sections)[0];
-      groups: Array<{
-        label: string | null;
-        selections: CoupleSelection[];
-        includedCount: number;
-        extraPriceNote: string | null;
-      }>;
-    }>;
+      .filter(Boolean) as GroupedSection[];
   })();
 
   const getItemName = (menuItemId: string) => {
@@ -71,41 +73,55 @@ export function CoupleSelectionsViewer({ coupleId, coupleName }: Props) {
   };
 
   const handleExportPdf = () => {
-    // Build a printable HTML document and trigger print
     const html = `
       <!DOCTYPE html>
       <html><head>
         <title>${coupleName} — Menu Selections</title>
         <style>
           body { font-family: Georgia, serif; max-width: 700px; margin: 40px auto; color: #333; }
-          h1 { font-size: 22px; font-style: italic; border-bottom: 1px solid #ccc; padding-bottom: 8px; }
-          h2 { font-size: 16px; margin-top: 24px; color: #3d4c3f; }
-          h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; color: #888; margin: 12px 0 6px; }
-          ul { list-style: none; padding: 0; }
-          li { padding: 4px 0; font-size: 14px; }
+          h1 { font-size: 22px; font-style: italic; border-bottom: 2px solid #3d4c3f; padding-bottom: 8px; color: #3d4c3f; }
+          .meta { font-size: 12px; color: #888; margin-bottom: 32px; }
+          .section-block { margin-bottom: 28px; }
+          .section-divider { border-top: 2px solid #3d4c3f; margin-bottom: 0; }
+          .section-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 0 6px; }
+          .section-title { font-size: 14px; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 700; color: #3d4c3f; }
+          .section-count { font-size: 11px; color: #888; }
+          .group-block { margin: 8px 0 12px 12px; padding-left: 12px; border-left: 2px solid #d4c9a8; }
+          .group-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #888; font-weight: 600; margin-bottom: 4px; }
+          ul { list-style: none; padding: 0; margin: 0; }
+          li { padding: 2px 0; font-size: 14px; }
+          li::before { content: "· "; color: #aaa; }
           .extra { color: #888; font-style: italic; }
-          .divider { border-top: 1px dashed #ccc; margin: 8px 0; font-size: 11px; color: #999; }
+          .divider { font-size: 10px; color: #999; margin: 6px 0; padding: 2px 0; border-top: 1px dashed #ccc; }
           @media print { body { margin: 20px; } }
         </style>
       </head><body>
-        <h1>${coupleName} — Menu Selections</h1>
-        <p style="font-size:12px;color:#888;">Generated ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+        <h1>${coupleName}</h1>
+        <p class="meta">Menu Selections · Generated ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
         ${grouped.map((g) => `
-          <h2>${g.section.emoji ? g.section.emoji + ' ' : ''}${g.section.section_title}</h2>
-          ${g.groups.map((grp) => {
-            const included = grp.selections.slice(0, grp.includedCount);
-            const extras = grp.selections.slice(grp.includedCount);
-            return `
-              ${grp.label ? `<h3>${grp.label}</h3>` : ''}
-              <ul>
-                ${included.map((s) => `<li>${getItemName(s.menu_item_id)}${s.notes ? ` — <em>${s.notes}</em>` : ''}</li>`).join('')}
-              </ul>
-              ${extras.length > 0 ? `
-                <div class="divider">${grp.includedCount} included · ${extras.length} extra${grp.extraPriceNote ? ` (${grp.extraPriceNote})` : ''}</div>
-                <ul>${extras.map((s) => `<li class="extra">${getItemName(s.menu_item_id)}${s.notes ? ` — <em>${s.notes}</em>` : ''}</li>`).join('')}</ul>
-              ` : ''}
-            `;
-          }).join('')}
+          <div class="section-block">
+            <div class="section-divider"></div>
+            <div class="section-header">
+              <span class="section-title">${g.section.emoji ? g.section.emoji + ' ' : ''}${g.section.section_title}</span>
+              <span class="section-count">${g.totalItems} item${g.totalItems !== 1 ? 's' : ''}</span>
+            </div>
+            ${g.groups.map((grp) => {
+              const included = grp.selections.slice(0, grp.includedCount);
+              const extras = grp.selections.slice(grp.includedCount);
+              return `
+                <div class="group-block">
+                  ${grp.label ? `<div class="group-label">${grp.label}</div>` : ''}
+                  <ul>
+                    ${included.map((s) => `<li>${getItemName(s.menu_item_id)}${s.notes ? ` — <em>${s.notes}</em>` : ''}</li>`).join('')}
+                  </ul>
+                  ${extras.length > 0 ? `
+                    <div class="divider">${grp.includedCount} included · ${extras.length} extra${grp.extraPriceNote ? ` (${grp.extraPriceNote})` : ''}</div>
+                    <ul>${extras.map((s) => `<li class="extra">${getItemName(s.menu_item_id)}${s.notes ? ` — <em>${s.notes}</em>` : ''}</li>`).join('')}</ul>
+                  ` : ''}
+                </div>
+              `;
+            }).join('')}
+          </div>
         `).join('')}
         ${grouped.length === 0 ? '<p style="color:#999;margin-top:32px;">No selections yet.</p>' : ''}
       </body></html>
@@ -123,7 +139,7 @@ export function CoupleSelectionsViewer({ coupleId, coupleName }: Props) {
       <div className="flex items-center gap-2">
         <button
           onClick={() => setExpanded(!expanded)}
-          className="flex items-center gap-1.5 font-sans text-[11px] uppercase tracking-widest text-muted-foreground hover:text-charcoal transition-colors"
+          className="flex items-center gap-1.5 font-sans text-[11px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
         >
           <ChevronDown size={12} className={`transition-transform ${expanded ? 'rotate-180' : ''}`} />
           {expanded ? 'Hide' : 'View'} Selections
@@ -141,50 +157,66 @@ export function CoupleSelectionsViewer({ coupleId, coupleName }: Props) {
       </div>
 
       {expanded && (
-        <div className="mt-3 pl-4 border-l-2 border-cream-dark">
+        <div className="mt-3">
           {isLoading ? (
             <p className="font-sans text-xs text-muted-foreground animate-pulse py-2">Loading selections…</p>
           ) : selectionCount === 0 ? (
             <p className="font-sans text-xs text-muted-foreground py-2 italic">No selections yet</p>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-1">
               {grouped.map((g) => (
                 <div key={g.section.id}>
-                  <p className="font-sans text-[11px] uppercase tracking-widest text-sage font-medium mb-1">
-                    {g.section.emoji && <span className="mr-1">{g.section.emoji}</span>}
-                    {g.section.section_title}
-                  </p>
+                  {/* Section header with divider */}
+                  <div className="border-t-2 border-primary/30 pt-2 pb-1 flex items-center justify-between">
+                    <p className="font-sans text-xs uppercase tracking-[0.15em] font-bold text-primary">
+                      {g.section.emoji && <span className="mr-1.5">{g.section.emoji}</span>}
+                      {g.section.section_title}
+                    </p>
+                    <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 font-sans">
+                      {g.totalItems} item{g.totalItems !== 1 ? 's' : ''}
+                    </Badge>
+                  </div>
+
+                  {/* Category groups */}
                   {g.groups.map((grp, gi) => {
                     const included = grp.selections.slice(0, grp.includedCount);
                     const extras = grp.selections.slice(grp.includedCount);
                     return (
-                      <div key={gi} className="mb-2">
+                      <div key={gi} className="ml-3 pl-3 border-l-2 border-accent mb-2">
                         {grp.label && (
-                          <p className="font-sans text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5">{grp.label}</p>
+                          <p className="font-sans text-[10px] uppercase tracking-[0.12em] text-muted-foreground font-semibold mt-1 mb-0.5">
+                            {grp.label}
+                          </p>
                         )}
-                        <ul className="space-y-0.5">
+                        <ul className="space-y-0">
                           {included.map((sel) => (
-                            <li key={sel.id} className="font-sans text-xs text-charcoal">
-                              {getItemName(sel.menu_item_id)}
-                              {sel.notes && <span className="text-muted-foreground ml-1">— {sel.notes}</span>}
+                            <li key={sel.id} className="font-sans text-xs text-foreground flex items-start gap-1.5 py-0.5">
+                              <span className="text-muted-foreground select-none">·</span>
+                              <span>
+                                {getItemName(sel.menu_item_id)}
+                                {sel.notes && <span className="text-muted-foreground ml-1">— {sel.notes}</span>}
+                              </span>
                             </li>
                           ))}
                         </ul>
                         {extras.length > 0 && (
                           <>
                             <div className="flex items-center gap-2 my-1">
-                              <div className="flex-1 h-px border-t border-dashed border-cream-dark" />
-                              <span className="font-sans text-[9px] uppercase tracking-widest text-muted-foreground">
+                              <div className="flex-1 h-px border-t border-dashed border-border" />
+                              <span className="font-sans text-[9px] uppercase tracking-widest text-muted-foreground whitespace-nowrap">
                                 {grp.includedCount} included · {extras.length} extra
                                 {grp.extraPriceNote && ` (${grp.extraPriceNote})`}
                               </span>
-                              <div className="flex-1 h-px border-t border-dashed border-cream-dark" />
+                              <div className="flex-1 h-px border-t border-dashed border-border" />
                             </div>
-                            <ul className="space-y-0.5">
+                            <ul className="space-y-0">
                               {extras.map((sel) => (
-                                <li key={sel.id} className="font-sans text-xs text-muted-foreground italic">
-                                  {getItemName(sel.menu_item_id)}
-                                  {sel.notes && <span className="ml-1">— {sel.notes}</span>}
+                                <li key={sel.id} className="font-sans text-xs text-muted-foreground italic flex items-start gap-1.5 py-0.5">
+                                  <span className="select-none">·</span>
+                                  <span>
+                                    {getItemName(sel.menu_item_id)}
+                                    {sel.notes && <span className="ml-1">— {sel.notes}</span>}
+                                  </span>
                                 </li>
                               ))}
                             </ul>
