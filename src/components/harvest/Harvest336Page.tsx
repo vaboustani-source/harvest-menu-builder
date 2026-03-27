@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Diamond, Plus } from 'lucide-react';
 import type { DietTag } from '@/data/menuData';
 import { DIET_FILTER_OPTIONS } from './DietTag';
 import { MenuItemCard } from './MenuItemCard';
@@ -8,6 +8,7 @@ import { AccordionBlock } from './AccordionBlock';
 import { BasicsContent } from './BasicsContent';
 import { CoupleLoginModal } from './CoupleLoginModal';
 import { useMenuData, type FullMenuSection } from '@/hooks/useMenuData';
+import { useBasicsCards } from '@/hooks/useBasicsCards';
 
 // Cross SVG pattern for hero
 const CROSS_PATTERN =
@@ -15,6 +16,7 @@ const CROSS_PATTERN =
 
 export function Harvest336Page() {
   const { data: sections, isLoading } = useMenuData();
+  const { data: basicsGroups } = useBasicsCards();
   const [activeTab, setActiveTab] = useState('basics');
   const [activeFilter, setActiveFilter] = useState<'all' | DietTag>('all');
   const [activeSeason, setActiveSeason] = useState<'all' | 'spring' | 'summer' | 'fall'>('all');
@@ -77,6 +79,20 @@ export function Harvest336Page() {
 
   const hasGroups = (section: FullMenuSection) =>
     section.items.some((i) => i.group_label != null);
+
+  const sectionToBasicsMap: Record<string, string[]> = {
+    'cocktail': ['Cocktail Hour'],
+    'reception': ['Reception Dinner (Family Style)'],
+    'bar': ['Bar Service (All Events)'],
+    'welcome': ['After-Party & Welcome Party'],
+    'packages': ['Breakfast, Brunch & Lunch Events'],
+  };
+
+  const getBasicsCardsForSection = (sectionId: string) => {
+    const groupLabels = sectionToBasicsMap[sectionId];
+    if (!groupLabels || groupLabels.length === 0 || !basicsGroups) return [];
+    return basicsGroups.filter(g => groupLabels.includes(g.label));
+  };
 
   if (isLoading) {
     return (
@@ -284,6 +300,52 @@ export function Harvest336Page() {
                   )}
                   <div className="w-[60px] h-px bg-sage-light mt-5 mb-9" />
                 </div>
+
+                {/* Basics inclusion cards for this section */}
+                {(() => {
+                  const basicsForSection = getBasicsCardsForSection(currentSection.id);
+                  if (basicsForSection.length === 0) return null;
+                  return (
+                    <div className="mb-8 space-y-3">
+                      {basicsForSection.map(group => (
+                        <div key={group.label}>
+                          {group.cards.map(card => (
+                            <div key={card.id} className={`rounded-[10px] border px-5 py-4 mb-3 ${
+                              card.card_type === 'included'
+                                ? 'border-sage/30 bg-sage/[0.04]'
+                                : 'border-warm/30 bg-warm/[0.04]'
+                            }`}>
+                              <div className="flex items-center gap-2 mb-2.5">
+                                <Diamond size={10} className={card.card_type === 'included' ? 'text-sage fill-sage' : 'text-warm'} />
+                                <p className="font-serif text-[13px] text-charcoal font-medium">{card.title}</p>
+                                <span className={`font-sans text-[9px] tracking-[0.2em] uppercase ${
+                                  card.card_type === 'included' ? 'text-sage' : 'text-warm'
+                                }`}>
+                                  {card.card_type === 'included' ? 'Included' : 'Add-On'}
+                                </span>
+                              </div>
+                              <ul className="space-y-1">
+                                {card.bullets.map((bullet, bi) => (
+                                  <li key={bi} className="flex items-start gap-2 font-sans text-[12px] text-charcoal/80 leading-[1.5]">
+                                    <span className={`mt-1.5 w-1 h-1 rounded-full shrink-0 ${
+                                      card.card_type === 'included' ? 'bg-sage' : 'bg-warm'
+                                    }`} />
+                                    <span>
+                                      {bullet.text}
+                                      {bullet.price && (
+                                        <span className="font-medium italic text-warm ml-1">{bullet.price}</span>
+                                      )}
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
 
                 {/* Packages */}
                 {currentSection.packages.length > 0 && (
