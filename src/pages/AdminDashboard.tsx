@@ -562,6 +562,49 @@ export default function AdminDashboard() {
   );
 }
 
+// ── Section Base Price Editor ──────────────────────────────────────────────────
+
+function SectionBasePriceEditor({ sectionId, currentPrice }: { sectionId: string; currentPrice: number | null }) {
+  const qc = useQueryClient();
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(String(currentPrice ?? ''));
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    setSaving(true);
+    const numVal = value.trim() ? parseFloat(value) : null;
+    await supabase.from('menu_sections').update({ base_price_pp: numVal } as any).eq('id', sectionId);
+    await qc.invalidateQueries({ queryKey: ['menu-data'] });
+    setSaving(false);
+    setEditing(false);
+  };
+
+  if (!editing) {
+    return (
+      <div className="mt-2 flex items-center gap-2">
+        <span className="font-sans text-[10px] uppercase tracking-widest text-muted-foreground">Base Price:</span>
+        <span className="font-sans text-xs font-medium text-charcoal">
+          {currentPrice != null ? `$${currentPrice}pp` : 'Not set'}
+        </span>
+        <button onClick={() => { setValue(String(currentPrice ?? '')); setEditing(true); }} className="font-sans text-[10px] text-primary underline">
+          {currentPrice != null ? 'Edit' : 'Set Price'}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-2 flex items-center gap-2">
+      <span className="font-sans text-[10px] uppercase tracking-widest text-muted-foreground">Base Price:</span>
+      <PriceInput value={value} onChange={setValue} placeholder="65" className="w-32" />
+      <Button onClick={handleSave} disabled={saving} size="sm" className="h-8 font-sans text-[10px] uppercase tracking-widest border border-primary bg-primary-foreground text-primary hover:bg-primary-foreground/90">
+        {saving ? 'Saving…' : 'Save'}
+      </Button>
+      <button onClick={() => setEditing(false)} className="font-sans text-[10px] text-muted-foreground underline">Cancel</button>
+    </div>
+  );
+}
+
 // ── Section Editor ────────────────────────────────────────────────────────────
 
 type SectionEditorProps = {
