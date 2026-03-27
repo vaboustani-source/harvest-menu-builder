@@ -17,6 +17,8 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Pencil, Trash2, LogOut, ChevronDown, GripVertical, Diamond, Lock, LockOpen, Users, Settings2, Calendar, UserCheck } from 'lucide-react';
+import { CoupleSelectionsViewer } from '@/components/admin/CoupleSelectionsViewer';
+import { useAllCoupleSelectionCounts } from '@/hooks/useAllCoupleSelectionCounts';
 import {
   DndContext,
   closestCenter,
