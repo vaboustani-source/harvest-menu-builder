@@ -154,7 +154,7 @@ export function ItemFormModal({ open, onClose, sectionId, item }: Props) {
           {error && <p className="text-xs text-red-600 font-sans">{error}</p>}
 
           <div className="flex gap-3 pt-2">
-            <Button onClick={handleSave} disabled={saving} className="flex-1 bg-primary-foreground text-primary font-sans text-xs tracking-widest uppercase hover:bg-primary-foreground/90">
+            <Button onClick={handleSave} disabled={saving} className="flex-1 border border-primary bg-primary-foreground text-primary font-sans text-xs tracking-widest uppercase hover:bg-primary-foreground/90">
               {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Add Item'}
             </Button>
             <Button variant="outline" onClick={onClose} className="font-sans text-xs tracking-widest uppercase">
