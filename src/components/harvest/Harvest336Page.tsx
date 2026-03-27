@@ -16,6 +16,7 @@ const CROSS_PATTERN =
 
 export function Harvest336Page() {
   const { data: sections, isLoading } = useMenuData();
+  const { data: basicsGroups } = useBasicsCards();
   const [activeTab, setActiveTab] = useState('basics');
   const [activeFilter, setActiveFilter] = useState<'all' | DietTag>('all');
   const [activeSeason, setActiveSeason] = useState<'all' | 'spring' | 'summer' | 'fall'>('all');
