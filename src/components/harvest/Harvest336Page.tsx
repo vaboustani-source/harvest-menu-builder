@@ -387,12 +387,6 @@ export function Harvest336Page() {
         <p className="font-sans text-[10px] tracking-[0.15em] text-white/30 mb-6">
           Couples: sign in with credentials from your venue coordinator
         </p>
-        <a
-          href="mailto:hello@gilbertsvillefarmhouse.com"
-          className="inline-block font-sans text-[11px] font-medium tracking-[0.2em] uppercase text-warm border border-warm/40 rounded-sm px-8 py-3 hover:bg-warm/10 transition-colors duration-200"
-        >
-          Contact the Kitchen
-        </a>
         <div className="mt-12 pt-8 border-t border-white/10">
           <p className="font-sans text-[10px] tracking-[0.15em] uppercase text-white/25">
             Gilbertsville Farmhouse · South New Berlin, NY · Harvest 336 Culinary Program
