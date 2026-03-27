@@ -214,7 +214,7 @@ export default function AdminDashboard() {
           <a href="/" target="_blank" className="font-sans text-[11px] uppercase tracking-widest opacity-70 hover:opacity-100 transition-opacity text-secondary-foreground">
             View Menu ↗
           </a>
-          <Button variant="ghost" onClick={handleLogout} className="text-white hover:text-white/80 hover:bg-white/10 font-sans text-xs uppercase tracking-widest px-3 gap-1.5">
+          <Button variant="ghost" onClick={handleLogout} className="text-secondary-foreground hover:text-white/80 hover:bg-white/10 font-sans text-xs uppercase tracking-widest px-3 gap-1.5">
             <LogOut size={14} /> Sign Out
           </Button>
         </div>
