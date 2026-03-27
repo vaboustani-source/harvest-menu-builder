@@ -120,10 +120,10 @@ export function ItemFormModal({ open, onClose, sectionId, item }: Props) {
                   key={tag}
                   type="button"
                   onClick={() => toggleDiet(tag)}
-                  className={`px-3 py-1 rounded-full border text-[11px] font-sans uppercase tracking-widest transition-colors ${
+                  className={`px-3 py-1 rounded-full border text-[11px] font-sans uppercase tracking-widest transition-colors text-primary ${
                     diet.includes(tag)
                       ? 'bg-sage text-white border-sage'
-                      : 'bg-white text-muted border-cream-dark hover:border-sage'
+                      : 'bg-white border-cream-dark hover:border-sage'
                   }`}
                 >
                   {tag === 'veg' ? 'Vegetarian' : tag === 'vegan' ? 'Vegan' : tag === 'gf' ? 'GF' : 'Dairy-Free'}
