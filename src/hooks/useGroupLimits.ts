@@ -7,6 +7,7 @@ export type GroupLimit = {
   group_label: string;
   included_count: number;
   extra_price_note: string | null;
+  extra_price_pp: number | null;
 };
 
 export function useGroupLimits() {

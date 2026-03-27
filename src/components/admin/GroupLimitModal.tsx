@@ -11,13 +11,14 @@ type Props = {
   onClose: () => void;
   sectionId: string;
   groupLabel: string;
-  currentLimit?: { id: string; included_count: number; extra_price_note: string | null } | null;
+  currentLimit?: { id: string; included_count: number; extra_price_note: string | null; extra_price_pp: number | null } | null;
 };
 
 export function GroupLimitModal({ open, onClose, sectionId, groupLabel, currentLimit }: Props) {
   const qc = useQueryClient();
   const [count, setCount] = useState(String(currentLimit?.included_count ?? 0));
   const [priceNote, setPriceNote] = useState(currentLimit?.extra_price_note ?? '');
+  const [extraPricePp, setExtraPricePp] = useState(String(currentLimit?.extra_price_pp ?? ''));
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
@@ -27,6 +28,7 @@ export function GroupLimitModal({ open, onClose, sectionId, groupLabel, currentL
       group_label: groupLabel,
       included_count: parseInt(count) || 0,
       extra_price_note: priceNote.trim() || null,
+      extra_price_pp: extraPricePp.trim() ? parseFloat(extraPricePp) : null,
     };
 
     if (currentLimit) {
@@ -57,7 +59,11 @@ export function GroupLimitModal({ open, onClose, sectionId, groupLabel, currentL
             <Input type="number" value={count} onChange={(e) => setCount(e.target.value)} min="0" placeholder="e.g. 3" />
           </div>
           <div className="space-y-1">
-            <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Extra Item Price Note</Label>
+            <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Extra Item Price ($ per person)</Label>
+            <Input type="number" value={extraPricePp} onChange={(e) => setExtraPricePp(e.target.value)} min="0" step="0.01" placeholder="e.g. 8" />
+          </div>
+          <div className="space-y-1">
+            <Label className="font-sans text-[11px] uppercase tracking-widest text-muted-foreground">Extra Item Price Note (display)</Label>
             <Input value={priceNote} onChange={(e) => setPriceNote(e.target.value)} placeholder="e.g. +$8pp per extra" />
           </div>
           <Button onClick={handleSave} disabled={saving} className="w-full border border-primary bg-primary-foreground text-primary font-sans text-xs tracking-widest uppercase hover:bg-primary-foreground/90">

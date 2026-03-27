@@ -42,6 +42,7 @@ export type DbMenuSection = {
   section_subtitle: string | null;
   description: string | null;
   sort_order: number;
+  base_price_pp: number | null;
 };
 
 export type FullMenuSection = DbMenuSection & {
