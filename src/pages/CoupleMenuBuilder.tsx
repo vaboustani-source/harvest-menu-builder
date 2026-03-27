@@ -5,10 +5,11 @@ import { useCoupleProfile } from '@/hooks/useCoupleSelections';
 import { useCoupleSelections } from '@/hooks/useCoupleSelections';
 import { useMenuData, type FullMenuSection } from '@/hooks/useMenuData';
 import { useGroupLimits } from '@/hooks/useGroupLimits';
+import { useBasicsCards } from '@/hooks/useBasicsCards';
 import { MenuItemCard } from '@/components/harvest/MenuItemCard';
 import { DietTagBadge } from '@/components/harvest/DietTag';
 import { Button } from '@/components/ui/button';
-import { LogOut, Check, Plus, Minus } from 'lucide-react';
+import { LogOut, Check, Plus, Minus, Diamond } from 'lucide-react';
 import type { DietTag } from '@/data/menuData';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -19,6 +20,7 @@ export default function CoupleMenuBuilder() {
   const { data: profile, isLoading: profileLoading } = useCoupleProfile();
   const { data: sections } = useMenuData();
   const { data: groupLimits } = useGroupLimits();
+  const { data: basicsGroups } = useBasicsCards();
   const { data: selections } = useCoupleSelections(profile?.id ?? null);
   const [activeTab, setActiveTab] = useState('');
   const [saving, setSaving] = useState<string | null>(null);
@@ -82,6 +84,23 @@ export default function CoupleMenuBuilder() {
 
   const getSelectedCountForGroup = (sectionId: string, groupLabel: string) => {
     return selections?.filter(s => s.section_id === sectionId && s.group_label === groupLabel).length ?? 0;
+  };
+
+  // Map section IDs to basics card group labels
+  const sectionToBasicsMap: Record<string, string[]> = {
+    'cocktail': ['Cocktail Hour'],
+    'reception': ['Reception Dinner (Family Style)'],
+    'bar': ['Bar Service (All Events)'],
+    'desserts': [],
+    'rehearsal': [],
+    'welcome': ['After-Party & Welcome Party'],
+    'packages': ['Breakfast, Brunch & Lunch Events'],
+  };
+
+  const getBasicsCardsForSection = (sectionId: string) => {
+    const groupLabels = sectionToBasicsMap[sectionId];
+    if (!groupLabels || groupLabels.length === 0 || !basicsGroups) return [];
+    return basicsGroups.filter(g => groupLabels.includes(g.label));
   };
 
   const currentSection = sections?.find(s => s.id === activeTab);
@@ -211,6 +230,52 @@ export default function CoupleMenuBuilder() {
                   <p className="font-sans text-[10px] text-text-muted-brand opacity-60 mt-2">
                     Selections beyond the included count are noted as extras with pricing
                   </p>
+                </div>
+              );
+            })()}
+
+            {/* Basics inclusion cards for this section */}
+            {(() => {
+              const basicsForSection = getBasicsCardsForSection(currentSection.id);
+              if (basicsForSection.length === 0) return null;
+              return (
+                <div className="mb-8 space-y-3">
+                  {basicsForSection.map(group => (
+                    <div key={group.label}>
+                      {group.cards.map(card => (
+                        <div key={card.id} className={`rounded-[10px] border px-5 py-4 mb-3 ${
+                          card.card_type === 'included'
+                            ? 'border-sage/30 bg-sage/[0.04]'
+                            : 'border-warm/30 bg-warm/[0.04]'
+                        }`}>
+                          <div className="flex items-center gap-2 mb-2.5">
+                            <Diamond size={10} className={card.card_type === 'included' ? 'text-sage fill-sage' : 'text-warm'} />
+                            <p className="font-serif text-[13px] text-charcoal font-medium">{card.title}</p>
+                            <span className={`font-sans text-[9px] tracking-[0.2em] uppercase ${
+                              card.card_type === 'included' ? 'text-sage' : 'text-warm'
+                            }`}>
+                              {card.card_type === 'included' ? 'Included' : 'Add-On'}
+                            </span>
+                          </div>
+                          <ul className="space-y-1">
+                            {card.bullets.map((bullet, bi) => (
+                              <li key={bi} className="flex items-start gap-2 font-sans text-[12px] text-charcoal/80 leading-[1.5]">
+                                <span className={`mt-1.5 w-1 h-1 rounded-full shrink-0 ${
+                                  card.card_type === 'included' ? 'bg-sage' : 'bg-warm'
+                                }`} />
+                                <span>
+                                  {bullet.text}
+                                  {bullet.price && (
+                                    <span className="font-medium italic text-warm ml-1">{bullet.price}</span>
+                                  )}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
                 </div>
               );
             })()}
