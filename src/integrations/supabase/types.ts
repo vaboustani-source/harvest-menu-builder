@@ -267,6 +267,7 @@ export type Database = {
       }
       menu_sections: {
         Row: {
+          base_price_pp: number | null
           created_at: string
           description: string | null
           emoji: string | null
@@ -278,6 +279,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          base_price_pp?: number | null
           created_at?: string
           description?: string | null
           emoji?: string | null
@@ -289,6 +291,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          base_price_pp?: number | null
           created_at?: string
           description?: string | null
           emoji?: string | null
@@ -305,6 +308,7 @@ export type Database = {
         Row: {
           created_at: string
           extra_price_note: string | null
+          extra_price_pp: number | null
           group_label: string
           id: string
           included_count: number
@@ -314,6 +318,7 @@ export type Database = {
         Insert: {
           created_at?: string
           extra_price_note?: string | null
+          extra_price_pp?: number | null
           group_label: string
           id?: string
           included_count?: number
@@ -323,6 +328,7 @@ export type Database = {
         Update: {
           created_at?: string
           extra_price_note?: string | null
+          extra_price_pp?: number | null
           group_label?: string
           id?: string
           included_count?: number

@@ -9,20 +9,22 @@ import { Badge } from '@/components/ui/badge';
 type Props = {
   coupleId: string;
   coupleName: string;
+  guestCount?: number | null;
 };
 
 type GroupedSection = {
-  section: { id: string; emoji: string | null; section_title: string };
+  section: { id: string; emoji: string | null; section_title: string; base_price_pp: number | null };
   totalItems: number;
   groups: Array<{
     label: string | null;
     selections: CoupleSelection[];
     includedCount: number;
     extraPriceNote: string | null;
+    extraPricePp: number | null;
   }>;
 };
 
-export function CoupleSelectionsViewer({ coupleId, coupleName }: Props) {
+export function CoupleSelectionsViewer({ coupleId, coupleName, guestCount }: Props) {
   const [expanded, setExpanded] = useState(false);
   const { data: selections, isLoading } = useCoupleSelections(expanded ? coupleId : null);
   const { data: sections } = useMenuData();
@@ -45,7 +47,7 @@ export function CoupleSelectionsViewer({ coupleId, coupleName }: Props) {
         });
 
         return {
-          section: { id: sec.id, emoji: sec.emoji, section_title: sec.section_title },
+          section: { id: sec.id, emoji: sec.emoji, section_title: sec.section_title, base_price_pp: sec.base_price_pp ?? null },
           totalItems: sectionSelections.length,
           groups: Array.from(byGroup.entries()).map(([label, sels]) => {
             const limit = groupLimits?.find(
@@ -56,6 +58,7 @@ export function CoupleSelectionsViewer({ coupleId, coupleName }: Props) {
               selections: sels,
               includedCount: limit?.included_count ?? sels.length,
               extraPriceNote: limit?.extra_price_note ?? null,
+              extraPricePp: limit?.extra_price_pp ?? null,
             };
           }),
         };
@@ -71,6 +74,28 @@ export function CoupleSelectionsViewer({ coupleId, coupleName }: Props) {
     }
     return 'Unknown item';
   };
+
+  // Pricing calculations
+  const sectionPricing = grouped.map((g) => {
+    const basePp = g.section.base_price_pp ?? 0;
+    const extraLines: { group: string; count: number; unitPrice: number; subtotal: number }[] = [];
+    g.groups.forEach((grp) => {
+      const extraCount = Math.max(0, grp.selections.length - grp.includedCount);
+      if (extraCount > 0 && grp.extraPricePp) {
+        extraLines.push({
+          group: grp.label ?? 'Items',
+          count: extraCount,
+          unitPrice: grp.extraPricePp,
+          subtotal: extraCount * grp.extraPricePp,
+        });
+      }
+    });
+    const extrasTotal = extraLines.reduce((sum, l) => sum + l.subtotal, 0);
+    return { sectionTitle: `${g.section.emoji ? g.section.emoji + ' ' : ''}${g.section.section_title}`, basePp, extraLines, extrasTotal, sectionTotal: basePp + extrasTotal };
+  });
+
+  const grandTotalPp = sectionPricing.reduce((sum, s) => sum + s.sectionTotal, 0);
+  const eventTotal = guestCount ? grandTotalPp * guestCount : null;
 
   const handleExportPdf = () => {
     const html = `
@@ -93,11 +118,20 @@ export function CoupleSelectionsViewer({ coupleId, coupleName }: Props) {
           li::before { content: "· "; color: #aaa; }
           .extra { color: #888; font-style: italic; }
           .divider { font-size: 10px; color: #999; margin: 6px 0; padding: 2px 0; border-top: 1px dashed #ccc; }
+          .pricing-block { margin-top: 32px; border-top: 2px solid #3d4c3f; padding-top: 16px; }
+          .pricing-title { font-size: 14px; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 700; color: #3d4c3f; margin-bottom: 12px; }
+          .pricing-section { margin-bottom: 12px; }
+          .pricing-section-title { font-size: 12px; font-weight: 600; color: #555; margin-bottom: 4px; }
+          .pricing-line { display: flex; justify-content: space-between; font-size: 12px; padding: 2px 0; color: #555; }
+          .pricing-line.extra-line { padding-left: 16px; font-style: italic; color: #888; }
+          .pricing-line.subtotal { font-weight: 600; color: #333; border-top: 1px solid #ddd; padding-top: 4px; margin-top: 4px; }
+          .grand-total { display: flex; justify-content: space-between; font-size: 16px; font-weight: 700; color: #3d4c3f; border-top: 2px solid #3d4c3f; padding-top: 8px; margin-top: 16px; }
+          .event-total { display: flex; justify-content: space-between; font-size: 13px; color: #888; margin-top: 4px; }
           @media print { body { margin: 20px; } }
         </style>
       </head><body>
         <h1>${coupleName}</h1>
-        <p class="meta">Menu Selections · Generated ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+        <p class="meta">Menu Selections · Generated ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}${guestCount ? ` · ${guestCount} guests` : ''}</p>
         ${grouped.map((g) => `
           <div class="section-block">
             <div class="section-divider"></div>
@@ -124,6 +158,24 @@ export function CoupleSelectionsViewer({ coupleId, coupleName }: Props) {
           </div>
         `).join('')}
         ${grouped.length === 0 ? '<p style="color:#999;margin-top:32px;">No selections yet.</p>' : ''}
+        
+        ${sectionPricing.length > 0 ? `
+          <div class="pricing-block">
+            <div class="pricing-title">Pricing Breakdown</div>
+            ${sectionPricing.map((sp) => `
+              <div class="pricing-section">
+                <div class="pricing-section-title">${sp.sectionTitle}</div>
+                ${sp.basePp > 0 ? `<div class="pricing-line"><span>Base package</span><span>$${sp.basePp.toFixed(2)}pp</span></div>` : ''}
+                ${sp.extraLines.map((el) => `
+                  <div class="pricing-line extra-line"><span>${el.count} extra ${el.group} × $${el.unitPrice.toFixed(2)}</span><span>$${el.subtotal.toFixed(2)}pp</span></div>
+                `).join('')}
+                <div class="pricing-line subtotal"><span>Section subtotal</span><span>$${sp.sectionTotal.toFixed(2)}pp</span></div>
+              </div>
+            `).join('')}
+            <div class="grand-total"><span>Total per person</span><span>$${grandTotalPp.toFixed(2)}pp</span></div>
+            ${eventTotal != null ? `<div class="event-total"><span>Event total (${guestCount} guests)</span><span>$${eventTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span></div>` : ''}
+          </div>
+        ` : ''}
       </body></html>
     `;
     const w = window.open('', '_blank');
@@ -166,7 +218,6 @@ export function CoupleSelectionsViewer({ coupleId, coupleName }: Props) {
             <div className="space-y-1">
               {grouped.map((g) => (
                 <div key={g.section.id}>
-                  {/* Section header with divider */}
                   <div className="border-t-2 border-primary/30 pt-2 pb-1 flex items-center justify-between">
                     <p className="font-sans text-xs uppercase tracking-[0.15em] font-bold text-primary">
                       {g.section.emoji && <span className="mr-1.5">{g.section.emoji}</span>}
@@ -177,7 +228,6 @@ export function CoupleSelectionsViewer({ coupleId, coupleName }: Props) {
                     </Badge>
                   </div>
 
-                  {/* Category groups */}
                   {g.groups.map((grp, gi) => {
                     const included = grp.selections.slice(0, grp.includedCount);
                     const extras = grp.selections.slice(grp.includedCount);
@@ -227,6 +277,39 @@ export function CoupleSelectionsViewer({ coupleId, coupleName }: Props) {
                   })}
                 </div>
               ))}
+
+              {/* Pricing summary inline */}
+              {sectionPricing.some(s => s.basePp > 0 || s.extraLines.length > 0) && (
+                <div className="border-t-2 border-primary/30 pt-3 mt-2">
+                  <p className="font-sans text-[10px] uppercase tracking-[0.15em] font-bold text-primary mb-2">Pricing Summary</p>
+                  {sectionPricing.map((sp, i) => (
+                    <div key={i} className="mb-2 ml-3 pl-3 border-l-2 border-accent">
+                      <p className="font-sans text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">{sp.sectionTitle}</p>
+                      {sp.basePp > 0 && (
+                        <div className="flex justify-between font-sans text-xs text-foreground">
+                          <span>Base package</span><span>${sp.basePp.toFixed(2)}pp</span>
+                        </div>
+                      )}
+                      {sp.extraLines.map((el, j) => (
+                        <div key={j} className="flex justify-between font-sans text-xs text-muted-foreground italic pl-2">
+                          <span>{el.count} extra {el.group} × ${el.unitPrice.toFixed(2)}</span><span>${el.subtotal.toFixed(2)}pp</span>
+                        </div>
+                      ))}
+                      <div className="flex justify-between font-sans text-xs font-semibold text-foreground border-t border-border mt-1 pt-1">
+                        <span>Subtotal</span><span>${sp.sectionTotal.toFixed(2)}pp</span>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="flex justify-between font-sans text-sm font-bold text-primary border-t-2 border-primary/30 pt-2 mt-2">
+                    <span>Total per person</span><span>${grandTotalPp.toFixed(2)}pp</span>
+                  </div>
+                  {eventTotal != null && (
+                    <div className="flex justify-between font-sans text-xs text-muted-foreground mt-1">
+                      <span>Event total ({guestCount} guests)</span><span>${eventTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
