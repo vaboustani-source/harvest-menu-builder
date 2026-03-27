@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Diamond, Plus } from 'lucide-react';
 import type { DietTag } from '@/data/menuData';
 import { DIET_FILTER_OPTIONS } from './DietTag';
 import { MenuItemCard } from './MenuItemCard';
@@ -8,6 +8,7 @@ import { AccordionBlock } from './AccordionBlock';
 import { BasicsContent } from './BasicsContent';
 import { CoupleLoginModal } from './CoupleLoginModal';
 import { useMenuData, type FullMenuSection } from '@/hooks/useMenuData';
+import { useBasicsCards } from '@/hooks/useBasicsCards';
 
 // Cross SVG pattern for hero
 const CROSS_PATTERN =
