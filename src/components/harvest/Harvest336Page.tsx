@@ -80,6 +80,20 @@ export function Harvest336Page() {
   const hasGroups = (section: FullMenuSection) =>
     section.items.some((i) => i.group_label != null);
 
+  const sectionToBasicsMap: Record<string, string[]> = {
+    'cocktail': ['Cocktail Hour'],
+    'reception': ['Reception Dinner (Family Style)'],
+    'bar': ['Bar Service (All Events)'],
+    'welcome': ['After-Party & Welcome Party'],
+    'packages': ['Breakfast, Brunch & Lunch Events'],
+  };
+
+  const getBasicsCardsForSection = (sectionId: string) => {
+    const groupLabels = sectionToBasicsMap[sectionId];
+    if (!groupLabels || groupLabels.length === 0 || !basicsGroups) return [];
+    return basicsGroups.filter(g => groupLabels.includes(g.label));
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">
