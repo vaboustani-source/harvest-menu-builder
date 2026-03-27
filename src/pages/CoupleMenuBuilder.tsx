@@ -172,6 +172,49 @@ export default function CoupleMenuBuilder() {
               <div className="w-[50px] h-px bg-sage-light mt-4 mb-6" />
             </div>
 
+            {/* Included limits summary */}
+            {(() => {
+              const sectionLimits = groupLimits?.filter(l => l.section_id === currentSection.id) ?? [];
+              if (sectionLimits.length === 0) return null;
+              return (
+                <div className="mb-8 rounded-[10px] border border-sage-light/60 bg-sage/[0.04] px-5 py-4">
+                  <p className="font-sans text-[9px] tracking-[0.3em] uppercase text-sage font-semibold mb-2.5">
+                    Included with your package
+                  </p>
+                  <div className="flex flex-wrap gap-x-5 gap-y-1.5">
+                    {sectionLimits.map(limit => {
+                      const selected = getSelectedCountForGroup(currentSection.id, limit.group_label);
+                      const filled = selected >= limit.included_count;
+                      const over = selected > limit.included_count;
+                      return (
+                        <div key={limit.id} className="flex items-center gap-1.5">
+                          <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] shrink-0 ${
+                            filled ? 'bg-sage text-white' : 'border border-cream-dark'
+                          }`}>
+                            {filled && <Check size={10} />}
+                          </span>
+                          <span className="font-sans text-[11px] text-charcoal">
+                            {limit.group_label}:
+                          </span>
+                          <span className={`font-sans text-[11px] font-medium ${over ? 'text-warm' : 'text-charcoal'}`}>
+                            {selected} / {limit.included_count}
+                          </span>
+                          {over && (
+                            <span className="font-sans text-[9px] tracking-wide uppercase text-warm">
+                              +{selected - limit.included_count} extra
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p className="font-sans text-[10px] text-text-muted-brand opacity-60 mt-2">
+                    Selections beyond the included count are noted as extras with pricing
+                  </p>
+                </div>
+              );
+            })()}
+
             {/* Grouped items */}
             {Object.entries(getGroupedItems(currentSection)).map(([group, items]) => {
               const groupLabel = group === '__ungrouped__' ? '' : group;
