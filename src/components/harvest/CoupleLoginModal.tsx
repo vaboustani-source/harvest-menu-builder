@@ -87,7 +87,7 @@ export function CoupleLoginModal({ open, onClose }: Props) {
             />
           </div>
           {error && <p className="text-xs text-red-600 font-sans">{error}</p>}
-          <Button onClick={handleLogin} disabled={loading} className="w-full bg-green hover:bg-green/90 text-white font-sans text-xs tracking-widest uppercase">
+          <Button onClick={handleLogin} disabled={loading} className="w-full bg-[#384339] hover:bg-[#384339]/90 text-white font-sans text-xs tracking-widest uppercase">
             {loading ? 'Signing in…' : 'Sign In & Build Menu'}
           </Button>
         </div>
