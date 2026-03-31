@@ -19,7 +19,7 @@ export function Harvest336Page() {
   const { data: basicsGroups } = useBasicsCards();
   const [activeTab, setActiveTab] = useState('basics');
   const [activeFilter, setActiveFilter] = useState<'all' | DietTag>('all');
-  const [activeSeason, setActiveSeason] = useState<'all' | 'spring' | 'summer' | 'fall'>('all');
+  const [activeSeason, setActiveSeason] = useState<'all' | 'year-round' | 'spring' | 'summer' | 'fall' | 'winter'>('all');
   const [scrolled, setScrolled] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [coupleLoginOpen, setCoupleLoginOpen] = useState(false);
@@ -62,7 +62,10 @@ export function Harvest336Page() {
 
   const isItemVisible = (diet?: string[] | null, season?: string[] | null) => {
     const dietMatch = activeFilter === 'all' || (diet?.includes(activeFilter) ?? false);
-    const seasonMatch = activeSeason === 'all' || (season?.includes(activeSeason) ?? false);
+    const isYearRound = !season || season.length === 0;
+    const seasonMatch =
+      activeSeason === 'all' ||
+      (activeSeason === 'year-round' ? isYearRound : (season?.includes(activeSeason) ?? false));
     return dietMatch && seasonMatch;
   };
 
@@ -257,7 +260,7 @@ export function Harvest336Page() {
           <span className="font-sans text-[10px] tracking-[0.2em] uppercase text-text-muted-brand mr-1">
             Season:
           </span>
-          {(['all', 'spring', 'summer', 'fall'] as const).map((s) => (
+          {(['all', 'year-round', 'spring', 'summer', 'fall', 'winter'] as const).map((s) => (
             <button
               key={s}
               onClick={() => setActiveSeason(s)}
@@ -267,7 +270,7 @@ export function Harvest336Page() {
                   : 'bg-white border-[#D5CFC8] text-text-muted-brand hover:border-warm hover:text-warm'
               }`}
             >
-              {s === 'all' ? 'All Seasons' : s.charAt(0).toUpperCase() + s.slice(1)}
+              {s === 'all' ? 'All Seasons' : s === 'year-round' ? 'Year-Round' : s.charAt(0).toUpperCase() + s.slice(1)}
             </button>
           ))}
         </div>
