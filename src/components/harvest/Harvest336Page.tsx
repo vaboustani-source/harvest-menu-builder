@@ -285,6 +285,8 @@ export function Harvest336Page() {
             {/* Basics tab gets custom layout */}
             {currentSection.id === 'basics' ? (
               <BasicsContent />
+            ) : currentSection.id === 'welcome' ? (
+              <WelcomeTableContent />
             ) : (
               <>
                 {/* Section Header */}
