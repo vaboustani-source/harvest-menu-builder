@@ -107,7 +107,7 @@ export function WelcomeTableContent() {
             <span className="not-italic" style={{ color: '#C9A84C' }}>$8pp</span>
             {' '}per person
           </p>
-          <p className="font-serif text-[12px] italic text-cream/55 leading-[1.6] mt-1">
+          <p className="font-serif italic text-cream/55 leading-[1.6] mt-1 text-sm">
             Passed drink service by Gilbertsville staff · served in glassware · includes Saratoga still &amp; sparkling water
           </p>
         </div>
