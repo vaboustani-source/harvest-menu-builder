@@ -92,22 +92,25 @@ export function WelcomeTableContent() {
         Service Included
       </p>
       <p className="font-serif text-[14px] italic text-text-muted-brand leading-[1.75] mb-6">
-        Station drink service in cocktail cups — included in your reception pricing.
+        Your welcome beverages are displayed at the welcome table as guests arrive before the ceremony. All drinks are served station-style in cocktail cups at no additional charge — this service is included in your reception pricing.
       </p>
 
       {/* Upgrade banner */}
       <div
-        className="rounded-[8px] px-6 py-4 flex items-start gap-3"
+        className="rounded-[8px] px-6 py-5 flex items-start gap-3"
         style={{ backgroundColor: '#2C3E2D' }}
       >
         <Plus size={14} className="text-warm mt-[2px] shrink-0" />
-        <p className="font-sans text-[12px] text-cream/90 leading-[1.6]">
-          <span className="font-sans text-[9px] tracking-[0.2em] uppercase text-warm mr-2">
-            + Upgrade
-          </span>
-          Passed drink service in glassware with Saratoga still &amp; sparkling water —{' '}
-          <span className="font-medium italic text-warm">$8pp</span>
-        </p>
+        <div>
+          <p className="font-sans text-[12px] text-cream/90 leading-[1.6] tracking-[0.05em] uppercase">
+            Upgrade Your Service —{' '}
+            <span className="not-italic" style={{ color: '#C9A84C' }}>$8pp</span>
+            {' '}per person
+          </p>
+          <p className="font-serif text-[12px] italic text-cream/55 leading-[1.6] mt-1">
+            Passed drink service by Gilbertsville staff · served in glassware · includes Saratoga still &amp; sparkling water
+          </p>
+        </div>
       </div>
     </div>
   );
