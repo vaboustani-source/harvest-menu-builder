@@ -92,7 +92,7 @@ export function WelcomeTableContent() {
         Service Included
       </p>
       <p className="font-serif text-[14px] italic text-text-muted-brand leading-[1.75] mb-6">
-        Your welcome beverages are displayed at the welcome table as guests arrive before the ceremony. All drinks are served station-style in cocktail cups at no additional charge — this service is included in your reception pricing.
+        {"\n"}
       </p>
 
       {/* Upgrade banner */}
