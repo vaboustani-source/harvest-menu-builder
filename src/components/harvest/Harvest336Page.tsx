@@ -267,7 +267,7 @@ export function Harvest336Page() {
                   : 'bg-white border-[#D5CFC8] text-text-muted-brand hover:border-warm hover:text-warm'
               }`}
             >
-              {s === 'all' ? 'All Seasons' : s.charAt(0).toUpperCase() + s.slice(1)}
+              {s === 'all' ? 'All Seasons' : s === 'year-round' ? 'Year-Round' : s.charAt(0).toUpperCase() + s.slice(1)}
             </button>
           ))}
         </div>

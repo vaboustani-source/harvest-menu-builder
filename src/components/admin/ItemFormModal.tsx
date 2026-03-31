@@ -16,7 +16,7 @@ type Props = {
 };
 
 const DIET_OPTIONS = ['veg', 'vegan', 'gf', 'df'] as const;
-const SEASON_OPTIONS = ['spring', 'summer', 'fall'] as const;
+const SEASON_OPTIONS = ['year-round', 'spring', 'summer', 'fall', 'winter'] as const;
 
 export function ItemFormModal({ open, onClose, sectionId, item }: Props) {
   const qc = useQueryClient();
