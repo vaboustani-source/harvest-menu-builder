@@ -385,6 +385,7 @@ export function Harvest336Page() {
                                   price: item.price ?? undefined,
                                   diet: (item.diet as DietTag[] | undefined) ?? undefined,
                                   note: item.note ?? undefined,
+                                  season: item.season ?? undefined,
                                 }}
                               />
                             ))}
@@ -399,13 +400,14 @@ export function Harvest336Page() {
                         return (
                           <MenuItemCard
                             key={item.id}
-                            item={{
-                              name: item.name,
-                              description: item.description ?? undefined,
-                              price: item.price ?? undefined,
-                              diet: (item.diet as DietTag[] | undefined) ?? undefined,
-                              note: item.note ?? undefined,
-                            }}
+                          item={{
+                            name: item.name,
+                            description: item.description ?? undefined,
+                            price: item.price ?? undefined,
+                            diet: (item.diet as DietTag[] | undefined) ?? undefined,
+                            note: item.note ?? undefined,
+                            season: item.season ?? undefined,
+                          }}
                           />
                         );
                       })}
