@@ -385,6 +385,7 @@ export function Harvest336Page() {
                                   price: item.price ?? undefined,
                                   diet: (item.diet as DietTag[] | undefined) ?? undefined,
                                   note: item.note ?? undefined,
+                                  season: item.season ?? undefined,
                                 }}
                               />
                             ))}
