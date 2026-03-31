@@ -91,9 +91,6 @@ export function WelcomeTableContent() {
       <p className="font-sans text-[10px] tracking-[0.35em] uppercase text-sage mb-[6px]">
         SERVICE UPGRADES
       </p>
-      <p className="font-serif text-[14px] italic text-text-muted-brand leading-[1.75] mb-6">
-        {"\n"}
-      </p>
 
       {/* Upgrade banner */}
       <div
