@@ -19,7 +19,7 @@ export function Harvest336Page() {
   const { data: basicsGroups } = useBasicsCards();
   const [activeTab, setActiveTab] = useState('basics');
   const [activeFilter, setActiveFilter] = useState<'all' | DietTag>('all');
-  const [activeSeason, setActiveSeason] = useState<'all' | 'spring' | 'summer' | 'fall'>('all');
+  const [activeSeason, setActiveSeason] = useState<'all' | 'year-round' | 'spring' | 'summer' | 'fall' | 'winter'>('all');
   const [scrolled, setScrolled] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [coupleLoginOpen, setCoupleLoginOpen] = useState(false);
