@@ -47,6 +47,44 @@ export type Database = {
         }
         Relationships: []
       }
+      builder_selections: {
+        Row: {
+          couple_id: string
+          created_at: string
+          id: string
+          selections: Json
+          status: string
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          id?: string
+          selections?: Json
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          id?: string
+          selections?: Json
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "builder_selections_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: true
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       couple_selections: {
         Row: {
           couple_id: string
