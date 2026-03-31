@@ -257,7 +257,7 @@ export function Harvest336Page() {
           <span className="font-sans text-[10px] tracking-[0.2em] uppercase text-text-muted-brand mr-1">
             Season:
           </span>
-          {(['all', 'spring', 'summer', 'fall'] as const).map((s) => (
+          {(['all', 'year-round', 'spring', 'summer', 'fall', 'winter'] as const).map((s) => (
             <button
               key={s}
               onClick={() => setActiveSeason(s)}
