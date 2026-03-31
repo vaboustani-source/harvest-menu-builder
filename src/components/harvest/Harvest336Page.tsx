@@ -6,6 +6,7 @@ import { MenuItemCard } from './MenuItemCard';
 import { PackageCardBlock } from './PackageCardBlock';
 import { AccordionBlock } from './AccordionBlock';
 import { BasicsContent } from './BasicsContent';
+import { RehearsalDinnerSection } from './RehearsalDinnerSection';
 import { CoupleLoginModal } from './CoupleLoginModal';
 import { useMenuData, type FullMenuSection } from '@/hooks/useMenuData';
 import { useBasicsCards } from '@/hooks/useBasicsCards';
