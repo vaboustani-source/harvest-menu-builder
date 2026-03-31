@@ -21,6 +21,9 @@ export type DbMenuPackage = {
   price: string;
   description: string;
   sort_order: number;
+  season?: string[];
+  is_featured?: boolean;
+  dietary_tags?: string[];
 };
 
 export type DbMenuAccordion = {
