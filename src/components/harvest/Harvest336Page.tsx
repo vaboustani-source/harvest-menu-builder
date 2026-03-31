@@ -350,6 +350,11 @@ export function Harvest336Page() {
                           ))}
                         </div>
                       ))}
+                      {currentSection.id === 'reception' && (
+                        <p className="font-serif text-[13px] italic text-text-muted-brand/70 leading-[1.6] mt-2 mb-4">
+                          Items marked <span className="font-sans text-[9px] font-semibold tracking-[0.15em] uppercase text-sage not-italic">Included</span> are part of your base package. Premium selections are noted with an upcharge.
+                        </p>
+                      )}
                     </div>
                   );
                 })()}
