@@ -1,6 +1,14 @@
 import { Diamond, Plus } from 'lucide-react';
 import { useBasicsCards, type BulletItem } from '@/hooks/useBasicsCards';
 
+const sectionIntros: Record<string, string> = {
+  'Cocktail Hour': 'One hour. Four selections. Every bite passed by Gilbertsville staff while your guests settle into the weekend.',
+  'Reception Dinner (Family Style)': 'This is the main event — courses hit the table family-style, meant to be shared. You choose the menu. We handle the rhythm, the pacing, and every plate.',
+  'Bar Service (All Events)': 'Full bar, all weekend, every event. Premium liquor, craft beer, Hudson Valley wines — poured by our staff from open to last call.',
+  'After-Party & Welcome Party': 'The bookend events that set the tone. Late-night bites after the reception. A welcome spread the night before. Both built to feel effortless.',
+  'Breakfast, Brunch & Lunch Events': 'Morning-after brunch is non-negotiable. Whether it\'s a full plated affair or a relaxed buffet, we build it fresh — same kitchen, same standards.',
+};
+
 function BulletLine({ item, type }: { item: BulletItem; type: 'included' | 'addon' }) {
   return (
     <li className="flex items-start gap-2.5 py-[5px]">
@@ -51,12 +59,17 @@ export function BasicsContent() {
       <div className="space-y-10">
         {groups?.map((group) => (
           <div key={group.label}>
-            <div className="flex items-center gap-3 mb-4">
-              <span className="font-sans text-[10px] tracking-[0.3em] uppercase text-sage">
+            <div className="flex items-center gap-3 mb-2">
+              <span className="font-sans text-[12px] tracking-[0.38em] uppercase text-sage">
                 {group.label}
               </span>
               <div className="flex-1 h-px bg-cream-dark" />
             </div>
+            {sectionIntros[group.label] && (
+              <p className="font-serif text-[14px] italic text-text-muted-brand max-w-[600px] leading-[1.7] mb-5">
+                {sectionIntros[group.label]}
+              </p>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {group.cards.map((card) => (
                 <div key={card.id} className="bg-white rounded-lg p-7 shadow-card">
@@ -68,6 +81,11 @@ export function BasicsContent() {
                       <BulletLine key={i} item={b} type={card.card_type} />
                     ))}
                   </ul>
+                  {card.title.toLowerCase().includes('rehearsal') && card.group_label === 'Bar Service (All Events)' && (
+                    <p className="font-serif text-[13px] italic text-text-muted-brand/60 mt-4 leading-[1.6]">
+                      Full bar package details available in your planning portal.
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
