@@ -42,8 +42,8 @@ export function WelcomeTableContent() {
       <p className="font-sans text-[10px] tracking-[0.35em] uppercase text-sage mb-[10px]">
         Welcome Table
       </p>
-      <p className="font-serif text-[15px] italic text-text-muted-brand max-w-[640px] leading-[1.75] mb-9">
-        "Two non-alcoholic selections. One wine spritzer. Ready before the first guest arrives."
+      <p className="font-serif italic text-text-muted-brand max-w-[640px] leading-[1.75] mb-9 text-base text-primary">
+        Service Included: Your welcome beverages are displayed at the welcome table as guests arrive before the ceremony. All drinks are served station-style in cocktail cups at no additional charge — this service is included in your reception pricing.
       </p>
 
       {/* Two cards side by side */}
