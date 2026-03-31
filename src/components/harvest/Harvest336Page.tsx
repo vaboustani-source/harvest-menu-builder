@@ -7,6 +7,7 @@ import { PackageCardBlock } from './PackageCardBlock';
 import { AccordionBlock } from './AccordionBlock';
 import { BasicsContent } from './BasicsContent';
 import { RehearsalDinnerSection } from './RehearsalDinnerSection';
+import { WelcomeTableContent } from './WelcomeTableContent';
 import { CoupleLoginModal } from './CoupleLoginModal';
 import { useMenuData, type FullMenuSection } from '@/hooks/useMenuData';
 import { useBasicsCards } from '@/hooks/useBasicsCards';
@@ -284,6 +285,8 @@ export function Harvest336Page() {
             {/* Basics tab gets custom layout */}
             {currentSection.id === 'basics' ? (
               <BasicsContent />
+            ) : currentSection.id === 'welcome' ? (
+              <WelcomeTableContent />
             ) : (
               <>
                 {/* Section Header */}
