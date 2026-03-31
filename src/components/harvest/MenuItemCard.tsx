@@ -1,8 +1,28 @@
 import type { MenuItem } from '@/data/menuData';
 import { DietTagBadge } from './DietTag';
 
+const SEASON_CONFIG: Record<string, { label: string; color: string }> = {
+  spring: { label: 'SPR', color: '#7BA05B' },
+  summer: { label: 'SUM', color: '#D4883A' },
+  fall:   { label: 'FALL', color: '#A0522D' },
+  winter: { label: 'WIN', color: '#4A7C9B' },
+};
+
+function SeasonTagBadge({ season }: { season: string }) {
+  const cfg = SEASON_CONFIG[season];
+  if (!cfg) return null;
+  return (
+    <span
+      style={{ color: cfg.color, borderColor: cfg.color }}
+      className="inline-block border rounded-sm px-[6px] py-[2px] text-[9px] font-sans font-medium tracking-widest uppercase leading-none"
+    >
+      {cfg.label}
+    </span>
+  );
+}
+
 interface Props {
-  item: MenuItem;
+  item: MenuItem & { season?: string[] | null };
   hidden?: boolean;
 }
 
@@ -34,6 +54,9 @@ export function MenuItemCard({ item, hidden }: Props) {
         <div className="flex gap-[5px] flex-wrap">
           {item.diet?.map((tag) => (
             <DietTagBadge key={tag} tag={tag} />
+          ))}
+          {item.season && item.season.length > 0 && item.season.map((s) => (
+            <SeasonTagBadge key={s} season={s} />
           ))}
         </div>
         {item.price && (
