@@ -88,7 +88,7 @@ export function WelcomeTableContent() {
       <div className="w-full h-px mb-8" style={{ backgroundColor: '#E8E2D9' }} />
 
       {/* Service Included */}
-      <p className="font-sans text-[10px] tracking-[0.35em] uppercase text-sage mb-[6px]">
+      <p className="font-sans text-[10px] tracking-[0.35em] uppercase text-sage mb-[6px] py-[9px]">
         SERVICE UPGRADES
       </p>
 
