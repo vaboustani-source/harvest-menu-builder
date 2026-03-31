@@ -59,9 +59,13 @@ export function MenuItemCard({ item, hidden }: Props) {
             <SeasonTagBadge key={s} season={s} />
           ))}
         </div>
-        {item.price && (
+        {item.price ? (
           <span className="font-sans text-[11px] font-medium text-warm whitespace-nowrap">
             {item.price}
+          </span>
+        ) : (
+          <span className="font-sans text-[9px] font-semibold tracking-[0.15em] uppercase text-sage whitespace-nowrap">
+            Included
           </span>
         )}
       </div>

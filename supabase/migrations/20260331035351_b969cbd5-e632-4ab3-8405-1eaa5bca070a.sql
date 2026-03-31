@@ -1,0 +1,3 @@
+UPDATE basics_cards
+SET bullets = '[{"text":"Artisan bread service"},{"text":"1 farm salad — choose from the Salads menu below"},{"text":"1 pasta or grain — choose from the Pastas & Grains menu below"},{"text":"2 protein entrées — choose from Poultry, Meats, or Fish below"},{"text":"2 vegetables or starches — choose from Vegetables & Starches below"},{"text":"All family-style platters, service & staffing"}]'::jsonb
+WHERE id = '61b9a71b-8042-4db3-b7ca-607d60e79ba9';
