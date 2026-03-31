@@ -62,7 +62,10 @@ export function Harvest336Page() {
 
   const isItemVisible = (diet?: string[] | null, season?: string[] | null) => {
     const dietMatch = activeFilter === 'all' || (diet?.includes(activeFilter) ?? false);
-    const seasonMatch = activeSeason === 'all' || (season?.includes(activeSeason) ?? false);
+    const isYearRound = !season || season.length === 0;
+    const seasonMatch =
+      activeSeason === 'all' ||
+      (activeSeason === 'year-round' ? isYearRound : (season?.includes(activeSeason) ?? false));
     return dietMatch && seasonMatch;
   };
 
