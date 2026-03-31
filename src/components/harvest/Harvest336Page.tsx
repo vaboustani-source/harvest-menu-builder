@@ -6,6 +6,7 @@ import { MenuItemCard } from './MenuItemCard';
 import { PackageCardBlock } from './PackageCardBlock';
 import { AccordionBlock } from './AccordionBlock';
 import { BasicsContent } from './BasicsContent';
+import { RehearsalDinnerSection } from './RehearsalDinnerSection';
 import { CoupleLoginModal } from './CoupleLoginModal';
 import { useMenuData, type FullMenuSection } from '@/hooks/useMenuData';
 import { useBasicsCards } from '@/hooks/useBasicsCards';
@@ -350,13 +351,17 @@ export function Harvest336Page() {
                   );
                 })()}
 
-                {/* Packages */}
+                {/* Packages — use special rehearsal component or default */}
                 {currentSection.packages.length > 0 && (
-                  <div className="flex flex-col gap-4 mb-12">
-                    {currentSection.packages.map((pkg) => (
-                      <PackageCardBlock key={pkg.id} card={{ title: pkg.title, price: pkg.price, description: pkg.description }} />
-                    ))}
-                  </div>
+                  currentSection.id === 'rehearsal' ? (
+                    <RehearsalDinnerSection packages={currentSection.packages} />
+                  ) : (
+                    <div className="flex flex-col gap-4 mb-12">
+                      {currentSection.packages.map((pkg) => (
+                        <PackageCardBlock key={pkg.id} card={{ title: pkg.title, price: pkg.price, description: pkg.description }} />
+                      ))}
+                    </div>
+                  )
                 )}
 
                 {/* Items — grouped or flat */}
