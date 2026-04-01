@@ -2,6 +2,7 @@ import { BuilderSelections, calculateTotal, rehearsalThemes, welcomeOptions, spr
 import { Button } from '@/components/ui/button';
 import { Check, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
+import { usePricingData } from '@/hooks/usePricingConfig';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
