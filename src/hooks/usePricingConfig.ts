@@ -12,6 +12,7 @@ export interface PricingConfigRow {
   included_count: number | null;
   is_active: boolean;
   sort_order: number;
+  display_category: string | null;
   created_at: string;
   updated_at: string;
 }
