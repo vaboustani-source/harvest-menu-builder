@@ -1,6 +1,7 @@
 import { BuilderSelections, rehearsalThemes } from '@/data/builderMenuData';
 import { Check } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import { usePricingConfig } from '@/hooks/usePricingConfig';
 
 interface Props {
   selections: BuilderSelections;
@@ -9,6 +10,12 @@ interface Props {
 
 export function StepRehearsalDinner({ selections, onChange }: Props) {
   const sel = selections.rehearsalDinner;
+  const { data: pricingItems } = usePricingConfig();
+
+  const getAddonPrice = (themeId: string): number | null => {
+    const row = pricingItems?.find(p => p.category === 'rehearsal-addons' && p.item_key === `addon-${themeId}`);
+    return row ? Number(row.price) : null;
+  };
 
   const selectTheme = (id: string) => {
     const isDeselect = sel.themeId === id;
@@ -16,12 +23,13 @@ export function StepRehearsalDinner({ selections, onChange }: Props) {
       rehearsalDinner: {
         ...sel,
         themeId: isDeselect ? null : id,
-        addOnSelected: isDeselect ? false : sel.addOnSelected,
+        addOnSelected: false, // always reset add-on when switching
       },
     });
   };
 
-  const toggleAddOn = () => {
+  const toggleAddOn = (e: React.MouseEvent) => {
+    e.stopPropagation();
     onChange({ rehearsalDinner: { ...sel, addOnSelected: !sel.addOnSelected } });
   };
 
@@ -38,6 +46,10 @@ export function StepRehearsalDinner({ selections, onChange }: Props) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {rehearsalThemes.map(theme => {
           const isSelected = sel.themeId === theme.id;
+          const addonPrice = getAddonPrice(theme.id);
+          const hasAddon = !!theme.addOn;
+          const addonActive = isSelected && sel.addOnSelected && hasAddon;
+
           return (
             <button
               key={theme.id}
@@ -77,11 +89,41 @@ export function StepRehearsalDinner({ selections, onChange }: Props) {
                 ))}
               </ul>
 
-              {theme.addOn && (
-                <div className="pt-3 border-t" style={{ borderColor: '#E8E2D9' }}>
-                  <p className="font-sans text-[10px]" style={{ color: '#C9A84C' }}>
-                    <span className="font-semibold">+</span> {theme.addOn.name} — +${theme.addOn.price}pp
-                  </p>
+              {/* Inline add-on toggle */}
+              {hasAddon && (
+                <div
+                  className="pt-3 mt-1 border-t"
+                  style={{
+                    borderColor: '#E8E2D9',
+                    background: addonActive ? 'rgba(201,168,76,0.1)' : 'transparent',
+                    borderRadius: addonActive ? '6px' : undefined,
+                    margin: addonActive ? '-2px -4px -4px -4px' : undefined,
+                    padding: addonActive ? '12px 10px 10px 10px' : undefined,
+                  }}
+                >
+                  <div
+                    className="flex items-center gap-3 cursor-pointer"
+                    onClick={isSelected ? toggleAddOn : undefined}
+                    role="checkbox"
+                    aria-checked={addonActive}
+                  >
+                    <span
+                      className="w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors"
+                      style={{
+                        borderColor: addonActive ? '#C9A84C' : isSelected ? '#C9A84C80' : '#E8E2D9',
+                        background: addonActive ? '#C9A84C' : 'transparent',
+                        opacity: isSelected ? 1 : 0.4,
+                      }}
+                    >
+                      {addonActive && <Check size={10} color="#FFFFFF" />}
+                    </span>
+                    <span className="font-serif italic text-[12px] flex-1" style={{ color: '#C9A84C' }}>
+                      {theme.addOn!.name}
+                    </span>
+                    <span className="font-sans text-[11px] font-medium whitespace-nowrap" style={{ color: '#C9A84C' }}>
+                      +${addonPrice ?? theme.addOn!.price}pp
+                    </span>
+                  </div>
                 </div>
               )}
 
@@ -92,26 +134,6 @@ export function StepRehearsalDinner({ selections, onChange }: Props) {
           );
         })}
       </div>
-
-      {/* Add-on toggle for selected theme */}
-      {sel.themeId && (() => {
-        const theme = rehearsalThemes.find(t => t.id === sel.themeId);
-        if (!theme?.addOn) return null;
-        return (
-          <div className="mt-6 rounded-xl p-5 border" style={{ background: '#FBF9F5', borderColor: '#E8E2D9' }}>
-            <label className="flex items-center justify-between cursor-pointer">
-              <div>
-                <p className="font-sans text-[11px] font-medium" style={{ color: '#2C3E2D' }}>
-                  <span style={{ color: '#C9A84C' }}>+</span> {theme.addOn.name}
-                </p>
-                <p className="font-sans text-[10px] italic" style={{ color: '#C9A84C' }}>+${theme.addOn.price}pp</p>
-              </div>
-              <input type="checkbox" checked={sel.addOnSelected} onChange={toggleAddOn}
-                className="w-5 h-5 rounded accent-[#2C3E2D]" />
-            </label>
-          </div>
-        );
-      })()}
 
       {/* Custom theme note */}
       <div className="mt-8 rounded-xl p-5 border" style={{ background: '#FBF9F5', borderColor: '#C9A84C40' }}>
