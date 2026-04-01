@@ -351,6 +351,45 @@ export type Database = {
         }
         Relationships: []
       }
+      pricing_config: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          included_count: number | null
+          is_active: boolean
+          item_key: string
+          item_label: string
+          price: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          included_count?: number | null
+          is_active?: boolean
+          item_key: string
+          item_label: string
+          price?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          included_count?: number | null
+          is_active?: boolean
+          item_key?: string
+          item_label?: string
+          price?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       section_group_limits: {
         Row: {
           created_at: string
