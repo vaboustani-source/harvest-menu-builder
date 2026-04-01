@@ -532,13 +532,15 @@ export function calculateTotal(sel: BuilderSelections, pricing: PricingData = de
 
   // Meal inclusions
   if (sel.mealInclusions.mimosaBar) {
-    lineItems.push({ label: 'Mimosa Bar', amount: 20, section: 'Meal Inclusions' });
+    const price = pricing.getPrice('mimosa_bar') ?? 20;
+    lineItems.push({ label: 'Mimosa Bar', amount: price, section: 'Meal Inclusions' });
   }
   if (sel.mealInclusions.bloodyMaryBar) {
-    lineItems.push({ label: 'Bloody Mary Bar', amount: 20, section: 'Meal Inclusions' });
+    const price = pricing.getPrice('bloody_mary_bar') ?? 20;
+    lineItems.push({ label: 'Bloody Mary Bar', amount: price, section: 'Meal Inclusions' });
   }
 
-  const basePackage = 105;
+  const basePackage = pricing.getPrice('base_reception_pp') ?? 105;
   const totalUpcharges = lineItems.reduce((sum, li) => sum + li.amount, 0);
 
   return {
