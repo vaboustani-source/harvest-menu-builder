@@ -118,7 +118,7 @@ export function Harvest336Page() {
       >
         <a
           href="/admin/login"
-          className="absolute top-4 right-5 font-sans text-[10px] uppercase tracking-[0.2em] text-white/30 hover:text-white/70 transition-colors z-10"
+          className="absolute top-4 right-5 font-sans text-[10px] uppercase tracking-[0.2em] transition-colors z-10 bg-accent text-primary py-[7px] px-[9px]"
         >
           Admin
         </a>
