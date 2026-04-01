@@ -1,5 +1,7 @@
+import { useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { PricingData } from '@/data/builderMenuData';
 
 export interface PricingConfigRow {
   id: string;
@@ -70,4 +72,19 @@ export function usePricingConfig() {
   };
 
   return { ...query, updatePrice, updateIncludedCount, toggleActive, addItem, deleteItem };
+}
+
+/** Lightweight hook that returns a PricingData object for calculateTotal */
+export function usePricingData(): PricingData {
+  const { data } = usePricingConfig();
+  return useMemo<PricingData>(() => ({
+    getPrice: (itemKey: string) => {
+      const row = data?.find(p => p.item_key === itemKey);
+      return row ? Number(row.price) : null;
+    },
+    getIncludedCount: (itemKey: string) => {
+      const row = data?.find(p => p.item_key === itemKey);
+      return row?.included_count ?? null;
+    },
+  }), [data]);
 }
