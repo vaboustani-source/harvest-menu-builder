@@ -1,5 +1,5 @@
 import { BuilderSelections, welcomeOptions, spritzerOptions } from '@/data/builderMenuData';
-import { Check } from 'lucide-react';
+import { Check, Sparkles } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 
 interface Props {
@@ -16,13 +16,21 @@ export function StepWelcomeHour({ selections, onChange }: Props) {
     const current = sel.nonAlcoholic;
     const updated = current.includes(id)
       ? current.filter(x => x !== id)
-      : current.length >= 2 ? current : [...current, id];
+      : [...current, id];
     onChange({ welcomeHour: { ...sel, nonAlcoholic: updated } });
   };
 
-  const selectSpritzer = (id: string) => {
-    onChange({ welcomeHour: { ...sel, spritzer: sel.spritzer === id ? null : id } });
+  const toggleSpritzer = (id: string) => {
+    const current = sel.spritzers;
+    const updated = current.includes(id)
+      ? current.filter(x => x !== id)
+      : [...current, id];
+    onChange({ welcomeHour: { ...sel, spritzers: updated } });
   };
+
+  const extraNonAlc = Math.max(0, sel.nonAlcoholic.length - 2);
+  const extraSpritzers = Math.max(0, sel.spritzers.length - 1);
+  const bothUpgrades = sel.passedServiceUpgrade && sel.champagneUpgrade;
 
   return (
     <div>
@@ -43,7 +51,12 @@ export function StepWelcomeHour({ selections, onChange }: Props) {
             </p>
             <span className="font-sans text-[10px] font-medium px-2 py-0.5 rounded-full"
               style={{ background: sel.nonAlcoholic.length >= 2 ? '#7A9E7E' : '#F0EDE8', color: sel.nonAlcoholic.length >= 2 ? '#FFF' : '#6B6B6B' }}>
-              {sel.nonAlcoholic.length} of 2
+              {sel.nonAlcoholic.length >= 2
+                ? extraNonAlc > 0
+                  ? `2 included · ${extraNonAlc} additional at +$2pp each`
+                  : '2 included'
+                : `${sel.nonAlcoholic.length} of 2`
+              }
             </span>
           </div>
 
@@ -52,7 +65,7 @@ export function StepWelcomeHour({ selections, onChange }: Props) {
             {beverages.map(opt => (
               <SelectableItem key={opt.id} label={opt.name}
                 selected={sel.nonAlcoholic.includes(opt.id)}
-                disabled={!sel.nonAlcoholic.includes(opt.id) && sel.nonAlcoholic.length >= 2}
+                isPremium={sel.nonAlcoholic.length >= 2 && !sel.nonAlcoholic.includes(opt.id)}
                 onClick={() => toggleNonAlcoholic(opt.id)} />
             ))}
           </div>
@@ -62,7 +75,7 @@ export function StepWelcomeHour({ selections, onChange }: Props) {
             {waters.map(opt => (
               <SelectableItem key={opt.id} label={opt.name}
                 selected={sel.nonAlcoholic.includes(opt.id)}
-                disabled={!sel.nonAlcoholic.includes(opt.id) && sel.nonAlcoholic.length >= 2}
+                isPremium={sel.nonAlcoholic.length >= 2 && !sel.nonAlcoholic.includes(opt.id)}
                 onClick={() => toggleNonAlcoholic(opt.id)} />
             ))}
           </div>
@@ -70,17 +83,29 @@ export function StepWelcomeHour({ selections, onChange }: Props) {
 
         {/* Spritzer panel */}
         <div className="rounded-xl border p-5" style={{ background: '#FFFFFF', borderColor: '#E8E2D9' }}>
-          <p className="font-sans text-[10px] tracking-[0.25em] uppercase font-semibold mb-1" style={{ color: '#2C3E2D' }}>
-            Wine Spritzers — Choose 1
-          </p>
+          <div className="flex items-center justify-between mb-1">
+            <p className="font-sans text-[10px] tracking-[0.25em] uppercase font-semibold" style={{ color: '#2C3E2D' }}>
+              Wine Spritzers
+            </p>
+            <span className="font-sans text-[10px] font-medium px-2 py-0.5 rounded-full"
+              style={{ background: sel.spritzers.length >= 1 ? '#7A9E7E' : '#F0EDE8', color: sel.spritzers.length >= 1 ? '#FFF' : '#6B6B6B' }}>
+              {sel.spritzers.length >= 1
+                ? extraSpritzers > 0
+                  ? `1 included · ${extraSpritzers} additional at +$2pp each`
+                  : '1 included'
+                : `${sel.spritzers.length} of 1`
+              }
+            </span>
+          </div>
           <p className="font-sans text-[9px] tracking-[0.15em] uppercase mb-4" style={{ color: '#C9A84C' }}>
             Sauvignon Blanc · Pinot Grigio · Rosé
           </p>
           <div className="space-y-2">
             {spritzerOptions.map(opt => (
               <SelectableItem key={opt.id} label={opt.name}
-                selected={sel.spritzer === opt.id}
-                onClick={() => selectSpritzer(opt.id)} />
+                selected={sel.spritzers.includes(opt.id)}
+                isPremium={sel.spritzers.length >= 1 && !sel.spritzers.includes(opt.id)}
+                onClick={() => toggleSpritzer(opt.id)} />
             ))}
           </div>
         </div>
@@ -95,7 +120,7 @@ export function StepWelcomeHour({ selections, onChange }: Props) {
           Station drink service in cocktail cups — included in your reception pricing.
         </p>
 
-        {/* Upgrade toggle */}
+        {/* Upgrade 1 — Passed Service */}
         <div className="rounded-xl p-5 flex items-center justify-between" style={{ background: '#2C3E2D' }}>
           <div>
             <p className="font-sans text-[11px] font-medium" style={{ color: '#FAF8F4' }}>
@@ -111,13 +136,43 @@ export function StepWelcomeHour({ selections, onChange }: Props) {
               onCheckedChange={v => onChange({ welcomeHour: { ...sel, passedServiceUpgrade: v } })} />
           </div>
         </div>
+
+        {/* Upgrade 2 — Champagne Welcome Station */}
+        <div className="rounded-xl p-5 flex items-center justify-between mt-3" style={{ background: '#2C3E2D' }}>
+          <div>
+            <p className="font-sans text-[11px] font-medium" style={{ color: '#FAF8F4' }}>
+              <span style={{ color: '#C9A84C' }}>+</span> UPGRADE — Champagne Welcome Station
+            </p>
+            <p className="font-serif italic text-[11px] mt-0.5" style={{ color: 'rgba(250,248,244,0.6)' }}>
+              {bothUpgrades
+                ? 'Champagne will be passed by your service staff alongside the drink station.'
+                : 'Champagne glasses displayed alongside the spritzer station. Staff replenishes throughout.'
+              }
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="font-sans text-[12px] font-medium" style={{ color: '#C9A84C' }}>$5pp</span>
+            <Switch checked={sel.champagneUpgrade}
+              onCheckedChange={v => onChange({ welcomeHour: { ...sel, champagneUpgrade: v } })} />
+          </div>
+        </div>
+
+        {/* Both upgrades note */}
+        {bothUpgrades && (
+          <div className="mt-3 flex items-center gap-2 px-4 py-2.5 rounded-lg" style={{ background: 'rgba(201,168,76,0.08)' }}>
+            <Sparkles size={12} style={{ color: '#C9A84C' }} />
+            <p className="font-sans text-[11px]" style={{ color: '#C9A84C' }}>
+              Both service upgrades selected — champagne will be passed by your servers.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-function SelectableItem({ label, selected, disabled, onClick }: {
-  label: string; selected: boolean; disabled?: boolean; onClick: () => void;
+function SelectableItem({ label, selected, disabled, isPremium, onClick }: {
+  label: string; selected: boolean; disabled?: boolean; isPremium?: boolean; onClick: () => void;
 }) {
   return (
     <button onClick={onClick} disabled={disabled}
@@ -135,7 +190,10 @@ function SelectableItem({ label, selected, disabled, onClick }: {
         }}>
         {selected && <Check size={10} color="#FFFFFF" />}
       </span>
-      <span className="font-serif text-[13px]" style={{ color: '#1A1A1A' }}>{label}</span>
+      <span className="font-serif text-[13px] flex-1" style={{ color: '#1A1A1A' }}>{label}</span>
+      {isPremium && !selected && (
+        <span className="font-sans text-[9px] font-medium" style={{ color: '#C9A84C' }}>+$2pp</span>
+      )}
     </button>
   );
 }

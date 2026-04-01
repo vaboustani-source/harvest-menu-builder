@@ -57,8 +57,9 @@ export interface BuilderSelections {
   };
   welcomeHour: {
     nonAlcoholic: string[];
-    spritzer: string | null;
+    spritzers: string[];
     passedServiceUpgrade: boolean;
+    champagneUpgrade: boolean;
   };
   cocktailHour: string[];
   reception: {
@@ -81,7 +82,7 @@ export interface BuilderSelections {
 
 export const defaultSelections: BuilderSelections = {
   rehearsalDinner: { themeId: null, addOnSelected: false, customThemeNote: '' },
-  welcomeHour: { nonAlcoholic: [], spritzer: null, passedServiceUpgrade: false },
+  welcomeHour: { nonAlcoholic: [], spritzers: [], passedServiceUpgrade: false, champagneUpgrade: false },
   cocktailHour: [],
   reception: { salads: [], pastasGrains: [], proteins: [], vegetablesStarches: [] },
   mealInclusions: { mimosaBar: false, bloodyMaryBar: false },
@@ -452,9 +453,24 @@ export function calculateTotal(sel: BuilderSelections): TotalBreakdown {
     }
   }
 
-  // Welcome hour upgrade
+  // Welcome hour — extra non-alcoholic selections beyond 2 included
+  const extraNonAlc = Math.max(0, sel.welcomeHour.nonAlcoholic.length - 2);
+  if (extraNonAlc > 0) {
+    lineItems.push({ label: `Extra Non-Alcoholic (×${extraNonAlc})`, amount: extraNonAlc * 2, section: 'Welcome Hour' });
+  }
+
+  // Welcome hour — extra spritzers beyond 1 included
+  const extraSpritzers = Math.max(0, sel.welcomeHour.spritzers.length - 1);
+  if (extraSpritzers > 0) {
+    lineItems.push({ label: `Extra Spritzer (×${extraSpritzers})`, amount: extraSpritzers * 2, section: 'Welcome Hour' });
+  }
+
+  // Welcome hour upgrades
   if (sel.welcomeHour.passedServiceUpgrade) {
     lineItems.push({ label: 'Passed Service Upgrade', amount: 8, section: 'Welcome Hour' });
+  }
+  if (sel.welcomeHour.champagneUpgrade) {
+    lineItems.push({ label: 'Champagne Welcome Station', amount: 5, section: 'Welcome Hour' });
   }
 
   // Cocktail hour — first 4 included, rest at their price

@@ -23,7 +23,7 @@ export function StepReview({ selections, guestCount, status, saving, onSaveDraft
 
   const theme = sel.rehearsalDinner.themeId ? rehearsalThemes.find(t => t.id === sel.rehearsalDinner.themeId) : null;
   const nonAlcNames = sel.welcomeHour.nonAlcoholic.map(id => welcomeOptions.find(o => o.id === id)?.name).filter(Boolean);
-  const spritzerName = sel.welcomeHour.spritzer ? spritzerOptions.find(o => o.id === sel.welcomeHour.spritzer)?.name : null;
+  const spritzerNames = sel.welcomeHour.spritzers.map(id => spritzerOptions.find(o => o.id === id)?.name).filter(Boolean);
   const cocktailNames = sel.cocktailHour.map(id => cocktailHourItems.find(i => i.id === id)).filter(Boolean);
 
   const catKeyMap: Record<string, keyof typeof sel.reception> = {
@@ -54,12 +54,15 @@ export function StepReview({ selections, guestCount, status, saving, onSaveDraft
 
       {/* Welcome Hour */}
       <ReviewSection title="Welcome Hour">
-        {nonAlcNames.length > 0 || spritzerName ? (
+        {nonAlcNames.length > 0 || spritzerNames.length > 0 ? (
           <div className="space-y-1">
             {nonAlcNames.map((n, i) => <p key={i} className="font-serif text-[13px]" style={{ color: '#1A1A1A' }}>{n}</p>)}
-            {spritzerName && <p className="font-serif text-[13px]" style={{ color: '#1A1A1A' }}>{spritzerName}</p>}
+            {spritzerNames.map((n, i) => <p key={`s-${i}`} className="font-serif text-[13px]" style={{ color: '#1A1A1A' }}>{n}</p>)}
             {sel.welcomeHour.passedServiceUpgrade && (
               <p className="font-sans text-[11px] mt-1" style={{ color: '#C9A84C' }}>+ Passed Service Upgrade (+$8pp)</p>
+            )}
+            {sel.welcomeHour.champagneUpgrade && (
+              <p className="font-sans text-[11px] mt-1" style={{ color: '#C9A84C' }}>+ Champagne Welcome Station (+$5pp)</p>
             )}
           </div>
         ) : <EmptyState />}
