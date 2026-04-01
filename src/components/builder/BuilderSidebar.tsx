@@ -1,4 +1,5 @@
 import { BuilderSelections, calculateTotal, rehearsalThemes } from '@/data/builderMenuData';
+import { usePricingData } from '@/hooks/usePricingConfig';
 
 interface Props {
   selections: BuilderSelections;
@@ -6,7 +7,8 @@ interface Props {
 }
 
 export function BuilderSidebar({ selections, guestCount }: Props) {
-  const total = calculateTotal(selections);
+  const pricing = usePricingData();
+  const total = calculateTotal(selections, pricing);
   const theme = selections.rehearsalDinner.themeId
     ? rehearsalThemes.find(t => t.id === selections.rehearsalDinner.themeId)
     : null;
@@ -29,7 +31,7 @@ export function BuilderSidebar({ selections, guestCount }: Props) {
       {theme && (
         <div className="flex justify-between items-baseline mb-1">
           <span className="font-sans text-[12px]" style={{ color: '#1A1A1A' }}>Rehearsal: {theme.name}</span>
-          <span className="font-sans text-[12px] font-medium" style={{ color: '#C9A84C' }}>${theme.price}pp</span>
+          <span className="font-sans text-[12px] font-medium" style={{ color: '#C9A84C' }}>${total.rehearsalDinnerCost}pp</span>
         </div>
       )}
 
@@ -76,7 +78,8 @@ export function BuilderSidebar({ selections, guestCount }: Props) {
 
 // Mobile version shown at bottom
 export function MobileTotalBar({ selections }: { selections: BuilderSelections }) {
-  const total = calculateTotal(selections);
+  const pricing = usePricingData();
+  const total = calculateTotal(selections, pricing);
   return (
     <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-4 py-3 border-t shadow-[0_-4px_12px_rgba(0,0,0,0.05)]"
       style={{ background: '#FFFFFF', borderColor: '#E8E2D9' }}>
