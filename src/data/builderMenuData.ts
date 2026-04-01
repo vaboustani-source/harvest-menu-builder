@@ -438,7 +438,17 @@ export interface TotalBreakdown {
   estimatedPerPerson: number;
 }
 
-export function calculateTotal(sel: BuilderSelections): TotalBreakdown {
+export interface PricingData {
+  getPrice: (itemKey: string) => number | null;
+  getIncludedCount: (itemKey: string) => number | null;
+}
+
+const defaultPricing: PricingData = {
+  getPrice: () => null,
+  getIncludedCount: () => null,
+};
+
+export function calculateTotal(sel: BuilderSelections, pricing: PricingData = defaultPricing): TotalBreakdown {
   const lineItems: LineItem[] = [];
   let rehearsalDinnerCost = 0;
 
@@ -446,37 +456,55 @@ export function calculateTotal(sel: BuilderSelections): TotalBreakdown {
   if (sel.rehearsalDinner.themeId) {
     const theme = rehearsalThemes.find(t => t.id === sel.rehearsalDinner.themeId);
     if (theme) {
-      rehearsalDinnerCost = theme.price;
+      rehearsalDinnerCost = pricing.getPrice(sel.rehearsalDinner.themeId) ?? theme.price;
       if (sel.rehearsalDinner.addOnSelected && theme.addOn) {
-        lineItems.push({ label: theme.addOn.name, amount: theme.addOn.price, section: 'Rehearsal Dinner' });
+        const addonPrice = pricing.getPrice(`addon-${sel.rehearsalDinner.themeId}`) ?? theme.addOn.price;
+        lineItems.push({ label: theme.addOn.name, amount: addonPrice, section: 'Rehearsal Dinner' });
       }
     }
   }
 
   // Welcome hour — extra non-alcoholic selections beyond 2 included
+  const extraNonAlcPrice = pricing.getPrice('extra_nonalc_pp') ?? 2;
   const extraNonAlc = Math.max(0, sel.welcomeHour.nonAlcoholic.length - 2);
   if (extraNonAlc > 0) {
-    lineItems.push({ label: `Extra Non-Alcoholic (×${extraNonAlc})`, amount: extraNonAlc * 2, section: 'Welcome Hour' });
+    lineItems.push({ label: `Extra Non-Alcoholic (×${extraNonAlc})`, amount: extraNonAlc * extraNonAlcPrice, section: 'Welcome Hour' });
   }
 
   // Welcome hour — extra spritzers beyond 1 included
+  const extraSpritzerPrice = pricing.getPrice('extra_spritzer_pp') ?? 2;
   const extraSpritzers = Math.max(0, sel.welcomeHour.spritzers.length - 1);
   if (extraSpritzers > 0) {
-    lineItems.push({ label: `Extra Spritzer (×${extraSpritzers})`, amount: extraSpritzers * 2, section: 'Welcome Hour' });
+    lineItems.push({ label: `Extra Spritzer (×${extraSpritzers})`, amount: extraSpritzers * extraSpritzerPrice, section: 'Welcome Hour' });
   }
 
   // Welcome hour upgrades
   if (sel.welcomeHour.passedServiceUpgrade) {
-    lineItems.push({ label: 'Passed Service Upgrade', amount: 8, section: 'Welcome Hour' });
+    const passedPrice = pricing.getPrice('passed_service_upgrade') ?? 8;
+    lineItems.push({ label: 'Passed Service Upgrade', amount: passedPrice, section: 'Welcome Hour' });
   }
   if (sel.welcomeHour.champagneUpgrade) {
-    lineItems.push({ label: 'Champagne Welcome Station', amount: 5, section: 'Welcome Hour' });
+    const champPrice = pricing.getPrice('champagne_upgrade') ?? 5;
+    lineItems.push({ label: 'Champagne Welcome Station', amount: champPrice, section: 'Welcome Hour' });
   }
 
-  // Cocktail hour — first 4 included, rest at their price
-  const selectedCocktails = sel.cocktailHour.map(id => cocktailHourItems.find(i => i.id === id)).filter(Boolean);
-  selectedCocktails.slice(COCKTAIL_INCLUDED_COUNT).forEach(item => {
-    if (item) lineItems.push({ label: item.name, amount: item.price, section: 'Cocktail Hour' });
+  // Cocktail hour — new pricing: included items pay premium only, extras pay full price
+  const cocktailIncluded = pricing.getIncludedCount('cocktail_included_count') ?? COCKTAIL_INCLUDED_COUNT;
+  const cocktailBaseValue = pricing.getPrice('cocktail_base_value') ?? 6;
+  sel.cocktailHour.forEach((id, idx) => {
+    const item = cocktailHourItems.find(i => i.id === id);
+    if (!item) return;
+    const itemPrice = pricing.getPrice(id) ?? item.price;
+    if (idx < cocktailIncluded) {
+      // Within included: only charge premium above base value
+      const premium = Math.max(0, itemPrice - cocktailBaseValue);
+      if (premium > 0) {
+        lineItems.push({ label: `${item.name} (premium)`, amount: premium, section: 'Cocktail Hour' });
+      }
+    } else {
+      // Beyond included: full price
+      lineItems.push({ label: item.name, amount: itemPrice, section: 'Cocktail Hour' });
+    }
   });
 
   // Reception — item upcharges + category surcharges
