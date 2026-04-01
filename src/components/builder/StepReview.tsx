@@ -18,8 +18,8 @@ interface Props {
 }
 
 export function StepReview({ selections, guestCount, status, saving, onSaveDraft, onSubmit }: Props) {
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const total = calculateTotal(selections);
+  const pricing = usePricingData();
+  const total = calculateTotal(selections, pricing);
   const sel = selections;
 
   const theme = sel.rehearsalDinner.themeId ? rehearsalThemes.find(t => t.id === sel.rehearsalDinner.themeId) : null;
