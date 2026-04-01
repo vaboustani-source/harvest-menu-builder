@@ -18,6 +18,7 @@ interface Props {
 }
 
 export function StepReview({ selections, guestCount, status, saving, onSaveDraft, onSubmit }: Props) {
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const pricing = usePricingData();
   const total = calculateTotal(selections, pricing);
   const sel = selections;
