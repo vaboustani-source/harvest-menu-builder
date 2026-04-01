@@ -82,7 +82,7 @@ export interface BuilderSelections {
 
 export const defaultSelections: BuilderSelections = {
   rehearsalDinner: { themeId: null, addOnSelected: false, customThemeNote: '' },
-  welcomeHour: { nonAlcoholic: [], spritzer: null, passedServiceUpgrade: false },
+  welcomeHour: { nonAlcoholic: [], spritzers: [], passedServiceUpgrade: false, champagneUpgrade: false },
   cocktailHour: [],
   reception: { salads: [], pastasGrains: [], proteins: [], vegetablesStarches: [] },
   mealInclusions: { mimosaBar: false, bloodyMaryBar: false },
