@@ -79,7 +79,7 @@ export default function AdminDashboard() {
   const { data: groupLimits } = useGroupLimits();
   const { data: selectionCounts } = useAllCoupleSelectionCounts();
   const [activeSectionId, setActiveSectionId] = useState<string>('');
-  const [adminView, setAdminView] = useState<'menu' | 'couples' | 'limits'>('menu');
+  const [adminView, setAdminView] = useState<'menu' | 'couples' | 'pricing'>('menu');
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Ownership lock for Basics tab
