@@ -401,6 +401,8 @@ export default function AdminDashboard() {
                   </div>
                 )}
               </div>
+            ) : adminView === 'pricing' ? (
+              <PricingManagement />
             ) :
             activeSection && activeSectionId === 'basics' ? (
               /* ── Basics Card Editor ── */
