@@ -23,7 +23,7 @@ export function StepReview({ selections, guestCount, status, saving, onSaveDraft
 
   const theme = sel.rehearsalDinner.themeId ? rehearsalThemes.find(t => t.id === sel.rehearsalDinner.themeId) : null;
   const nonAlcNames = sel.welcomeHour.nonAlcoholic.map(id => welcomeOptions.find(o => o.id === id)?.name).filter(Boolean);
-  const spritzerName = sel.welcomeHour.spritzer ? spritzerOptions.find(o => o.id === sel.welcomeHour.spritzer)?.name : null;
+  const spritzerNames = sel.welcomeHour.spritzers.map(id => spritzerOptions.find(o => o.id === id)?.name).filter(Boolean);
   const cocktailNames = sel.cocktailHour.map(id => cocktailHourItems.find(i => i.id === id)).filter(Boolean);
 
   const catKeyMap: Record<string, keyof typeof sel.reception> = {
