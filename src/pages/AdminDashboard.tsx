@@ -19,6 +19,7 @@ import { Label } from '@/components/ui/label';
 import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Pencil, Trash2, LogOut, ChevronDown, GripVertical, Diamond, Lock, LockOpen, Users, Settings2, Calendar, UserCheck } from 'lucide-react';
 import { CoupleSelectionsViewer } from '@/components/admin/CoupleSelectionsViewer';
+import { PricingManagement } from '@/components/admin/PricingManagement';
 import { useAllCoupleSelectionCounts } from '@/hooks/useAllCoupleSelectionCounts';
 import {
   DndContext,
@@ -78,7 +79,7 @@ export default function AdminDashboard() {
   const { data: groupLimits } = useGroupLimits();
   const { data: selectionCounts } = useAllCoupleSelectionCounts();
   const [activeSectionId, setActiveSectionId] = useState<string>('');
-  const [adminView, setAdminView] = useState<'menu' | 'couples' | 'limits'>('menu');
+  const [adminView, setAdminView] = useState<'menu' | 'couples' | 'pricing'>('menu');
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Ownership lock for Basics tab
@@ -275,6 +276,14 @@ export default function AdminDashboard() {
               >
                 <Users size={11} /> Couples
               </button>
+              <button
+                onClick={() => setAdminView('pricing')}
+                className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-md font-sans text-[10px] uppercase tracking-widest transition-colors ${
+                  adminView === 'pricing' ? 'bg-green text-white' : 'text-charcoal hover:bg-white'
+                }`}
+              >
+                <Settings2 size={11} /> Pricing
+              </button>
             </div>
 
             {adminView === 'menu' && (
@@ -392,6 +401,8 @@ export default function AdminDashboard() {
                   </div>
                 )}
               </div>
+            ) : adminView === 'pricing' ? (
+              <PricingManagement />
             ) :
             activeSection && activeSectionId === 'basics' ? (
               /* ── Basics Card Editor ── */
