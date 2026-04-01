@@ -57,8 +57,9 @@ export interface BuilderSelections {
   };
   welcomeHour: {
     nonAlcoholic: string[];
-    spritzer: string | null;
+    spritzers: string[];
     passedServiceUpgrade: boolean;
+    champagneUpgrade: boolean;
   };
   cocktailHour: string[];
   reception: {
