@@ -507,27 +507,40 @@ export function calculateTotal(sel: BuilderSelections, pricing: PricingData = de
     }
   });
 
-  // Reception — item upcharges + category surcharges
+  // Reception — unified pricing: within included = premium only, additional = extra charge + premium
+  const receptionPricingKeys: Record<string, { included: string; extra: string }> = {
+    'salads': { included: 'salads_included', extra: 'salads_extra_pp' },
+    'pastas-grains': { included: 'pastas_included', extra: 'pastas_extra_pp' },
+    'proteins': { included: 'proteins_included', extra: 'proteins_extra_pp' },
+    'vegetables-starches': { included: 'sides_included', extra: 'sides_extra_pp' },
+  };
+
   for (const cat of receptionCategories) {
     const key = cat.id === 'salads' ? 'salads'
       : cat.id === 'pastas-grains' ? 'pastasGrains'
       : cat.id === 'proteins' ? 'proteins'
       : 'vegetablesStarches';
     const selectedIds = sel.reception[key as keyof typeof sel.reception];
+    const pKeys = receptionPricingKeys[cat.id];
+    const includedCount = pricing.getIncludedCount(pKeys.included) ?? cat.included;
+    const extraCharge = pricing.getPrice(pKeys.extra) ?? cat.extraPrice;
 
-    // Item-level upcharges
-    for (const id of selectedIds) {
+    selectedIds.forEach((id, idx) => {
       const item = cat.items.find(i => i.id === id);
-      if (item && item.price > 0) {
-        lineItems.push({ label: item.name, amount: item.price, section: 'Reception' });
-      }
-    }
+      if (!item) return;
+      const premium = pricing.getPrice(id) ?? item.price;
 
-    // Category surcharge for exceeding included count
-    const extras = Math.max(0, selectedIds.length - cat.included);
-    if (extras > 0) {
-      lineItems.push({ label: `${cat.label} extra (×${extras})`, amount: extras * cat.extraPrice, section: 'Reception' });
-    }
+      if (idx < includedCount) {
+        // Within included: only premium
+        if (premium > 0) {
+          lineItems.push({ label: `${item.name} (premium)`, amount: premium, section: 'Reception' });
+        }
+      } else {
+        // Additional: extra charge + premium
+        const total = extraCharge + premium;
+        lineItems.push({ label: item.name, amount: total, section: 'Reception' });
+      }
+    });
   }
 
   // Meal inclusions

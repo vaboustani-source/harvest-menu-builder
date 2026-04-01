@@ -1,6 +1,6 @@
 import { BuilderSelections, receptionCategories, type ReceptionItem } from '@/data/builderMenuData';
-import { Check } from 'lucide-react';
-import { Diamond } from 'lucide-react';
+import { Check, Diamond } from 'lucide-react';
+import { usePricingConfig } from '@/hooks/usePricingConfig';
 
 interface Props {
   selections: BuilderSelections;
@@ -14,8 +14,28 @@ const catKeyMap: Record<string, keyof BuilderSelections['reception']> = {
   'vegetables-starches': 'vegetablesStarches',
 };
 
+const catPricingKeys: Record<string, { included: string; extra: string }> = {
+  'salads': { included: 'salads_included', extra: 'salads_extra_pp' },
+  'pastas-grains': { included: 'pastas_included', extra: 'pastas_extra_pp' },
+  'proteins': { included: 'proteins_included', extra: 'proteins_extra_pp' },
+  'vegetables-starches': { included: 'sides_included', extra: 'sides_extra_pp' },
+};
+
 export function StepReceptionDinner({ selections, onChange }: Props) {
   const sel = selections.reception;
+  const { data: pricingItems } = usePricingConfig();
+
+  const getPricingVal = (key: string) => pricingItems?.find(p => p.item_key === key);
+  const getItemPremium = (itemId: string): number => {
+    const row = pricingItems?.find(p => p.category === 'reception-items' && p.item_key === itemId);
+    if (row) return Number(row.price);
+    // Fallback to static data
+    for (const cat of receptionCategories) {
+      const item = cat.items.find(i => i.id === itemId);
+      if (item) return item.price;
+    }
+    return 0;
+  };
 
   const toggle = (catId: string, itemId: string) => {
     const key = catKeyMap[catId];
@@ -42,16 +62,16 @@ export function StepReceptionDinner({ selections, onChange }: Props) {
         <div className="flex items-center gap-2 mb-3">
           <Diamond size={12} style={{ color: '#7A9E7E' }} />
           <p className="font-sans text-[10px] tracking-[0.2em] uppercase font-semibold" style={{ color: '#2C3E2D' }}>
-            Base Package — $105pp
+            Base Package — ${getPricingVal('base_reception_pp')?.price ?? 105}pp
           </p>
         </div>
         <ul className="space-y-1">
           {[
             'Artisan bread service',
-            '1 farm salad — choose from Salads below',
-            '1 pasta or grain — choose from Pastas & Grains below',
-            '2 protein entrées — choose from Poultry, Meats, or Fish below',
-            '2 vegetables or starches — choose from Vegetables & Starches below',
+            `${getPricingVal('salads_included')?.included_count ?? 1} farm salad — choose from Salads below`,
+            `${getPricingVal('pastas_included')?.included_count ?? 1} pasta or grain — choose from Pastas & Grains below`,
+            `${getPricingVal('proteins_included')?.included_count ?? 2} protein entrées — choose from Poultry, Meats, or Fish below`,
+            `${getPricingVal('sides_included')?.included_count ?? 2} vegetables or starches — choose from Vegetables & Starches below`,
             'All family-style platters, service & staffing',
           ].map((b, i) => (
             <li key={i} className="flex items-start gap-2">
@@ -67,21 +87,23 @@ export function StepReceptionDinner({ selections, onChange }: Props) {
         const key = catKeyMap[cat.id];
         const selected = sel[key] || [];
         const grouped = groupBySubcategory(cat.items);
+        const pKeys = catPricingKeys[cat.id];
+        const includedCount = getPricingVal(pKeys.included)?.included_count ?? cat.included;
+        const extraCharge = pKeys ? Number(getPricingVal(pKeys.extra)?.price ?? cat.extraPrice) : cat.extraPrice;
+        const extras = Math.max(0, selected.length - includedCount);
 
         return (
           <div key={cat.id} className="mb-10">
             <div className="flex items-center justify-between mb-4">
               <p className="font-sans text-[10px] tracking-[0.3em] uppercase font-semibold" style={{ color: '#2C3E2D' }}>{cat.label}</p>
-              <div className="flex items-center gap-2">
-                <span className="font-sans text-[10px]" style={{
-                  color: selected.length > cat.included ? '#C9A84C' : '#6B6B6B',
-                }}>
-                  {selected.length} of {cat.included} included
-                </span>
-                {selected.length > cat.included && (
-                  <span className="font-sans text-[9px]" style={{ color: '#C9A84C' }}>{cat.extraLabel}</span>
-                )}
-              </div>
+              <span className="font-sans text-[10px]" style={{
+                color: selected.length > includedCount ? '#C9A84C' : '#6B6B6B',
+              }}>
+                {selected.length <= includedCount
+                  ? `${selected.length} of ${includedCount} included`
+                  : `${includedCount} of ${includedCount} included · ${extras} additional`
+                }
+              </span>
             </div>
 
             {grouped.map(({ subcategory, items }) => (
@@ -95,7 +117,29 @@ export function StepReceptionDinner({ selections, onChange }: Props) {
                   {items.map(item => {
                     const isSelected = selected.includes(item.id);
                     const selIdx = selected.indexOf(item.id);
-                    const isExtra = isSelected && selIdx >= cat.included;
+                    const isWithinIncluded = isSelected && selIdx < includedCount;
+                    const isExtra = isSelected && selIdx >= includedCount;
+                    const premium = getItemPremium(item.id);
+                    const hasPremium = premium > 0;
+
+                    // Calculate total charge for this item
+                    let chargeLabel = '';
+                    let totalCharge = 0;
+                    if (isWithinIncluded) {
+                      if (hasPremium) {
+                        chargeLabel = `INCLUDED +$${premium}pp premium`;
+                        totalCharge = premium;
+                      } else {
+                        chargeLabel = 'INCLUDED';
+                      }
+                    } else if (isExtra) {
+                      totalCharge = extraCharge + premium;
+                      if (hasPremium) {
+                        chargeLabel = `+$${totalCharge}pp`;
+                      } else {
+                        chargeLabel = `+$${extraCharge}pp`;
+                      }
+                    }
 
                     return (
                       <button key={item.id} onClick={() => toggle(cat.id, item.id)}
@@ -129,11 +173,33 @@ export function StepReceptionDinner({ selections, onChange }: Props) {
                               ))}
                             </div>
                           )}
+                          {/* Premium indicator — always shown for premium items */}
+                          {hasPremium && !isSelected && (
+                            <p className="font-sans text-[10px] font-medium mt-1" style={{ color: '#C9A84C' }}>
+                              +${premium}pp premium
+                            </p>
+                          )}
+                          {/* Extra breakdown */}
+                          {isExtra && hasPremium && (
+                            <p className="font-sans text-[9px] mt-0.5" style={{ color: '#6B6B6B' }}>
+                              (${extraCharge}pp additional + ${premium}pp premium)
+                            </p>
+                          )}
                         </div>
-                        <span className="font-sans text-[11px] font-medium whitespace-nowrap"
-                          style={{ color: item.price > 0 ? '#C9A84C' : isSelected ? '#7A9E7E' : '#6B6B6B' }}>
-                          {item.price > 0 ? `+$${item.price}pp` : isSelected ? 'INCLUDED' : '—'}
-                        </span>
+                        <div className="text-right shrink-0">
+                          {isSelected ? (
+                            <span className="font-sans text-[10px] font-semibold tracking-[0.05em] uppercase"
+                              style={{ color: isExtra ? '#C9A84C' : hasPremium ? '#C9A84C' : '#7A9E7E' }}>
+                              {chargeLabel}
+                            </span>
+                          ) : hasPremium ? (
+                            <span className="font-sans text-[11px] font-medium" style={{ color: '#C9A84C' }}>
+                              +${premium}pp
+                            </span>
+                          ) : (
+                            <span className="font-sans text-[11px]" style={{ color: '#6B6B6B' }}>—</span>
+                          )}
+                        </div>
                       </button>
                     );
                   })}
