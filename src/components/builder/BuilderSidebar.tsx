@@ -27,12 +27,15 @@ export function BuilderSidebar({ selections, guestCount }: Props) {
       </div>
       <p className="font-sans text-[10px] italic mb-4" style={{ color: '#6B6B6B' }}>Included</p>
 
-      {/* Rehearsal dinner */}
+      {/* Rehearsal dinner — base cost line */}
       {theme && (
-        <div className="flex justify-between items-baseline mb-1">
-          <span className="font-sans text-[12px]" style={{ color: '#1A1A1A' }}>Rehearsal: {theme.name}</span>
-          <span className="font-sans text-[12px] font-medium" style={{ color: '#C9A84C' }}>${total.rehearsalDinnerCost}pp</span>
-        </div>
+        <>
+          <div className="flex justify-between items-baseline mb-1">
+            <span className="font-sans text-[12px]" style={{ color: '#1A1A1A' }}>Rehearsal Dinner — {theme.name}</span>
+            <span className="font-sans text-[12px] font-medium" style={{ color: '#1A1A1A' }}>${total.rehearsalDinnerCost}pp</span>
+          </div>
+          <p className="font-sans text-[10px] italic mb-4" style={{ color: '#6B6B6B' }}>Included meal</p>
+        </>
       )}
 
       {/* Line items */}
@@ -52,7 +55,7 @@ export function BuilderSidebar({ selections, guestCount }: Props) {
         <div className="flex justify-between items-baseline mb-1">
           <span className="font-sans text-[11px] font-medium" style={{ color: '#1A1A1A' }}>Total Upcharges</span>
           <span className="font-sans text-[12px] font-semibold" style={{ color: '#C9A84C' }}>
-            +${total.totalUpcharges + (total.rehearsalDinnerCost || 0)}pp
+            +${total.totalUpcharges}pp
           </span>
         </div>
         <div className="flex justify-between items-baseline mt-2">
@@ -89,7 +92,7 @@ export function MobileTotalBar({ selections }: { selections: BuilderSelections }
           <p className="font-serif text-lg font-light" style={{ color: '#2C3E2D' }}>${total.estimatedPerPerson}pp</p>
         </div>
         <div className="text-right">
-          <p className="font-sans text-[10px]" style={{ color: '#C9A84C' }}>+${total.totalUpcharges + total.rehearsalDinnerCost}pp upcharges</p>
+          <p className="font-sans text-[10px]" style={{ color: '#C9A84C' }}>+${total.totalUpcharges}pp upcharges</p>
           <p className="font-sans text-[10px]" style={{ color: '#6B6B6B' }}>${total.basePackage}pp base included</p>
         </div>
       </div>
