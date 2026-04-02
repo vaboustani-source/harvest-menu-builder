@@ -41,7 +41,25 @@ export function useBuilderState() {
         .maybeSingle();
 
       if (state) {
-        setSelections({ ...defaultSelections, ...(state.selections as any) });
+        const saved = (state.selections || {}) as any;
+        // Deep merge nested objects so partial saves don't lose default arrays
+        const merged: BuilderSelections = {
+          ...defaultSelections,
+          ...saved,
+          rehearsalDinner: { ...defaultSelections.rehearsalDinner, ...saved.rehearsalDinner },
+          welcomeHour: { ...defaultSelections.welcomeHour, ...saved.welcomeHour },
+          cocktailHour: Array.isArray(saved.cocktailHour) ? saved.cocktailHour : defaultSelections.cocktailHour,
+          reception: {
+            salads: Array.isArray(saved.reception?.salads) ? saved.reception.salads : defaultSelections.reception.salads,
+            pastasGrains: Array.isArray(saved.reception?.pastasGrains) ? saved.reception.pastasGrains : defaultSelections.reception.pastasGrains,
+            proteins: Array.isArray(saved.reception?.proteins) ? saved.reception.proteins : defaultSelections.reception.proteins,
+            vegetablesStarches: Array.isArray(saved.reception?.vegetablesStarches) ? saved.reception.vegetablesStarches : defaultSelections.reception.vegetablesStarches,
+          },
+          mealInclusions: { ...defaultSelections.mealInclusions, ...saved.mealInclusions },
+          desserts: { ...defaultSelections.desserts, ...saved.desserts },
+          barPackage: { ...defaultSelections.barPackage, ...saved.barPackage },
+        };
+        setSelections(merged);
         setStatus(state.status);
       }
     }
