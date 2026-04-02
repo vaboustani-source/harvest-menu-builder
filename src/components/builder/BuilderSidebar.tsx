@@ -25,7 +25,7 @@ export function BuilderSidebar({ selections, guestCount }: Props) {
         <span className="font-sans text-[12px]" style={{ color: '#1A1A1A' }}>Base Reception Package</span>
         <span className="font-sans text-[12px] font-medium" style={{ color: '#1A1A1A' }}>${total.basePackage}pp</span>
       </div>
-      <p className="font-sans text-[10px] italic mb-4" style={{ color: '#6B6B6B' }}>Included</p>
+      <p className="font-sans text-[10px] italic mb-4" style={{ color: '#6B6B6B' }}>Starting at</p>
 
       {/* Rehearsal dinner — base cost line */}
       {theme && (
