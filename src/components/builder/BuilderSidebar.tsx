@@ -92,7 +92,7 @@ export function MobileTotalBar({ selections }: { selections: BuilderSelections }
           <p className="font-serif text-lg font-light" style={{ color: '#2C3E2D' }}>${total.estimatedPerPerson}pp</p>
         </div>
         <div className="text-right">
-          <p className="font-sans text-[10px]" style={{ color: '#C9A84C' }}>+${total.totalUpcharges + total.rehearsalDinnerCost}pp upcharges</p>
+          <p className="font-sans text-[10px]" style={{ color: '#C9A84C' }}>+${total.totalUpcharges}pp upcharges</p>
           <p className="font-sans text-[10px]" style={{ color: '#6B6B6B' }}>${total.basePackage}pp base included</p>
         </div>
       </div>
