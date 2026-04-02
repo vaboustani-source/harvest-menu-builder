@@ -33,7 +33,7 @@ const SECTIONS: SectionBlock[] = [
     id: 'welcome',
     label: 'Welcome Hour',
     categories: [
-      { key: 'welcome', label: 'WELCOME HOUR', description: 'Service upgrades available at the welcome table.' },
+      { key: 'welcome', label: 'WELCOME HOUR', description: 'Non-alcoholic and spritzer selections for the welcome table.', showActiveToggle: true },
     ],
   },
   {
