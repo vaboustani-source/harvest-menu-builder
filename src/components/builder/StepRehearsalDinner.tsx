@@ -1,16 +1,33 @@
+import { useState } from 'react';
 import { BuilderSelections, rehearsalThemes } from '@/data/builderMenuData';
 import { Check } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { usePricingConfig } from '@/hooks/usePricingConfig';
+import { BuilderFilterBar, type DietFilter, type SeasonFilter } from './BuilderFilterBar';
 
 interface Props {
   selections: BuilderSelections;
   onChange: (updates: Partial<BuilderSelections>) => void;
 }
 
+/** Parse season text from rehearsal themes to match filter */
+function themeMatchesSeason(seasonText: string, filter: SeasonFilter): boolean {
+  if (filter === 'all') return true;
+  const lower = seasonText.toLowerCase();
+  if (filter === 'year-round') return lower.includes('year-round');
+  return lower.includes(filter);
+}
+
+function themeMatchesDiet(dietTags: string[], filter: DietFilter): boolean {
+  if (filter === 'all') return true;
+  return dietTags.includes(filter);
+}
+
 export function StepRehearsalDinner({ selections, onChange }: Props) {
   const sel = selections.rehearsalDinner;
   const { data: pricingItems } = usePricingConfig();
+  const [dietFilter, setDietFilter] = useState<DietFilter>('all');
+  const [seasonFilter, setSeasonFilter] = useState<SeasonFilter>('all');
 
   const getAddonPrice = (themeId: string): number | null => {
     const row = pricingItems?.find(p => p.category === 'rehearsal-addons' && p.item_key === `addon-${themeId}`);
@@ -23,7 +40,7 @@ export function StepRehearsalDinner({ selections, onChange }: Props) {
       rehearsalDinner: {
         ...sel,
         themeId: isDeselect ? null : id,
-        addOnSelected: false, // always reset add-on when switching
+        addOnSelected: false,
       },
     });
   };
@@ -32,6 +49,11 @@ export function StepRehearsalDinner({ selections, onChange }: Props) {
     e.stopPropagation();
     onChange({ rehearsalDinner: { ...sel, addOnSelected: !sel.addOnSelected } });
   };
+
+  const visibleThemes = rehearsalThemes.filter(theme =>
+    themeMatchesDiet(theme.dietaryTags, dietFilter) &&
+    themeMatchesSeason(theme.season, seasonFilter)
+  );
 
   return (
     <div>
@@ -43,8 +65,11 @@ export function StepRehearsalDinner({ selections, onChange }: Props) {
         </p>
       </div>
 
+      <BuilderFilterBar dietFilter={dietFilter} seasonFilter={seasonFilter}
+        onDietChange={setDietFilter} onSeasonChange={setSeasonFilter} />
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {rehearsalThemes.map(theme => {
+        {visibleThemes.map(theme => {
           const isSelected = sel.themeId === theme.id;
           const addonPrice = getAddonPrice(theme.id);
           const hasAddon = !!theme.addOn;
@@ -71,13 +96,22 @@ export function StepRehearsalDinner({ selections, onChange }: Props) {
               <p className="font-sans text-[10px] tracking-[0.25em] uppercase font-semibold mb-1" style={{ color: '#2C3E2D' }}>
                 {theme.name}
               </p>
-              <p className="font-sans text-[10px] italic mb-3" style={{ color: '#C9A84C' }}>{theme.season}</p>
+              <p className="font-sans text-[10px] italic mb-2" style={{ color: '#C9A84C' }}>{theme.season}</p>
 
-              <div className="flex gap-1.5 mb-3">
-                {theme.dietaryTags.map(tag => (
-                  <span key={tag} className="font-sans text-[8px] tracking-wider uppercase px-1.5 py-0.5 rounded"
-                    style={{ background: '#F0EDE8', color: '#6B6B6B' }}>{tag}</span>
-                ))}
+              {/* Diet & Season badges */}
+              <div className="flex flex-wrap gap-1 mb-3">
+                {theme.dietaryTags.map(tag => {
+                  const colors: Record<string, string> = {
+                    'VG': '#5a9456', 'VE': '#7a5a9e', 'GF': '#9E6B3C', 'DF': '#3C6B9E',
+                  };
+                  const c = colors[tag] || '#6B6B6B';
+                  return (
+                    <span key={tag} className="inline-block border rounded-sm px-[6px] py-[2px] text-[9px] font-sans font-medium tracking-widest uppercase leading-none"
+                      style={{ color: c, borderColor: c }}>
+                      {tag}
+                    </span>
+                  );
+                })}
               </div>
 
               <ul className="space-y-1 mb-4">
