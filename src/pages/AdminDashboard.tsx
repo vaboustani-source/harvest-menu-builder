@@ -294,10 +294,10 @@ export default function AdminDashboard() {
                     <button
                       key={s.id}
                       onClick={() => handleSelectSection(s.id)}
-                      className={`w-full text-left px-3 py-2.5 rounded-lg font-sans text-[13px] transition-colors border-solid bg-[#b1cdb5]/0 ${
+                      className={`w-full text-left px-3 py-2.5 rounded-lg font-sans text-[13px] transition-colors border-solid ${
                         s.id === activeSectionId
-                          ? 'bg-green text-white'
-                          : 'text-charcoal hover:bg-cream-dark'
+                          ? 'bg-sage-light/30 text-primary font-medium'
+                          : 'text-foreground hover:bg-secondary'
                       }`}
                     >
                       <span className="flex items-center gap-2 text-primary">
