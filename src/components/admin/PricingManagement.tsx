@@ -33,7 +33,7 @@ const SECTIONS: SectionBlock[] = [
     id: 'welcome',
     label: 'Welcome Hour',
     categories: [
-      { key: 'welcome', label: 'WELCOME HOUR', description: 'Service upgrades available at the welcome table.' },
+      { key: 'welcome', label: 'WELCOME HOUR', description: 'Non-alcoholic and spritzer selections for the welcome table.', showActiveToggle: true },
     ],
   },
   {
@@ -69,17 +69,30 @@ const SECTIONS: SectionBlock[] = [
   {
     id: 'desserts',
     label: 'Desserts',
-    categories: [],
+    categories: [
+      { key: 'desserts', label: 'DESSERT ITEMS & PACKAGES', description: 'Individual dessert items and dessert table packages.', showActiveToggle: true },
+    ],
   },
   {
     id: 'bar',
     label: 'Bar',
-    categories: [],
+    categories: [
+      { key: 'bar', label: 'BAR PACKAGES', description: 'Bar package tiers and pricing.', showActiveToggle: true },
+    ],
   },
   {
     id: 'packages',
     label: 'Weekend Packages',
-    categories: [],
+    categories: [
+      { key: 'packages', label: 'WEEKEND PACKAGES', description: 'Bundled weekend pricing tiers.', showActiveToggle: true },
+    ],
+  },
+  {
+    id: 'basics',
+    label: 'The Basics',
+    categories: [
+      { key: 'basics', label: 'THE BASICS', description: 'Site fee, catering, and lodging packages.', showActiveToggle: true },
+    ],
   },
 ];
 

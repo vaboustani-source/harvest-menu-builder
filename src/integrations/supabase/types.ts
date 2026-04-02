@@ -361,6 +361,7 @@ export type Database = {
           is_active: boolean
           item_key: string
           item_label: string
+          menu_item_id: string | null
           price: number
           sort_order: number
           updated_at: string
@@ -374,6 +375,7 @@ export type Database = {
           is_active?: boolean
           item_key: string
           item_label: string
+          menu_item_id?: string | null
           price?: number
           sort_order?: number
           updated_at?: string
@@ -387,6 +389,7 @@ export type Database = {
           is_active?: boolean
           item_key?: string
           item_label?: string
+          menu_item_id?: string | null
           price?: number
           sort_order?: number
           updated_at?: string
