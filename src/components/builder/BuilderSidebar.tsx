@@ -27,12 +27,15 @@ export function BuilderSidebar({ selections, guestCount }: Props) {
       </div>
       <p className="font-sans text-[10px] italic mb-4" style={{ color: '#6B6B6B' }}>Included</p>
 
-      {/* Rehearsal dinner */}
+      {/* Rehearsal dinner — base cost line */}
       {theme && (
-        <div className="flex justify-between items-baseline mb-1">
-          <span className="font-sans text-[12px]" style={{ color: '#1A1A1A' }}>Rehearsal: {theme.name}</span>
-          <span className="font-sans text-[12px] font-medium" style={{ color: '#C9A84C' }}>${total.rehearsalDinnerCost}pp</span>
-        </div>
+        <>
+          <div className="flex justify-between items-baseline mb-1">
+            <span className="font-sans text-[12px]" style={{ color: '#1A1A1A' }}>Rehearsal Dinner — {theme.name}</span>
+            <span className="font-sans text-[12px] font-medium" style={{ color: '#1A1A1A' }}>${total.rehearsalDinnerCost}pp</span>
+          </div>
+          <p className="font-sans text-[10px] italic mb-4" style={{ color: '#6B6B6B' }}>Included meal</p>
+        </>
       )}
 
       {/* Line items */}
