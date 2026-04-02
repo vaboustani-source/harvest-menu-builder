@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { BuilderSelections, cocktailHourItems } from '@/data/builderMenuData';
 import { Check } from 'lucide-react';
 import { usePricingConfig } from '@/hooks/usePricingConfig';
+import { BuilderFilterBar, matchesFilters, ItemBadges, type DietFilter, type SeasonFilter } from './BuilderFilterBar';
 
 interface Props {
   selections: BuilderSelections;
@@ -10,8 +12,9 @@ interface Props {
 export function StepCocktailHour({ selections, onChange }: Props) {
   const selected = selections.cocktailHour;
   const { data: pricingItems } = usePricingConfig();
+  const [dietFilter, setDietFilter] = useState<DietFilter>('all');
+  const [seasonFilter, setSeasonFilter] = useState<SeasonFilter>('all');
 
-  // Pull values from admin pricing
   const includedCountRow = pricingItems?.find(p => p.item_key === 'cocktail_included_count');
   const baseValueRow = pricingItems?.find(p => p.item_key === 'cocktail_base_value');
   const includedCount = includedCountRow?.included_count ?? 4;
@@ -33,6 +36,11 @@ export function StepCocktailHour({ selections, onChange }: Props) {
 
   const extras = Math.max(0, selected.length - includedCount);
 
+  // Cocktail items don't have season data, so treat empty as year-round
+  const visibleItems = cocktailHourItems.filter(item =>
+    matchesFilters(item.diet, undefined, dietFilter, seasonFilter)
+  );
+
   return (
     <div>
       <div className="mb-8">
@@ -42,6 +50,9 @@ export function StepCocktailHour({ selections, onChange }: Props) {
           One hour. {includedCount} selections. Every bite passed by Gilbertsville staff.
         </p>
       </div>
+
+      <BuilderFilterBar dietFilter={dietFilter} seasonFilter={seasonFilter}
+        onDietChange={setDietFilter} onSeasonChange={setSeasonFilter} />
 
       {/* Counter */}
       <div className="rounded-xl border px-5 py-3.5 mb-6 flex items-center justify-between"
@@ -56,7 +67,7 @@ export function StepCocktailHour({ selections, onChange }: Props) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {cocktailHourItems.map(item => {
+        {visibleItems.map(item => {
           const isSelected = selected.includes(item.id);
           const selectionIndex = isSelected ? selected.indexOf(item.id) : -1;
           const isWithinIncluded = isSelected && selectionIndex < includedCount;
@@ -80,16 +91,16 @@ export function StepCocktailHour({ selections, onChange }: Props) {
               )}
 
               <p className="font-serif text-[13.5px] pr-8 leading-snug" style={{ color: '#1A1A1A' }}>{item.name}</p>
+              
               <div className="flex items-center gap-2 mt-2">
                 <span className="font-sans text-[9px] tracking-[0.15em] uppercase px-1.5 py-0.5 rounded"
                   style={{ background: '#F0EDE8', color: '#6B6B6B' }}>
                   {item.type}
                 </span>
-                {item.diet.map(d => (
-                  <span key={d} className="font-sans text-[8px] tracking-wider uppercase px-1.5 py-0.5 rounded"
-                    style={{ background: '#F0EDE8', color: '#6B6B6B' }}>{d}</span>
-                ))}
               </div>
+
+              {/* Diet & Season badges */}
+              <ItemBadges diet={item.diet} season={undefined} />
 
               {/* Price display */}
               <div className="mt-2">

@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { BuilderSelections, receptionCategories, type ReceptionItem } from '@/data/builderMenuData';
 import { Check, Diamond } from 'lucide-react';
 import { usePricingConfig } from '@/hooks/usePricingConfig';
+import { BuilderFilterBar, matchesFilters, ItemBadges, type DietFilter, type SeasonFilter } from './BuilderFilterBar';
 
 interface Props {
   selections: BuilderSelections;
@@ -24,12 +26,13 @@ const catPricingKeys: Record<string, { included: string; extra: string }> = {
 export function StepReceptionDinner({ selections, onChange }: Props) {
   const sel = selections.reception;
   const { data: pricingItems } = usePricingConfig();
+  const [dietFilter, setDietFilter] = useState<DietFilter>('all');
+  const [seasonFilter, setSeasonFilter] = useState<SeasonFilter>('all');
 
   const getPricingVal = (key: string) => pricingItems?.find(p => p.item_key === key);
   const getItemPremium = (itemId: string): number => {
     const row = pricingItems?.find(p => p.category === 'reception-items' && p.item_key === itemId);
     if (row) return Number(row.price);
-    // Fallback to static data
     for (const cat of receptionCategories) {
       const item = cat.items.find(i => i.id === itemId);
       if (item) return item.price;
@@ -56,6 +59,9 @@ export function StepReceptionDinner({ selections, onChange }: Props) {
           Family style. Every platter passed. Every seat fed.
         </p>
       </div>
+
+      <BuilderFilterBar dietFilter={dietFilter} seasonFilter={seasonFilter}
+        onDietChange={setDietFilter} onSeasonChange={setSeasonFilter} />
 
       {/* Base package summary */}
       <div className="rounded-xl border p-5 mb-8" style={{ background: 'rgba(122,158,126,0.04)', borderColor: 'rgba(122,158,126,0.3)' }}>
@@ -86,11 +92,16 @@ export function StepReceptionDinner({ selections, onChange }: Props) {
       {receptionCategories.map(cat => {
         const key = catKeyMap[cat.id];
         const selected = sel[key] || [];
-        const grouped = groupBySubcategory(cat.items);
         const pKeys = catPricingKeys[cat.id];
         const includedCount = getPricingVal(pKeys.included)?.included_count ?? cat.included;
         const extraCharge = pKeys ? Number(getPricingVal(pKeys.extra)?.price ?? cat.extraPrice) : cat.extraPrice;
         const extras = Math.max(0, selected.length - includedCount);
+
+        // Filter items but group by subcategory
+        const filteredItems = cat.items.filter(item =>
+          matchesFilters(item.diet, item.season, dietFilter, seasonFilter)
+        );
+        const grouped = groupBySubcategory(filteredItems);
 
         return (
           <div key={cat.id} className="mb-10">
@@ -122,23 +133,12 @@ export function StepReceptionDinner({ selections, onChange }: Props) {
                     const premium = getItemPremium(item.id);
                     const hasPremium = premium > 0;
 
-                    // Calculate total charge for this item
                     let chargeLabel = '';
-                    let totalCharge = 0;
                     if (isWithinIncluded) {
-                      if (hasPremium) {
-                        chargeLabel = `INCLUDED +$${premium}pp premium`;
-                        totalCharge = premium;
-                      } else {
-                        chargeLabel = 'INCLUDED';
-                      }
+                      chargeLabel = hasPremium ? `INCLUDED +$${premium}pp premium` : 'INCLUDED';
                     } else if (isExtra) {
-                      totalCharge = extraCharge + premium;
-                      if (hasPremium) {
-                        chargeLabel = `+$${totalCharge}pp`;
-                      } else {
-                        chargeLabel = `+$${extraCharge}pp`;
-                      }
+                      const totalCharge = extraCharge + premium;
+                      chargeLabel = hasPremium ? `+$${totalCharge}pp` : `+$${extraCharge}pp`;
                     }
 
                     return (
@@ -157,22 +157,8 @@ export function StepReceptionDinner({ selections, onChange }: Props) {
                         </span>
                         <div className="flex-1 min-w-0">
                           <p className="font-serif text-[13px]" style={{ color: '#1A1A1A' }}>{item.name}</p>
-                          {item.season.length > 0 && (
-                            <div className="flex gap-1 mt-1">
-                              {item.season.map(s => (
-                                <span key={s} className="font-sans text-[8px] tracking-wider uppercase px-1.5 py-0.5 rounded"
-                                  style={{ background: '#F0EDE8', color: '#6B6B6B' }}>{s.slice(0, 3).toUpperCase()}</span>
-                              ))}
-                            </div>
-                          )}
-                          {item.diet.length > 0 && (
-                            <div className="flex gap-1 mt-1">
-                              {item.diet.map(d => (
-                                <span key={d} className="font-sans text-[8px] tracking-wider uppercase px-1.5 py-0.5 rounded"
-                                  style={{ background: '#F0EDE8', color: '#6B6B6B' }}>{d}</span>
-                              ))}
-                            </div>
-                          )}
+                          {/* Diet & Season badges */}
+                          <ItemBadges diet={item.diet} season={item.season} />
                           {/* Premium indicator — always shown for premium items */}
                           {hasPremium && !isSelected && (
                             <p className="font-sans text-[10px] font-medium mt-1" style={{ color: '#C9A84C' }}>
