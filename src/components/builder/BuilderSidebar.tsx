@@ -55,7 +55,7 @@ export function BuilderSidebar({ selections, guestCount }: Props) {
         <div className="flex justify-between items-baseline mb-1">
           <span className="font-sans text-[11px] font-medium" style={{ color: '#1A1A1A' }}>Total Upcharges</span>
           <span className="font-sans text-[12px] font-semibold" style={{ color: '#C9A84C' }}>
-            +${total.totalUpcharges + (total.rehearsalDinnerCost || 0)}pp
+            +${total.totalUpcharges}pp
           </span>
         </div>
         <div className="flex justify-between items-baseline mt-2">
