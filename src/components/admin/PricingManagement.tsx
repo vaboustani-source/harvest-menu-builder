@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { GroupedPricingList } from './GroupedPricingList';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface CategoryConfig {
   key: string;
@@ -16,13 +15,13 @@ interface CategoryConfig {
   allowAdd?: boolean;
 }
 
-interface SidebarSection {
+interface SectionBlock {
   id: string;
   label: string;
   categories: CategoryConfig[];
 }
 
-const SECTIONS: SidebarSection[] = [
+const SECTIONS: SectionBlock[] = [
   {
     id: 'global',
     label: 'Global Rules',
@@ -93,7 +92,6 @@ function formatTimestamp(ts: string) {
 
 export function PricingManagement() {
   const { data: allItems, isLoading, updatePrice, updateIncludedCount, toggleActive, addItem, deleteItem } = usePricingConfig();
-  const [activeSection, setActiveSection] = useState(SECTIONS[0].id);
 
   if (isLoading) {
     return (
@@ -106,50 +104,29 @@ export function PricingManagement() {
   const itemsByCategory = (category: string) =>
     (allItems ?? []).filter(i => i.category === category).sort((a, b) => a.sort_order - b.sort_order);
 
-  const currentSection = SECTIONS.find(s => s.id === activeSection) ?? SECTIONS[0];
-
   return (
-    <div>
-      <div className="border-b border-cream-dark pb-4 mb-6">
-        <h2 className="font-serif italic text-2xl text-green">Pricing Management</h2>
+    <div className="space-y-10">
+      <div className="border-b border-border pb-4">
+        <h2 className="font-serif italic text-2xl text-primary">Pricing Management</h2>
         <p className="font-sans text-xs text-muted-foreground mt-1 leading-relaxed max-w-xl">
           All prices in the couple-facing builder pull from this table. Changes take effect immediately for new sessions.
         </p>
       </div>
 
-      <div className="flex gap-6 min-h-[600px]">
-        {/* Left sidebar */}
-        <nav className="w-[210px] shrink-0">
-          <p className="font-sans text-[10px] uppercase tracking-widest text-muted-foreground mb-3 px-2">Sections</p>
-          <div className="space-y-0.5">
-            {SECTIONS.map(s => (
-              <button
-                key={s.id}
-                onClick={() => setActiveSection(s.id)}
-                className={`w-full text-left px-3 py-2.5 rounded-lg font-sans text-[13px] transition-colors ${
-                  s.id === activeSection
-                    ? 'bg-green text-white'
-                    : 'text-foreground hover:bg-secondary'
-                }`}
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
-        </nav>
+      {SECTIONS.map(section => (
+        <div key={section.id}>
+          <h3 className="font-serif italic text-xl text-primary mb-4">{section.label}</h3>
 
-        {/* Right content panel */}
-        <ScrollArea className="flex-1 min-w-0">
-          <div className="space-y-8 pr-2">
-            {currentSection.categories.length === 0 ? (
-              <div className="text-center py-16 bg-card rounded-lg border border-border">
-                <p className="font-serif italic text-lg text-foreground mb-1">No pricing rules yet</p>
-                <p className="font-sans text-xs text-muted-foreground">
-                  Pricing for {currentSection.label} has not been configured.
-                </p>
-              </div>
-            ) : (
-              currentSection.categories.map(cat => (
+          {section.categories.length === 0 ? (
+            <div className="text-center py-12 bg-card rounded-lg border border-border">
+              <p className="font-serif italic text-lg text-foreground mb-1">No pricing rules yet</p>
+              <p className="font-sans text-xs text-muted-foreground">
+                Pricing for {section.label} has not been configured.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {section.categories.map(cat => (
                 <PricingSection
                   key={cat.key}
                   config={cat}
@@ -160,11 +137,11 @@ export function PricingManagement() {
                   onAddItem={addItem}
                   onDeleteItem={deleteItem}
                 />
-              ))
-            )}
-          </div>
-        </ScrollArea>
-      </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 }
