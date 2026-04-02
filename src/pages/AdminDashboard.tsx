@@ -258,37 +258,33 @@ export default function AdminDashboard() {
         <div className="flex gap-6">
           {/* Section sidebar - desktop */}
           <aside className="hidden md:block w-48 shrink-0">
-            {/* Admin view switcher */}
-            <div className="flex gap-1 mb-4 bg-cream-dark rounded-lg p-1">
-              <button
-                onClick={() => setAdminView('menu')}
-                className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-md font-sans text-[10px] uppercase tracking-widest transition-colors text-ring ${
-                  adminView === 'menu' ? 'bg-green text-white' : 'text-charcoal hover:bg-white'
-                }`}
-              >
-                Menu
-              </button>
-              <button
-                onClick={() => setAdminView('couples')}
-                className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-md font-sans text-[10px] uppercase tracking-widest transition-colors ${
-                  adminView === 'couples' ? 'bg-green text-white' : 'text-charcoal hover:bg-white'
-                }`}
-              >
-                <Users size={11} /> Couples
-              </button>
-              <button
-                onClick={() => setAdminView('pricing')}
-                className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-md font-sans text-[10px] uppercase tracking-widest transition-colors ${
-                  adminView === 'pricing' ? 'bg-green text-white' : 'text-charcoal hover:bg-white'
-                }`}
-              >
-                <Settings2 size={11} /> Pricing
-              </button>
-            </div>
+            {/* Admin view switcher — vertical */}
+            <p className="font-sans text-[10px] uppercase tracking-widest text-muted-foreground mb-3 px-2">Dashboard</p>
+            <nav className="space-y-0.5 mb-6">
+              {([
+                { key: 'menu' as const, label: 'Menu', icon: null },
+                { key: 'couples' as const, label: 'Couples', icon: <Users size={13} /> },
+                { key: 'pricing' as const, label: 'Pricing', icon: <Settings2 size={13} /> },
+              ]).map(tab => (
+                <button
+                  key={tab.key}
+                  onClick={() => setAdminView(tab.key)}
+                  className={`w-full text-left px-3 py-2.5 rounded-lg font-sans text-[13px] transition-colors flex items-center gap-2 ${
+                    adminView === tab.key
+                      ? 'bg-sage-light/30 text-primary font-medium'
+                      : 'text-foreground hover:bg-secondary'
+                  }`}
+                >
+                  {tab.icon}
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
 
             {adminView === 'menu' && (
               <>
-                <p className="font-sans text-[10px] uppercase tracking-widest text-muted-foreground mb-3 px-2">Sections</p>
+                <div className="border-t border-border my-2" />
+                <p className="font-sans text-[10px] uppercase tracking-widest text-muted-foreground mb-3 mt-3 px-2">Sections</p>
                 <nav className="space-y-0.5">
                   {sections?.map((s) => (
                     <button
@@ -312,8 +308,9 @@ export default function AdminDashboard() {
 
             {adminView === 'couples' && (
               <div>
-                <p className="font-sans text-[10px] uppercase tracking-widest text-muted-foreground mb-3 px-2">Couple Accounts</p>
-                <Button onClick={() => setCoupleModal(true)} size="sm" className="w-full bg-green hover:bg-green/90 text-white font-sans text-xs gap-1.5 mb-3">
+                <div className="border-t border-border my-2" />
+                <p className="font-sans text-[10px] uppercase tracking-widest text-muted-foreground mb-3 mt-3 px-2">Couple Accounts</p>
+                <Button onClick={() => setCoupleModal(true)} size="sm" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-sans text-xs gap-1.5 mb-3">
                   <Plus size={13} /> Add Couple
                 </Button>
                 <p className="font-sans text-[10px] text-muted-foreground px-2">{couples?.length ?? 0} couple{(couples?.length ?? 0) !== 1 ? 's' : ''} registered</p>
