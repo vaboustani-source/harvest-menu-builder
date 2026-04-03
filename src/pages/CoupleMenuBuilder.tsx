@@ -3,7 +3,9 @@ import { useBuilderState } from '@/hooks/useBuilderState';
 import { BuilderSelections, STEPS, defaultSelections } from '@/data/builderMenuData';
 import { CoupleLogin } from '@/components/builder/CoupleLogin';
 import { ProgressStepper } from '@/components/builder/ProgressStepper';
-import { BuilderSidebar, MobileTotalBar } from '@/components/builder/BuilderSidebar';
+import { BuilderSidebar } from '@/components/builder/BuilderSidebar';
+import { MobileProgressBar } from '@/components/builder/MobileProgressBar';
+import { MobileStickyTotal } from '@/components/builder/MobileTotalDrawer';
 import { StepRehearsalDinner } from '@/components/builder/StepRehearsalDinner';
 import { StepWelcomeHour } from '@/components/builder/StepWelcomeHour';
 import { StepCocktailHour } from '@/components/builder/StepCocktailHour';
@@ -15,7 +17,6 @@ import { StepReview } from '@/components/builder/StepReview';
 import { Button } from '@/components/ui/button';
 import { LogOut, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { toast } from 'sonner';
-import { STEPS as STEP_LIST } from '@/data/builderMenuData';
 
 export default function CoupleMenuBuilder() {
   const {
@@ -58,7 +59,6 @@ export default function CoupleMenuBuilder() {
 
   const isReview = currentStep === STEPS.length - 1;
   const isFirst = currentStep === 0;
-  const isLast = currentStep === STEPS.length - 1;
 
   const stepComponents = [
     <StepRehearsalDinner key="rehearsal" selections={selections} onChange={handleChange} />,
@@ -98,27 +98,49 @@ export default function CoupleMenuBuilder() {
         </div>
       </header>
 
-      {/* Stepper */}
-      <ProgressStepper current={currentStep} onChange={goToStep} />
+      {/* Desktop Stepper — hidden on mobile */}
+      <div className="hidden md:block">
+        <ProgressStepper current={currentStep} onChange={goToStep} />
+      </div>
+
+      {/* Mobile Progress Bar — hidden on desktop */}
+      <MobileProgressBar current={currentStep} onChange={goToStep} />
+
+      {/* Mobile saved indicator */}
+      <div className="md:hidden text-center py-2">
+        {lastSavedAt && !saving && (
+          <div className="flex items-center justify-center gap-1.5">
+            <Check size={12} style={{ color: '#7A9E7E' }} />
+            <span className="font-serif italic text-[12px]" style={{ color: '#7A9E7E' }}>Saved</span>
+          </div>
+        )}
+        {saving && (
+          <span className="font-serif italic text-[12px]" style={{ color: '#C9A84C' }}>Saving…</span>
+        )}
+      </div>
 
       {/* Content + Sidebar */}
       <div className="max-w-[1200px] mx-auto flex">
-        <main className="flex-1 px-6 pt-8 pb-32 lg:pb-16">
-          {/* Saved indicator */}
-          {lastSavedAt && !saving && (
-            <div className="flex items-center gap-1.5 mb-4">
-              <Check size={12} style={{ color: '#7A9E7E' }} />
-              <span className="font-serif italic text-[12px]" style={{ color: '#7A9E7E' }}>Saved</span>
-            </div>
-          )}
-          {saving && (
-            <div className="mb-4">
-              <span className="font-serif italic text-[12px]" style={{ color: '#C9A84C' }}>Saving…</span>
-            </div>
-          )}
+        {/* pb-32 on mobile to clear sticky bar + nav buttons, lg:pb-16 on desktop */}
+        <main className="flex-1 px-6 pt-8 pb-40 md:pb-16">
+          {/* Desktop saved indicator */}
+          <div className="hidden md:block">
+            {lastSavedAt && !saving && (
+              <div className="flex items-center gap-1.5 mb-4">
+                <Check size={12} style={{ color: '#7A9E7E' }} />
+                <span className="font-serif italic text-[12px]" style={{ color: '#7A9E7E' }}>Saved</span>
+              </div>
+            )}
+            {saving && (
+              <div className="mb-4">
+                <span className="font-serif italic text-[12px]" style={{ color: '#C9A84C' }}>Saving…</span>
+              </div>
+            )}
+          </div>
+
           {stepComponents[currentStep]}
 
-          {/* Navigation */}
+          {/* Navigation buttons */}
           {!isReview && (
             <div className="flex items-center justify-between mt-10 pt-6 border-t" style={{ borderColor: '#E8E2D9' }}>
               {!isFirst ? (
@@ -139,7 +161,8 @@ export default function CoupleMenuBuilder() {
         <BuilderSidebar selections={selections} guestCount={profile.guest_count} />
       </div>
 
-      <MobileTotalBar selections={selections} />
+      {/* Mobile sticky total bar + drawer */}
+      <MobileStickyTotal selections={selections} guestCount={profile.guest_count} />
     </div>
   );
 }
