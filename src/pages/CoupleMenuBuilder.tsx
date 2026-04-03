@@ -84,7 +84,7 @@ export default function CoupleMenuBuilder() {
           <h1 className="font-serif italic text-lg leading-none" style={{ color: '#FAF8F4' }}>
             {profile.partner1_name} & {profile.partner2_name}
           </h1>
-        </div>
+        </a>
         <div className="flex items-center gap-4">
           {profile.wedding_date && (
             <span className="font-sans text-[11px] hidden sm:block" style={{ color: 'rgba(250,248,244,0.5)' }}>
