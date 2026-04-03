@@ -27,9 +27,9 @@ export function CoupleLogin({ onLogin }: Props) {
           <p className="font-sans text-[10px] tracking-[0.35em] uppercase mb-4" style={{ color: '#2C3E2D' }}>
             Gilbertsville Farmhouse
           </p>
-          <h1 className="font-serif text-4xl font-light mb-2" style={{ color: '#2C3E2D' }}>
+          <a href="/" className="font-serif text-4xl font-light cursor-pointer transition-colors hover:text-[#C9A84C]" style={{ color: '#2C3E2D' }}>
             Harvest 336
-          </h1>
+          </a>
           <p className="font-serif text-lg" style={{ color: '#C9A84C' }}>
             Menu Builder
           </p>
