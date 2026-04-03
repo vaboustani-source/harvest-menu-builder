@@ -191,5 +191,5 @@ export function useBuilderState() {
     setProfile(null);
   };
 
-  return { profile, selections, setSelections, status, loading, saving, saveSelections, submitSelections, logout };
+  return { profile, selections, setSelections, status, loading, saving, lastSavedAt, saveSelections, submitSelections, logout };
 }
