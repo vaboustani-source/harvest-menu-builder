@@ -71,6 +71,7 @@ export interface BuilderSelections {
   mealInclusions: {
     mimosaBar: boolean;
     bloodyMaryBar: boolean;
+    farewellBrunch: boolean;
   };
   desserts: {
     notes: string;
@@ -85,7 +86,7 @@ export const defaultSelections: BuilderSelections = {
   welcomeHour: { nonAlcoholic: [], spritzers: [], passedServiceUpgrade: false, champagneUpgrade: false },
   cocktailHour: [],
   reception: { salads: [], pastasGrains: [], proteins: [], vegetablesStarches: [] },
-  mealInclusions: { mimosaBar: false, bloodyMaryBar: false },
+  mealInclusions: { mimosaBar: false, bloodyMaryBar: false, farewellBrunch: false },
   desserts: { notes: '' },
   barPackage: { notes: '' },
 };
@@ -551,6 +552,10 @@ export function calculateTotal(sel: BuilderSelections, pricing: PricingData = de
   if (sel.mealInclusions.bloodyMaryBar) {
     const price = pricing.getPrice('bloody_mary_bar') ?? 20;
     lineItems.push({ label: 'Bloody Mary Bar', amount: price, section: 'Meal Inclusions' });
+  }
+  if (sel.mealInclusions.farewellBrunch) {
+    const price = pricing.getPrice('farewell_brunch') ?? 25;
+    lineItems.push({ label: 'Upgrade to Farewell Brunch', amount: price, section: 'Meal Inclusions' });
   }
 
   const basePackage = pricing.getPrice('base_reception_pp') ?? 105;

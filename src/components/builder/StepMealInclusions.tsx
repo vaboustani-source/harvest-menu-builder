@@ -1,5 +1,6 @@
 import { BuilderSelections } from '@/data/builderMenuData';
 import { Switch } from '@/components/ui/switch';
+import { usePricingData } from '@/hooks/usePricingConfig';
 
 interface Props {
   selections: BuilderSelections;
@@ -39,10 +40,12 @@ export function StepMealInclusions({ selections, onChange }: Props) {
             Sunday morning. The last meal together before the weekend closes.
           </p>
           <div className="space-y-3">
-            <ToggleUpgrade label="Mimosa Bar" price={20} checked={sel.mimosaBar}
+            <ToggleUpgrade label="Mimosa Bar" itemKey="mimosa_bar" fallbackPrice={20} checked={sel.mimosaBar}
               onChange={v => onChange({ mealInclusions: { ...sel, mimosaBar: v } })} />
-            <ToggleUpgrade label="Bloody Mary Bar" price={20} checked={sel.bloodyMaryBar}
+            <ToggleUpgrade label="Bloody Mary Bar" itemKey="bloody_mary_bar" fallbackPrice={20} checked={sel.bloodyMaryBar}
               onChange={v => onChange({ mealInclusions: { ...sel, bloodyMaryBar: v } })} />
+            <ToggleUpgrade label="Upgrade to Farewell Brunch" subtitle="Extend the morning with a full brunch spread." itemKey="farewell_brunch" fallbackPrice={25} checked={sel.farewellBrunch}
+              onChange={v => onChange({ mealInclusions: { ...sel, farewellBrunch: v } })} />
           </div>
         </div>
       </div>
@@ -60,13 +63,16 @@ function MealCard({ title, body, placeholder }: { title: string; body: string; p
   );
 }
 
-function ToggleUpgrade({ label, price, checked, onChange }: {
-  label: string; price: number; checked: boolean; onChange: (v: boolean) => void;
+function ToggleUpgrade({ label, subtitle, itemKey, fallbackPrice, checked, onChange }: {
+  label: string; subtitle?: string; itemKey: string; fallbackPrice: number; checked: boolean; onChange: (v: boolean) => void;
 }) {
+  const pricing = usePricingData();
+  const price = pricing.getPrice(itemKey) ?? fallbackPrice;
   return (
     <div className="flex items-center justify-between px-4 py-3 rounded-lg border" style={{ borderColor: '#E8E2D9' }}>
       <div>
         <p className="font-sans text-[12px] font-medium" style={{ color: '#1A1A1A' }}>{label}</p>
+        {subtitle && <p className="font-serif text-[11px] italic" style={{ color: '#6B6B6B' }}>{subtitle}</p>}
         <p className="font-sans text-[10px]" style={{ color: '#C9A84C' }}>+${price}pp</p>
       </div>
       <Switch checked={checked} onCheckedChange={onChange} />
