@@ -55,6 +55,15 @@ export function CoupleLogin({ onLogin }: Props) {
             {loading ? 'Signing in…' : 'Sign In'}
           </Button>
         </form>
+
+        <div className="text-center mt-4 space-y-3">
+          <a href="/" className="font-sans text-[13px] block hover:underline" style={{ color: '#2C3E2D' }}>
+            View the Harvest 336 Menu →
+          </a>
+          <a href="/admin" className="font-sans text-[11px] block hover:underline" style={{ color: '#6B6B6B' }}>
+            Coordinator access
+          </a>
+        </div>
       </div>
     </div>
   );
