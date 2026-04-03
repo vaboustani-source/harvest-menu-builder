@@ -70,8 +70,8 @@ export function BuilderSidebar({ selections, guestCount }: Props) {
             </span>
           </div>
         ) : (
-          <p className="font-sans text-[10px] italic mt-1" style={{ color: '#C9A84C' }}>
-            Est. Total (guest count not yet set — contact your coordinator)
+          <p className="font-sans text-[10px] italic mt-1" style={{ color: '#6B6B6B' }}>
+            Grand total available once your coordinator confirms guest count.
           </p>
         )}
       </div>
