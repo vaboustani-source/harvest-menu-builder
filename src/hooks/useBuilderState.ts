@@ -154,19 +154,27 @@ export function useBuilderState() {
     setLoading(false);
   };
 
-  const saveSelections = useCallback(async (newSelections: BuilderSelections, newStatus?: string) => {
+  const saveSelections = useCallback(async (newSelections?: BuilderSelections, newStatus?: string) => {
     if (!profile) return;
+    // Cancel any pending auto-save to avoid race
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     setSaving(true);
+    const toSave = newSelections ?? selectionsRef.current;
     const statusToSave = newStatus || (status === 'not_started' ? 'in_progress' : status);
+
+    logChanges(profile.id, previousSelectionsRef.current, toSave, status === 'submitted');
+    previousSelectionsRef.current = toSave;
+
     await (supabase as any)
       .from('builder_selections')
       .upsert({
         couple_id: profile.id,
-        selections: newSelections,
+        selections: toSave,
         status: statusToSave,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'couple_id' });
     setStatus(statusToSave);
+    setLastSavedAt(new Date());
     setSaving(false);
   }, [profile, status]);
 
