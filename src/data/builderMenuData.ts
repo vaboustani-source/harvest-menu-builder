@@ -79,6 +79,15 @@ export interface BuilderSelections {
   barPackage: {
     notes: string;
   };
+  stepNotes: {
+    rehearsalDinner: string;
+    welcomeHour: string;
+    cocktailHour: string;
+    receptionDinner: string;
+    mealInclusions: string;
+    desserts: string;
+    barPackage: string;
+  };
 }
 
 export const defaultSelections: BuilderSelections = {
@@ -89,6 +98,15 @@ export const defaultSelections: BuilderSelections = {
   mealInclusions: { mimosaBar: false, bloodyMaryBar: false, farewellBrunch: false },
   desserts: { notes: '' },
   barPackage: { notes: '' },
+  stepNotes: {
+    rehearsalDinner: '',
+    welcomeHour: '',
+    cocktailHour: '',
+    receptionDinner: '',
+    mealInclusions: '',
+    desserts: '',
+    barPackage: '',
+  },
 };
 
 // === STEPS ===
