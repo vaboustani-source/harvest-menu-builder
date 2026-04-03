@@ -115,6 +115,79 @@ export type Database = {
         }
         Relationships: []
       }
+      couple_guide_settings: {
+        Row: {
+          call_fee: number
+          couple_id: string
+          created_at: string
+          id: string
+          out_of_season_amount: number
+          out_of_season_enabled: boolean
+          revision_fee: number
+          updated_at: string
+        }
+        Insert: {
+          call_fee?: number
+          couple_id: string
+          created_at?: string
+          id?: string
+          out_of_season_amount?: number
+          out_of_season_enabled?: boolean
+          revision_fee?: number
+          updated_at?: string
+        }
+        Update: {
+          call_fee?: number
+          couple_id?: string
+          created_at?: string
+          id?: string
+          out_of_season_amount?: number
+          out_of_season_enabled?: boolean
+          revision_fee?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "couple_guide_settings_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: true
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      couple_milestones: {
+        Row: {
+          couple_id: string
+          id: string
+          status: string
+          step_number: number
+          updated_at: string
+        }
+        Insert: {
+          couple_id: string
+          id?: string
+          status?: string
+          step_number: number
+          updated_at?: string
+        }
+        Update: {
+          couple_id?: string
+          id?: string
+          status?: string
+          step_number?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "couple_milestones_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       couple_selections: {
         Row: {
           couple_id: string
@@ -189,6 +262,36 @@ export type Database = {
           updated_at?: string
           user_id?: string
           wedding_date?: string | null
+        }
+        Relationships: []
+      }
+      guide_cards: {
+        Row: {
+          body: string
+          card_key: string
+          created_at: string
+          header: string
+          id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          card_key: string
+          created_at?: string
+          header: string
+          id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          card_key?: string
+          created_at?: string
+          header?: string
+          id?: string
+          sort_order?: number
+          updated_at?: string
         }
         Relationships: []
       }
