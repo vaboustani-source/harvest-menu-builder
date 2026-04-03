@@ -6,6 +6,7 @@ import { ProgressStepper } from '@/components/builder/ProgressStepper';
 import { BuilderSidebar } from '@/components/builder/BuilderSidebar';
 import { MobileProgressBar } from '@/components/builder/MobileProgressBar';
 import { MobileStickyTotal } from '@/components/builder/MobileTotalDrawer';
+import { StepMenuGuide } from '@/components/builder/StepMenuGuide';
 import { StepRehearsalDinner } from '@/components/builder/StepRehearsalDinner';
 import { StepWelcomeHour } from '@/components/builder/StepWelcomeHour';
 import { StepCocktailHour } from '@/components/builder/StepCocktailHour';
