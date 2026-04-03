@@ -62,13 +62,17 @@ export function BuilderSidebar({ selections, guestCount }: Props) {
           <span className="font-sans text-[12px] font-semibold" style={{ color: '#2C3E2D' }}>Estimated Per Person</span>
           <span className="font-serif text-xl font-light" style={{ color: '#2C3E2D' }}>${total.estimatedPerPerson}pp</span>
         </div>
-        {guestCount && (
+        {guestCount ? (
           <div className="flex justify-between items-baseline mt-1">
             <span className="font-sans text-[10px]" style={{ color: '#6B6B6B' }}>Est. Total ({guestCount} guests)</span>
             <span className="font-sans text-[12px] font-medium" style={{ color: '#2C3E2D' }}>
               ${(total.estimatedPerPerson * guestCount).toLocaleString()}
             </span>
           </div>
+        ) : (
+          <p className="font-sans text-[10px] italic mt-1" style={{ color: '#C9A84C' }}>
+            Est. Total (guest count not yet set — contact your coordinator)
+          </p>
         )}
       </div>
 
