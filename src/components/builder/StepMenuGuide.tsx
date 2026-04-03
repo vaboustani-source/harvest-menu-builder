@@ -1,6 +1,7 @@
 import { Check, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useGuideCards, useMilestones, useGuideSettings } from '@/hooks/useMenuGuide';
+import { useGuideCards, useGuideSettings } from '@/hooks/useMenuGuide';
+import { useMenuProgress, MILESTONE_DEFS, MILESTONE_COUPLE_LABELS, getMilestoneState } from '@/hooks/useMenuProgress';
 
 interface Props {
   coupleId: string;
@@ -8,32 +9,10 @@ interface Props {
   onGoToStep: (step: number) => void;
 }
 
-const MILESTONES = [
-  { num: 1, label: 'Build Your Draft', desc: 'Work through each meal moment and submit your first selections.', statuses: ['not_started', 'in_progress', 'submitted'] },
-  { num: 2, label: 'Review Call with Brandon', desc: 'Your coordinator reviews your draft with you. Questions answered. Adjustments noted.', statuses: ['pending', 'scheduled', 'complete'] },
-  { num: 3, label: 'First Revision', desc: 'One round of changes after your review call.', statuses: ['not_started', 'in_progress', 'submitted'] },
-  { num: 4, label: 'The Tasting', desc: 'You come to the estate. You eat. The menu earns its place.', statuses: ['pending', 'scheduled', 'complete'] },
-  { num: 5, label: 'Final Revision', desc: 'One last round of changes after the tasting. Then it\'s set.', statuses: ['not_started', 'in_progress', 'locked'] },
-];
-
-const STATUS_LABELS: Record<string, string> = {
-  not_started: 'NOT STARTED',
-  in_progress: 'IN PROGRESS',
-  submitted: 'SUBMITTED',
-  pending: 'PENDING',
-  scheduled: 'SCHEDULED',
-  complete: 'COMPLETE',
-  locked: 'LOCKED',
-};
-
-const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
-  not_started: { bg: '#F0EDE8', text: '#6B6B6B' },
-  in_progress: { bg: '#C9A84C20', text: '#C9A84C' },
-  submitted: { bg: '#7A9E7E20', text: '#7A9E7E' },
-  pending: { bg: '#F0EDE8', text: '#6B6B6B' },
-  scheduled: { bg: '#C9A84C20', text: '#C9A84C' },
+const STATUS_COLORS = {
   complete: { bg: '#7A9E7E20', text: '#7A9E7E' },
-  locked: { bg: '#2C3E2D20', text: '#2C3E2D' },
+  current: { bg: '#C9A84C20', text: '#C9A84C' },
+  upcoming: { bg: '#F0EDE8', text: '#6B6B6B' },
 };
 
 function interpolateBody(body: string, settings: { revision_fee: number; call_fee: number }) {
@@ -44,27 +23,19 @@ function interpolateBody(body: string, settings: { revision_fee: number; call_fe
 
 export function StepMenuGuide({ coupleId, builderStatus, onGoToStep }: Props) {
   const { data: cards } = useGuideCards();
-  const { data: milestones } = useMilestones(coupleId);
+  const { data: milestones } = useMenuProgress(coupleId);
   const { data: settings } = useGuideSettings(coupleId);
 
-  const getMilestoneStatus = (stepNum: number): string => {
-    const m = milestones?.find(ms => ms.step_number === stepNum);
-    if (m) return m.status;
-    // Auto-derive step 1 from builder status
-    if (stepNum === 1) {
-      if (builderStatus === 'submitted') return 'submitted';
-      if (builderStatus === 'in_progress') return 'in_progress';
-    }
-    return MILESTONES.find(ms => ms.num === stepNum)?.statuses[0] ?? 'not_started';
+  const isComplete = (name: string) => {
+    const ms = getMilestoneState(milestones, name);
+    return ms?.is_complete ?? false;
   };
 
-  // Find the first non-complete milestone to determine "current"
-  const currentMilestone = MILESTONES.findIndex(m => {
-    const s = getMilestoneStatus(m.num);
-    return s !== 'complete' && s !== 'submitted' && s !== 'locked';
-  });
+  // Find the first incomplete milestone index
+  const currentIndex = MILESTONE_DEFS.findIndex(def => !isComplete(def.name));
+  const allComplete = currentIndex === -1;
 
-  const isLocked = getMilestoneStatus(5) === 'locked';
+  const isLocked = allComplete; // all milestones done = menu is set
   const hasStarted = builderStatus !== 'not_started';
   const isSubmitted = builderStatus === 'submitted';
 
@@ -102,54 +73,51 @@ export function StepMenuGuide({ coupleId, builderStatus, onGoToStep }: Props) {
         {/* Desktop horizontal timeline */}
         <div className="hidden md:block">
           <div className="flex items-start">
-            {MILESTONES.map((m, i) => {
-              const status = getMilestoneStatus(m.num);
-              const isComplete = status === 'complete' || status === 'submitted' || status === 'locked';
-              const isCurrent = i === currentMilestone;
-              const statusColor = STATUS_COLORS[status] ?? STATUS_COLORS.not_started;
+            {MILESTONE_DEFS.map((def, i) => {
+              const complete = isComplete(def.name);
+              const isCurrent = i === currentIndex;
+              const label = MILESTONE_COUPLE_LABELS[def.name] ?? def.label;
+              const statusStyle = complete ? STATUS_COLORS.complete : isCurrent ? STATUS_COLORS.current : STATUS_COLORS.upcoming;
+              const statusLabel = complete ? 'COMPLETE' : isCurrent ? 'IN PROGRESS' : 'UPCOMING';
 
               return (
-                <div key={m.num} className="flex-1 relative">
-                  {/* Connector line */}
+                <div key={def.name} className="flex-1 relative">
                   {i > 0 && (
                     <div
                       className="absolute top-3.5 right-1/2 w-full h-[2px]"
-                      style={{ background: isComplete || isCurrent ? '#7A9E7E' : '#E8E2D9' }}
+                      style={{ background: complete || isCurrent ? '#7A9E7E' : '#E8E2D9' }}
                     />
                   )}
                   <div className="relative flex flex-col items-center text-center px-2">
-                    {/* Circle */}
                     <div
                       className="w-7 h-7 rounded-full flex items-center justify-center relative z-10 shrink-0"
                       style={{
-                        background: isComplete ? '#2C3E2D' : isCurrent ? '#C9A84C' : 'transparent',
-                        border: !isComplete && !isCurrent ? '2px solid #E8E2D9' : 'none',
+                        background: complete ? '#2C3E2D' : isCurrent ? '#C9A84C' : 'transparent',
+                        border: !complete && !isCurrent ? '2px solid #E8E2D9' : 'none',
                       }}
                     >
-                      {isComplete ? (
+                      {complete ? (
                         <Check size={12} style={{ color: '#C9A84C' }} />
                       ) : isCurrent ? (
                         <div className="w-2 h-2 rounded-full bg-white" />
                       ) : (
-                        <span className="font-sans text-[10px]" style={{ color: '#6B6B6B' }}>{m.num}</span>
+                        <span className="font-sans text-[10px]" style={{ color: '#6B6B6B' }}>{i + 1}</span>
                       )}
                     </div>
-                    {/* Label */}
                     <p
                       className="font-sans text-[11px] mt-2 leading-tight"
                       style={{ fontWeight: isCurrent ? 600 : 400, color: isCurrent ? '#2C3E2D' : '#6B6B6B' }}
                     >
-                      {m.label}
+                      {label}
                     </p>
                     <p className="font-sans text-[9px] mt-1 leading-snug" style={{ color: '#9A9A9A' }}>
-                      {m.desc}
+                      {def.description}
                     </p>
-                    {/* Status badge */}
                     <span
                       className="font-sans text-[8px] tracking-[0.15em] uppercase mt-2 px-2 py-0.5 rounded-full"
-                      style={{ background: statusColor.bg, color: statusColor.text }}
+                      style={{ background: statusStyle.bg, color: statusStyle.text }}
                     >
-                      {STATUS_LABELS[status] ?? status}
+                      {statusLabel}
                     </span>
                   </div>
                 </div>
@@ -160,51 +128,50 @@ export function StepMenuGuide({ coupleId, builderStatus, onGoToStep }: Props) {
 
         {/* Mobile vertical timeline */}
         <div className="md:hidden space-y-0">
-          {MILESTONES.map((m, i) => {
-            const status = getMilestoneStatus(m.num);
-            const isComplete = status === 'complete' || status === 'submitted' || status === 'locked';
-            const isCurrent = i === currentMilestone;
-            const statusColor = STATUS_COLORS[status] ?? STATUS_COLORS.not_started;
+          {MILESTONE_DEFS.map((def, i) => {
+            const complete = isComplete(def.name);
+            const isCurrent = i === currentIndex;
+            const label = MILESTONE_COUPLE_LABELS[def.name] ?? def.label;
+            const statusStyle = complete ? STATUS_COLORS.complete : isCurrent ? STATUS_COLORS.current : STATUS_COLORS.upcoming;
+            const statusLabel = complete ? 'COMPLETE' : isCurrent ? 'IN PROGRESS' : 'UPCOMING';
 
             return (
-              <div key={m.num} className="flex gap-4">
-                {/* Vertical line + circle */}
+              <div key={def.name} className="flex gap-4">
                 <div className="flex flex-col items-center">
                   <div
                     className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
                     style={{
-                      background: isComplete ? '#2C3E2D' : isCurrent ? '#C9A84C' : 'transparent',
-                      border: !isComplete && !isCurrent ? '2px solid #E8E2D9' : 'none',
+                      background: complete ? '#2C3E2D' : isCurrent ? '#C9A84C' : 'transparent',
+                      border: !complete && !isCurrent ? '2px solid #E8E2D9' : 'none',
                     }}
                   >
-                    {isComplete ? (
+                    {complete ? (
                       <Check size={12} style={{ color: '#C9A84C' }} />
                     ) : isCurrent ? (
                       <div className="w-2 h-2 rounded-full bg-white" />
                     ) : (
-                      <span className="font-sans text-[10px]" style={{ color: '#6B6B6B' }}>{m.num}</span>
+                      <span className="font-sans text-[10px]" style={{ color: '#6B6B6B' }}>{i + 1}</span>
                     )}
                   </div>
-                  {i < MILESTONES.length - 1 && (
-                    <div className="w-[2px] flex-1 min-h-[24px]" style={{ background: isComplete ? '#7A9E7E' : '#E8E2D9' }} />
+                  {i < MILESTONE_DEFS.length - 1 && (
+                    <div className="w-[2px] flex-1 min-h-[24px]" style={{ background: complete ? '#7A9E7E' : '#E8E2D9' }} />
                   )}
                 </div>
-                {/* Content */}
                 <div className="pb-6 pt-0.5">
                   <p
                     className="font-sans text-[12px] leading-tight"
                     style={{ fontWeight: isCurrent ? 600 : 400, color: isCurrent ? '#2C3E2D' : '#6B6B6B' }}
                   >
-                    {m.label}
+                    {label}
                   </p>
                   <p className="font-sans text-[10px] mt-0.5 leading-snug" style={{ color: '#9A9A9A' }}>
-                    {m.desc}
+                    {def.description}
                   </p>
                   <span
                     className="font-sans text-[8px] tracking-[0.15em] uppercase mt-1.5 inline-block px-2 py-0.5 rounded-full"
-                    style={{ background: statusColor.bg, color: statusColor.text }}
+                    style={{ background: statusStyle.bg, color: statusStyle.text }}
                   >
-                    {STATUS_LABELS[status] ?? status}
+                    {statusLabel}
                   </span>
                 </div>
               </div>
