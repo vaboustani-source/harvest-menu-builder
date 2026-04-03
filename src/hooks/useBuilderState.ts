@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { BuilderSelections, defaultSelections, STEPS } from '@/data/builderMenuData';
+import { autoTriggerMilestone } from '@/hooks/useMenuProgress';
 
 export interface CoupleProfile {
   id: string;
