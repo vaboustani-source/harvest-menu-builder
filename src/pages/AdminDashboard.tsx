@@ -378,9 +378,7 @@ export default function AdminDashboard() {
                                   <Calendar size={11} /> {new Date(couple.wedding_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                 </span>
                               )}
-                              {couple.guest_count && (
-                                <span className="font-sans text-xs text-muted-foreground">{couple.guest_count} guests</span>
-                              )}
+                              <EditableGuestCount coupleId={couple.id} initialCount={couple.guest_count} />
                             </div>
                           </div>
                           <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
