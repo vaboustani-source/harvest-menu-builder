@@ -13,8 +13,9 @@ import { StepDesserts } from '@/components/builder/StepDesserts';
 import { StepBarPackage } from '@/components/builder/StepBarPackage';
 import { StepReview } from '@/components/builder/StepReview';
 import { Button } from '@/components/ui/button';
-import { LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LogOut, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import { STEPS as STEP_LIST } from '@/data/builderMenuData';
 
 export default function CoupleMenuBuilder() {
   const {
