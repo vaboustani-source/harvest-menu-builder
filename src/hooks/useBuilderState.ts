@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { BuilderSelections, defaultSelections } from '@/data/builderMenuData';
 
@@ -17,6 +17,37 @@ export function useBuilderState() {
   const [status, setStatus] = useState<string>('not_started');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const selectionsRef = useRef(selections);
+  const profileRef = useRef(profile);
+  const statusRef = useRef(status);
+
+  // Keep refs in sync
+  useEffect(() => { selectionsRef.current = selections; }, [selections]);
+  useEffect(() => { profileRef.current = profile; }, [profile]);
+  useEffect(() => { statusRef.current = status; }, [status]);
+
+  // Auto-save 2s after any selection change
+  useEffect(() => {
+    if (loading || !profileRef.current) return;
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    autoSaveTimer.current = setTimeout(() => {
+      const p = profileRef.current;
+      const s = statusRef.current;
+      if (!p) return;
+      const statusToSave = s === 'not_started' ? 'in_progress' : s;
+      (supabase as any)
+        .from('builder_selections')
+        .upsert({
+          couple_id: p.id,
+          selections: selectionsRef.current,
+          status: statusToSave,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'couple_id' })
+        .then(() => { if (s === 'not_started') setStatus('in_progress'); });
+    }, 2000);
+    return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current); };
+  }, [selections, loading]);
 
   useEffect(() => {
     loadProfile();
