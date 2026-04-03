@@ -13,13 +13,13 @@ export interface CoupleProfile {
 
 // Map step index to a human-readable name and the selections key
 const STEP_KEYS: Record<number, { name: string; key: keyof BuilderSelections }> = {
-  0: { name: 'Rehearsal Dinner', key: 'rehearsalDinner' },
-  1: { name: 'Welcome Hour', key: 'welcomeHour' },
-  2: { name: 'Cocktail Hour', key: 'cocktailHour' },
-  3: { name: 'Reception Dinner', key: 'reception' },
-  4: { name: 'Meal Inclusions', key: 'mealInclusions' },
-  5: { name: 'Desserts', key: 'desserts' },
-  6: { name: 'Bar Package', key: 'barPackage' },
+  1: { name: 'Rehearsal Dinner', key: 'rehearsalDinner' },
+  2: { name: 'Welcome Hour', key: 'welcomeHour' },
+  3: { name: 'Cocktail Hour', key: 'cocktailHour' },
+  4: { name: 'Reception Dinner', key: 'reception' },
+  5: { name: 'Meal Inclusions', key: 'mealInclusions' },
+  6: { name: 'Desserts', key: 'desserts' },
+  7: { name: 'Bar Package', key: 'barPackage' },
 };
 
 function logChanges(
