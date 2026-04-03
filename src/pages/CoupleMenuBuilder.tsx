@@ -77,8 +77,8 @@ export default function CoupleMenuBuilder() {
       {/* Header */}
       <header className="sticky top-0 z-50 px-6 py-3.5 flex items-center justify-between"
         style={{ background: '#2C3E2D', boxShadow: '0 2px 12px rgba(44,62,45,0.15)' }}>
-        <div>
-          <p className="font-sans text-[9px] tracking-[0.3em] uppercase" style={{ color: 'rgba(250,248,244,0.5)' }}>
+        <a href="/" className="block cursor-pointer group">
+          <p className="font-sans text-[9px] tracking-[0.3em] uppercase transition-colors group-hover:text-[#C9A84C]" style={{ color: 'rgba(250,248,244,0.5)' }}>
             Harvest 336 · Menu Builder
           </p>
           <h1 className="font-serif italic text-lg leading-none" style={{ color: '#FAF8F4' }}>
