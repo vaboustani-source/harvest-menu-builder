@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { BuilderSelections, defaultSelections, STEPS } from '@/data/builderMenuData';
+import { autoTriggerMilestone } from '@/hooks/useMenuProgress';
 
 export interface CoupleProfile {
   id: string;
@@ -190,6 +191,24 @@ export function useBuilderState() {
         submitted_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }, { onConflict: 'couple_id' });
+
+    // Auto-trigger the appropriate milestone based on current progress
+    // Check which milestones are already complete to determine which submission this is
+    const { data: progress } = await (supabase as any)
+      .from('menu_progress')
+      .select('milestone_name, is_complete')
+      .eq('couple_id', profile.id);
+
+    const isComplete = (name: string) => progress?.find((p: any) => p.milestone_name === name)?.is_complete ?? false;
+
+    if (!isComplete('draft_submitted')) {
+      await autoTriggerMilestone(profile.id, 'draft_submitted');
+    } else if (isComplete('review_call_complete') && !isComplete('first_revision_submitted')) {
+      await autoTriggerMilestone(profile.id, 'first_revision_submitted');
+    } else if (isComplete('tasting_complete') && !isComplete('final_revision_submitted')) {
+      await autoTriggerMilestone(profile.id, 'final_revision_submitted');
+    }
+
     setStatus('submitted');
     setSaving(false);
   }, [profile, selections]);

@@ -445,6 +445,53 @@ export type Database = {
           },
         ]
       }
+      menu_progress: {
+        Row: {
+          completed_at: string | null
+          couple_id: string
+          created_at: string
+          id: string
+          is_complete: boolean
+          milestone_name: string
+          notes: string | null
+          override_timestamp: string | null
+          set_by: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          couple_id: string
+          created_at?: string
+          id?: string
+          is_complete?: boolean
+          milestone_name: string
+          notes?: string | null
+          override_timestamp?: string | null
+          set_by?: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          couple_id?: string
+          created_at?: string
+          id?: string
+          is_complete?: boolean
+          milestone_name?: string
+          notes?: string | null
+          override_timestamp?: string | null
+          set_by?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_progress_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       menu_sections: {
         Row: {
           base_price_pp: number | null
