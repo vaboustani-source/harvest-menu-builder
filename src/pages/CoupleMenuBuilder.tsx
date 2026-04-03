@@ -40,7 +40,7 @@ export default function CoupleMenuBuilder() {
   };
 
   const handleSaveDraft = async () => {
-    await saveSelections(selections);
+    await saveSelections();
     toast.success("Selections saved.");
   };
 
