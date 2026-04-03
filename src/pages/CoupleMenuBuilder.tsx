@@ -20,7 +20,7 @@ import { STEPS as STEP_LIST } from '@/data/builderMenuData';
 export default function CoupleMenuBuilder() {
   const {
     profile, selections, setSelections, status,
-    loading, saving, saveSelections, submitSelections, logout,
+    loading, saving, lastSavedAt, saveSelections, submitSelections, logout,
   } = useBuilderState();
   const [currentStep, setCurrentStep] = useState(0);
 
