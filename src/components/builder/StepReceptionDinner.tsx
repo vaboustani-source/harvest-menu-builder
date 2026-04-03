@@ -3,6 +3,7 @@ import { BuilderSelections, receptionCategories, type ReceptionItem } from '@/da
 import { Check, Diamond } from 'lucide-react';
 import { usePricingConfig } from '@/hooks/usePricingConfig';
 import { BuilderFilterBar, matchesFilters, ItemBadges, type DietFilter, type SeasonFilter } from './BuilderFilterBar';
+import { StepNotes } from './StepNotes';
 
 interface Props {
   selections: BuilderSelections;
@@ -195,6 +196,9 @@ export function StepReceptionDinner({ selections, onChange }: Props) {
           </div>
         );
       })}
+
+      <StepNotes stepLabel="Reception Dinner" value={selections.stepNotes.receptionDinner}
+        onChange={v => onChange({ stepNotes: { ...selections.stepNotes, receptionDinner: v } })} />
     </div>
   );
 }

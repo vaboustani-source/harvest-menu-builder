@@ -1,6 +1,7 @@
 import { BuilderSelections, welcomeOptions, spritzerOptions } from '@/data/builderMenuData';
 import { Check, Sparkles } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { StepNotes } from './StepNotes';
 
 interface Props {
   selections: BuilderSelections;
@@ -167,6 +168,9 @@ export function StepWelcomeHour({ selections, onChange }: Props) {
           </div>
         )}
       </div>
+
+      <StepNotes stepLabel="Welcome Hour" value={selections.stepNotes.welcomeHour}
+        onChange={v => onChange({ stepNotes: { ...selections.stepNotes, welcomeHour: v } })} />
     </div>
   );
 }

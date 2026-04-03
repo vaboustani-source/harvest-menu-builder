@@ -89,6 +89,7 @@ export function useBuilderState() {
           mealInclusions: { ...defaultSelections.mealInclusions, ...saved.mealInclusions },
           desserts: { ...defaultSelections.desserts, ...saved.desserts },
           barPackage: { ...defaultSelections.barPackage, ...saved.barPackage },
+          stepNotes: { ...defaultSelections.stepNotes, ...saved.stepNotes },
         };
         setSelections(merged);
         setStatus(state.status);

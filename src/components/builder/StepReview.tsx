@@ -52,6 +52,7 @@ export function StepReview({ selections, guestCount, status, saving, onSaveDraft
             )}
           </div>
         ) : <EmptyState />}
+        <NoteDisplay note={sel.stepNotes.rehearsalDinner} />
       </ReviewSection>
 
       {/* Welcome Hour */}
@@ -68,6 +69,7 @@ export function StepReview({ selections, guestCount, status, saving, onSaveDraft
             )}
           </div>
         ) : <EmptyState />}
+        <NoteDisplay note={sel.stepNotes.welcomeHour} />
       </ReviewSection>
 
       {/* Cocktail Hour */}
@@ -84,6 +86,7 @@ export function StepReview({ selections, guestCount, status, saving, onSaveDraft
             ))}
           </div>
         ) : <EmptyState />}
+        <NoteDisplay note={sel.stepNotes.cocktailHour} />
       </ReviewSection>
 
       {/* Reception */}
@@ -109,23 +112,33 @@ export function StepReview({ selections, guestCount, status, saving, onSaveDraft
           );
         })}
         {Object.values(sel.reception).every(a => a.length === 0) && <EmptyState />}
+        <NoteDisplay note={sel.stepNotes.receptionDinner} />
       </ReviewSection>
 
       {/* Meal Inclusions */}
       <ReviewSection title="Meal Inclusions">
         {sel.mealInclusions.mimosaBar && <p className="font-serif text-[13px]" style={{ color: '#1A1A1A' }}>Mimosa Bar — +$20pp</p>}
         {sel.mealInclusions.bloodyMaryBar && <p className="font-serif text-[13px]" style={{ color: '#1A1A1A' }}>Bloody Mary Bar — +$20pp</p>}
-        {!sel.mealInclusions.mimosaBar && !sel.mealInclusions.bloodyMaryBar && <EmptyState />}
+        {sel.mealInclusions.farewellBrunch && <p className="font-serif text-[13px]" style={{ color: '#1A1A1A' }}>Upgrade to Farewell Brunch — +$25pp</p>}
+        {!sel.mealInclusions.mimosaBar && !sel.mealInclusions.bloodyMaryBar && !sel.mealInclusions.farewellBrunch && <EmptyState />}
+        <NoteDisplay note={sel.stepNotes.mealInclusions} />
       </ReviewSection>
 
-      {/* Notes */}
-      {(sel.desserts.notes || sel.barPackage.notes || sel.rehearsalDinner.customThemeNote) && (
-        <ReviewSection title="Notes">
-          {sel.rehearsalDinner.customThemeNote && <p className="font-serif text-[12px] italic" style={{ color: '#6B6B6B' }}>Rehearsal: {sel.rehearsalDinner.customThemeNote}</p>}
-          {sel.desserts.notes && <p className="font-serif text-[12px] italic" style={{ color: '#6B6B6B' }}>Desserts: {sel.desserts.notes}</p>}
-          {sel.barPackage.notes && <p className="font-serif text-[12px] italic" style={{ color: '#6B6B6B' }}>Bar: {sel.barPackage.notes}</p>}
-        </ReviewSection>
-      )}
+      {/* Desserts */}
+      <ReviewSection title="Desserts">
+        {sel.desserts.notes ? (
+          <p className="font-serif text-[12px] italic" style={{ color: '#6B6B6B' }}>Dessert notes: {sel.desserts.notes}</p>
+        ) : <EmptyState />}
+        <NoteDisplay note={sel.stepNotes.desserts} />
+      </ReviewSection>
+
+      {/* Bar Package */}
+      <ReviewSection title="Bar Package">
+        {sel.barPackage.notes ? (
+          <p className="font-serif text-[12px] italic" style={{ color: '#6B6B6B' }}>Bar notes: {sel.barPackage.notes}</p>
+        ) : <EmptyState />}
+        <NoteDisplay note={sel.stepNotes.barPackage} />
+      </ReviewSection>
 
       {/* Totals */}
       <div className="rounded-xl border p-6 mt-6" style={{ background: '#FFFFFF', borderColor: '#E8E2D9' }}>
@@ -214,4 +227,14 @@ function ReviewSection({ title, children }: { title: string; children: React.Rea
 
 function EmptyState() {
   return <p className="font-serif italic text-[12px]" style={{ color: '#6B6B6B' }}>Nothing selected yet. Take your time.</p>;
+}
+
+function NoteDisplay({ note }: { note: string }) {
+  if (!note) return null;
+  return (
+    <div className="mt-2 pt-2 border-t" style={{ borderColor: '#F0EDE8' }}>
+      <p className="font-sans text-[9px] tracking-[0.15em] uppercase mb-0.5" style={{ color: '#6B6B6B' }}>Notes</p>
+      <p className="font-serif text-[12px] italic" style={{ color: '#6B6B6B' }}>{note}</p>
+    </div>
+  );
 }
