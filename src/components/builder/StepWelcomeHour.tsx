@@ -1,6 +1,7 @@
 import { BuilderSelections, welcomeOptions, spritzerOptions } from '@/data/builderMenuData';
 import { Check, Sparkles } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { StepNotes } from './StepNotes';
 
 interface Props {
   selections: BuilderSelections;
