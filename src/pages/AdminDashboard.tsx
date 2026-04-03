@@ -452,6 +452,8 @@ export default function AdminDashboard() {
               </div>
             ) : adminView === 'pricing' ? (
               <PricingManagement />
+            ) : adminView === 'guide-cards' ? (
+              <GuideCardsEditor />
             ) :
             activeSection && activeSectionId === 'basics' ? (
               /* ── Basics Card Editor ── */
