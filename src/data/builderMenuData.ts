@@ -86,7 +86,7 @@ export const defaultSelections: BuilderSelections = {
   welcomeHour: { nonAlcoholic: [], spritzers: [], passedServiceUpgrade: false, champagneUpgrade: false },
   cocktailHour: [],
   reception: { salads: [], pastasGrains: [], proteins: [], vegetablesStarches: [] },
-  mealInclusions: { mimosaBar: false, bloodyMaryBar: false },
+  mealInclusions: { mimosaBar: false, bloodyMaryBar: false, farewellBrunch: false },
   desserts: { notes: '' },
   barPackage: { notes: '' },
 };
