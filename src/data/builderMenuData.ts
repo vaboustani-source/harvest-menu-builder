@@ -71,6 +71,7 @@ export interface BuilderSelections {
   mealInclusions: {
     mimosaBar: boolean;
     bloodyMaryBar: boolean;
+    farewellBrunch: boolean;
   };
   desserts: {
     notes: string;
