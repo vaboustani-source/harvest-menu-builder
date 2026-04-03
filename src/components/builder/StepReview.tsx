@@ -86,6 +86,7 @@ export function StepReview({ selections, guestCount, status, saving, onSaveDraft
             ))}
           </div>
         ) : <EmptyState />}
+        <NoteDisplay note={sel.stepNotes.cocktailHour} />
       </ReviewSection>
 
       {/* Reception */}
