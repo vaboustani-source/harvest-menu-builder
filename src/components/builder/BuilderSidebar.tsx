@@ -83,23 +83,3 @@ export function BuilderSidebar({ selections, guestCount }: Props) {
   );
 }
 
-// Mobile version shown at bottom
-export function MobileTotalBar({ selections }: { selections: BuilderSelections }) {
-  const pricing = usePricingData();
-  const total = calculateTotal(selections, pricing);
-  return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-4 py-3 border-t shadow-[0_-4px_12px_rgba(0,0,0,0.05)]"
-      style={{ background: '#FFFFFF', borderColor: '#E8E2D9' }}>
-      <div className="flex items-center justify-between max-w-[600px] mx-auto">
-        <div>
-          <p className="font-sans text-[9px] tracking-[0.2em] uppercase" style={{ color: '#6B6B6B' }}>Estimated Total</p>
-          <p className="font-serif text-lg font-light" style={{ color: '#2C3E2D' }}>${total.estimatedPerPerson}pp</p>
-        </div>
-        <div className="text-right">
-          <p className="font-sans text-[10px]" style={{ color: '#C9A84C' }}>+${total.totalUpcharges}pp upcharges</p>
-          <p className="font-sans text-[10px]" style={{ color: '#6B6B6B' }}>${total.basePackage}pp base included</p>
-        </div>
-      </div>
-    </div>
-  );
-}
