@@ -124,14 +124,21 @@ export function StepReview({ selections, guestCount, status, saving, onSaveDraft
         <NoteDisplay note={sel.stepNotes.mealInclusions} />
       </ReviewSection>
 
-      {/* Notes */}
-      {(sel.desserts.notes || sel.barPackage.notes || sel.rehearsalDinner.customThemeNote) && (
-        <ReviewSection title="Notes">
-          {sel.rehearsalDinner.customThemeNote && <p className="font-serif text-[12px] italic" style={{ color: '#6B6B6B' }}>Rehearsal: {sel.rehearsalDinner.customThemeNote}</p>}
-          {sel.desserts.notes && <p className="font-serif text-[12px] italic" style={{ color: '#6B6B6B' }}>Desserts: {sel.desserts.notes}</p>}
-          {sel.barPackage.notes && <p className="font-serif text-[12px] italic" style={{ color: '#6B6B6B' }}>Bar: {sel.barPackage.notes}</p>}
-        </ReviewSection>
-      )}
+      {/* Desserts */}
+      <ReviewSection title="Desserts">
+        {sel.desserts.notes ? (
+          <p className="font-serif text-[12px] italic" style={{ color: '#6B6B6B' }}>Dessert notes: {sel.desserts.notes}</p>
+        ) : <EmptyState />}
+        <NoteDisplay note={sel.stepNotes.desserts} />
+      </ReviewSection>
+
+      {/* Bar Package */}
+      <ReviewSection title="Bar Package">
+        {sel.barPackage.notes ? (
+          <p className="font-serif text-[12px] italic" style={{ color: '#6B6B6B' }}>Bar notes: {sel.barPackage.notes}</p>
+        ) : <EmptyState />}
+        <NoteDisplay note={sel.stepNotes.barPackage} />
+      </ReviewSection>
 
       {/* Totals */}
       <div className="rounded-xl border p-6 mt-6" style={{ background: '#FFFFFF', borderColor: '#E8E2D9' }}>
