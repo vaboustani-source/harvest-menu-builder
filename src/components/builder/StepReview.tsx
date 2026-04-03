@@ -112,13 +112,16 @@ export function StepReview({ selections, guestCount, status, saving, onSaveDraft
           );
         })}
         {Object.values(sel.reception).every(a => a.length === 0) && <EmptyState />}
+        <NoteDisplay note={sel.stepNotes.receptionDinner} />
       </ReviewSection>
 
       {/* Meal Inclusions */}
       <ReviewSection title="Meal Inclusions">
         {sel.mealInclusions.mimosaBar && <p className="font-serif text-[13px]" style={{ color: '#1A1A1A' }}>Mimosa Bar — +$20pp</p>}
         {sel.mealInclusions.bloodyMaryBar && <p className="font-serif text-[13px]" style={{ color: '#1A1A1A' }}>Bloody Mary Bar — +$20pp</p>}
-        {!sel.mealInclusions.mimosaBar && !sel.mealInclusions.bloodyMaryBar && <EmptyState />}
+        {sel.mealInclusions.farewellBrunch && <p className="font-serif text-[13px]" style={{ color: '#1A1A1A' }}>Upgrade to Farewell Brunch — +$25pp</p>}
+        {!sel.mealInclusions.mimosaBar && !sel.mealInclusions.bloodyMaryBar && !sel.mealInclusions.farewellBrunch && <EmptyState />}
+        <NoteDisplay note={sel.stepNotes.mealInclusions} />
       </ReviewSection>
 
       {/* Notes */}
