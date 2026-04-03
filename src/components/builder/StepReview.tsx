@@ -228,3 +228,13 @@ function ReviewSection({ title, children }: { title: string; children: React.Rea
 function EmptyState() {
   return <p className="font-serif italic text-[12px]" style={{ color: '#6B6B6B' }}>Nothing selected yet. Take your time.</p>;
 }
+
+function NoteDisplay({ note }: { note: string }) {
+  if (!note) return null;
+  return (
+    <div className="mt-2 pt-2 border-t" style={{ borderColor: '#F0EDE8' }}>
+      <p className="font-sans text-[9px] tracking-[0.15em] uppercase mb-0.5" style={{ color: '#6B6B6B' }}>Notes</p>
+      <p className="font-serif text-[12px] italic" style={{ color: '#6B6B6B' }}>{note}</p>
+    </div>
+  );
+}
