@@ -143,8 +143,8 @@ export default function CoupleMenuBuilder() {
 
           {stepComponents[currentStep]}
 
-          {/* Navigation buttons */}
-          {!isReview && (
+          {/* Navigation buttons — hide on guide and review steps */}
+          {!isReview && !isGuide && (
             <div className="flex items-center justify-between mt-10 pt-6 border-t" style={{ borderColor: '#E8E2D9' }}>
               {!isFirst ? (
                 <Button variant="outline" onClick={() => goToStep(currentStep - 1)}
