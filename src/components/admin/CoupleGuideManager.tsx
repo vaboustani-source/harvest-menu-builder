@@ -1,39 +1,73 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
-import { useGuideCards, useMilestones, useGuideSettings, type GuideCard } from '@/hooks/useMenuGuide';
+import { useGuideCards, useGuideSettings, type GuideCard } from '@/hooks/useMenuGuide';
+import { useMenuProgress, MILESTONE_DEFS, setMilestoneProgress, type ProgressMilestone } from '@/hooks/useMenuProgress';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Pencil, Check } from 'lucide-react';
 
-// ── Milestone Manager per couple ──
+// ── Badge component ──
+function SetByBadge({ milestone }: { milestone: ProgressMilestone }) {
+  if (!milestone.is_complete) return null;
+  // If override_timestamp is set AND set_by is admin → EDITED
+  if (milestone.override_timestamp && milestone.set_by === 'admin') {
+    return <span className="font-sans text-[8px] tracking-[0.1em] uppercase px-1.5 py-0.5 rounded-full" style={{ background: '#C9A84C20', color: '#C9A84C' }}>EDITED</span>;
+  }
+  if (milestone.set_by === 'system') {
+    return <span className="font-sans text-[8px] tracking-[0.1em] uppercase px-1.5 py-0.5 rounded-full" style={{ background: '#7A9E7E20', color: '#7A9E7E' }}>AUTO</span>;
+  }
+  return <span className="font-sans text-[8px] tracking-[0.1em] uppercase px-1.5 py-0.5 rounded-full" style={{ background: '#E8E2D920', color: '#6B6B6B' }}>MANUAL</span>;
+}
 
-const MILESTONE_DEFS = [
-  { num: 1, label: 'Build Your Draft', statuses: ['not_started', 'in_progress', 'submitted'] },
-  { num: 2, label: 'Review Call', statuses: ['pending', 'scheduled', 'complete'] },
-  { num: 3, label: 'First Revision', statuses: ['not_started', 'in_progress', 'submitted'] },
-  { num: 4, label: 'The Tasting', statuses: ['pending', 'scheduled', 'complete'] },
-  { num: 5, label: 'Final Revision', statuses: ['not_started', 'in_progress', 'locked'] },
-];
+// ── Milestone Manager per couple ──
 
 export function CoupleGuideManager({ coupleId, coupleName }: { coupleId: string; coupleName: string }) {
   const qc = useQueryClient();
-  const { data: milestones } = useMilestones(coupleId);
+  const { data: milestones } = useMenuProgress(coupleId);
   const { data: settings } = useGuideSettings(coupleId);
   const [expanded, setExpanded] = useState(false);
+  const [editingNotes, setEditingNotes] = useState<string | null>(null);
+  const [noteText, setNoteText] = useState('');
+  const [editingTimestamp, setEditingTimestamp] = useState<string | null>(null);
+  const [timestampValue, setTimestampValue] = useState('');
 
-  const getStatus = (stepNum: number) => milestones?.find(m => m.step_number === stepNum)?.status ?? MILESTONE_DEFS.find(m => m.num === stepNum)?.statuses[0] ?? 'not_started';
+  const getMilestone = (name: string): ProgressMilestone | null =>
+    milestones?.find(m => m.milestone_name === name) ?? null;
 
-  const setMilestoneStatus = async (stepNum: number, status: string) => {
-    await (supabase as any)
-      .from('couple_milestones')
-      .upsert({ couple_id: coupleId, step_number: stepNum, status }, { onConflict: 'couple_id,step_number' });
-    qc.invalidateQueries({ queryKey: ['couple-milestones', coupleId] });
+  const handleToggle = async (milestoneName: string, checked: boolean) => {
+    const existing = getMilestone(milestoneName);
+    await setMilestoneProgress(coupleId, milestoneName, checked, 'admin', {
+      notes: existing?.notes ?? undefined,
+    });
+    qc.invalidateQueries({ queryKey: ['menu-progress', coupleId] });
+  };
+
+  const handleSaveNotes = async (milestoneName: string) => {
+    const existing = getMilestone(milestoneName);
+    await setMilestoneProgress(coupleId, milestoneName, existing?.is_complete ?? false, existing?.set_by as any ?? 'admin', {
+      notes: noteText || undefined,
+      overrideTimestamp: existing?.override_timestamp ?? undefined,
+    });
+    qc.invalidateQueries({ queryKey: ['menu-progress', coupleId] });
+    setEditingNotes(null);
+  };
+
+  const handleSaveTimestamp = async (milestoneName: string) => {
+    const existing = getMilestone(milestoneName);
+    if (!existing?.is_complete) return;
+    const ts = timestampValue ? new Date(timestampValue).toISOString() : undefined;
+    await setMilestoneProgress(coupleId, milestoneName, true, 'admin', {
+      notes: existing?.notes ?? undefined,
+      overrideTimestamp: ts,
+    });
+    qc.invalidateQueries({ queryKey: ['menu-progress', coupleId] });
+    setEditingTimestamp(null);
   };
 
   const updateSetting = async (key: string, value: any) => {
@@ -62,27 +96,97 @@ export function CoupleGuideManager({ coupleId, coupleName }: { coupleId: string;
         <button onClick={() => setExpanded(false)} className="font-sans text-[10px] text-muted-foreground hover:underline">Collapse ▴</button>
       </div>
 
-      {/* Milestones */}
+      {/* Progress Checklist */}
       <div>
-        <p className="font-sans text-[9px] tracking-[0.15em] uppercase text-muted-foreground mb-2">Milestone Statuses</p>
-        <div className="space-y-2">
-          {MILESTONE_DEFS.map(m => (
-            <div key={m.num} className="flex items-center gap-3">
-              <span className="font-sans text-[11px] w-32 shrink-0" style={{ color: '#2C3E2D' }}>{m.label}</span>
-              <Select value={getStatus(m.num)} onValueChange={val => setMilestoneStatus(m.num, val)}>
-                <SelectTrigger className="h-7 text-[11px] w-36">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {m.statuses.map(s => (
-                    <SelectItem key={s} value={s} className="text-[11px]">
-                      {s.replace(/_/g, ' ').toUpperCase()}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          ))}
+        <p className="font-sans text-[9px] tracking-[0.15em] uppercase text-muted-foreground mb-2">Progress Checklist</p>
+        <div className="space-y-3">
+          {MILESTONE_DEFS.map(def => {
+            const ms = getMilestone(def.name);
+            const isComplete = ms?.is_complete ?? false;
+            const displayTime = ms?.override_timestamp ?? ms?.completed_at;
+
+            return (
+              <div key={def.name} className="bg-secondary/30 rounded-lg px-3 py-2.5">
+                <div className="flex items-center gap-3">
+                  <Checkbox
+                    checked={isComplete}
+                    onCheckedChange={(checked) => handleToggle(def.name, !!checked)}
+                    className="shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-sans text-[11px] font-medium" style={{ color: '#2C3E2D' }}>{def.label}</span>
+                      {ms && <SetByBadge milestone={ms} />}
+                      {def.autoTriggerable && (
+                        <span className="font-sans text-[7px] tracking-[0.1em] uppercase text-muted-foreground">auto-triggered</span>
+                      )}
+                    </div>
+                    {isComplete && displayTime && (
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="font-sans text-[10px] text-muted-foreground">
+                          {new Date(displayTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                        </span>
+                        <button
+                          onClick={() => {
+                            setEditingTimestamp(def.name);
+                            setTimestampValue(displayTime ? new Date(displayTime).toISOString().slice(0, 16) : '');
+                          }}
+                          className="font-sans text-[9px] text-muted-foreground hover:text-foreground hover:underline"
+                        >
+                          edit ✎
+                        </button>
+                      </div>
+                    )}
+                    {isComplete && ms?.set_by === 'admin' && def.autoTriggerable && !ms?.override_timestamp && (
+                      <p className="font-sans text-[9px] italic mt-0.5" style={{ color: '#6B6B6B' }}>
+                        Manually set by coordinator
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Notes */}
+                <div className="mt-1.5 ml-7">
+                  {editingNotes === def.name ? (
+                    <div className="flex items-start gap-2">
+                      <Textarea
+                        value={noteText}
+                        onChange={e => setNoteText(e.target.value)}
+                        rows={2}
+                        className="text-[11px] flex-1"
+                        placeholder="Add a note..."
+                      />
+                      <Button size="sm" onClick={() => handleSaveNotes(def.name)} className="h-7 text-[10px] px-2">Save</Button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setEditingNotes(def.name);
+                        setNoteText(ms?.notes ?? '');
+                      }}
+                      className="font-sans text-[10px] text-muted-foreground hover:text-foreground hover:underline"
+                    >
+                      {ms?.notes ? `📝 ${ms.notes}` : '+ Add note'}
+                    </button>
+                  )}
+                </div>
+
+                {/* Timestamp override modal inline */}
+                {editingTimestamp === def.name && (
+                  <div className="mt-2 ml-7 flex items-center gap-2">
+                    <Input
+                      type="datetime-local"
+                      value={timestampValue}
+                      onChange={e => setTimestampValue(e.target.value)}
+                      className="h-7 text-[11px] w-56"
+                    />
+                    <Button size="sm" onClick={() => handleSaveTimestamp(def.name)} className="h-7 text-[10px] px-2">Set</Button>
+                    <button onClick={() => setEditingTimestamp(null)} className="font-sans text-[9px] text-muted-foreground hover:underline">Cancel</button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
