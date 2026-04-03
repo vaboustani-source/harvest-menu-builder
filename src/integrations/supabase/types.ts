@@ -85,6 +85,36 @@ export type Database = {
           },
         ]
       }
+      change_history: {
+        Row: {
+          changed_at: string
+          couple_id: string
+          id: string
+          new_value: Json | null
+          post_submission: boolean
+          previous_value: Json | null
+          step: string
+        }
+        Insert: {
+          changed_at?: string
+          couple_id: string
+          id?: string
+          new_value?: Json | null
+          post_submission?: boolean
+          previous_value?: Json | null
+          step: string
+        }
+        Update: {
+          changed_at?: string
+          couple_id?: string
+          id?: string
+          new_value?: Json | null
+          post_submission?: boolean
+          previous_value?: Json | null
+          step?: string
+        }
+        Relationships: []
+      }
       couple_selections: {
         Row: {
           couple_id: string
@@ -361,6 +391,7 @@ export type Database = {
           is_active: boolean
           item_key: string
           item_label: string
+          last_updated_by: string | null
           menu_item_id: string | null
           price: number
           sort_order: number
@@ -375,6 +406,7 @@ export type Database = {
           is_active?: boolean
           item_key: string
           item_label: string
+          last_updated_by?: string | null
           menu_item_id?: string | null
           price?: number
           sort_order?: number
@@ -389,6 +421,7 @@ export type Database = {
           is_active?: boolean
           item_key?: string
           item_label?: string
+          last_updated_by?: string | null
           menu_item_id?: string | null
           price?: number
           sort_order?: number
