@@ -19,6 +19,7 @@ import { Label } from '@/components/ui/label';
 import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Pencil, Trash2, LogOut, ChevronDown, GripVertical, Diamond, Lock, LockOpen, Users, Settings2, Calendar, UserCheck } from 'lucide-react';
 import { CoupleSelectionsViewer } from '@/components/admin/CoupleSelectionsViewer';
+import { CoupleHistoryViewer } from '@/components/admin/CoupleHistoryViewer';
 import { PricingManagement } from '@/components/admin/PricingManagement';
 import { useAllCoupleSelectionCounts } from '@/hooks/useAllCoupleSelectionCounts';
 import {
@@ -392,6 +393,10 @@ export default function AdminDashboard() {
                           coupleId={couple.id}
                           coupleName={`${couple.partner1_name} & ${couple.partner2_name}`}
                           guestCount={couple.guest_count}
+                        />
+                        <CoupleHistoryViewer
+                          coupleId={couple.id}
+                          coupleName={`${couple.partner1_name} & ${couple.partner2_name}`}
                         />
                       </div>
                     ))}

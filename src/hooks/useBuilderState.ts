@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { BuilderSelections, defaultSelections } from '@/data/builderMenuData';
+import { BuilderSelections, defaultSelections, STEPS } from '@/data/builderMenuData';
 
 export interface CoupleProfile {
   id: string;
@@ -11,14 +11,61 @@ export interface CoupleProfile {
   email: string;
 }
 
+// Map step index to a human-readable name and the selections key
+const STEP_KEYS: Record<number, { name: string; key: keyof BuilderSelections }> = {
+  0: { name: 'Rehearsal Dinner', key: 'rehearsalDinner' },
+  1: { name: 'Welcome Hour', key: 'welcomeHour' },
+  2: { name: 'Cocktail Hour', key: 'cocktailHour' },
+  3: { name: 'Reception Dinner', key: 'reception' },
+  4: { name: 'Meal Inclusions', key: 'mealInclusions' },
+  5: { name: 'Desserts', key: 'desserts' },
+  6: { name: 'Bar Package', key: 'barPackage' },
+};
+
+function logChanges(
+  coupleId: string,
+  prev: BuilderSelections,
+  next: BuilderSelections,
+  isSubmitted: boolean,
+) {
+  const entries: { step: string; previous_value: any; new_value: any }[] = [];
+  for (const [, { name, key }] of Object.entries(STEP_KEYS)) {
+    const p = JSON.stringify(prev[key]);
+    const n = JSON.stringify(next[key]);
+    if (p !== n) {
+      entries.push({ step: name, previous_value: prev[key], new_value: next[key] });
+    }
+  }
+  // Also check stepNotes
+  const pNotes = JSON.stringify(prev.stepNotes);
+  const nNotes = JSON.stringify(next.stepNotes);
+  if (pNotes !== nNotes) {
+    entries.push({ step: 'Step Notes', previous_value: prev.stepNotes, new_value: next.stepNotes });
+  }
+
+  if (entries.length === 0) return;
+
+  const rows = entries.map(e => ({
+    couple_id: coupleId,
+    step: e.step,
+    previous_value: e.previous_value,
+    new_value: e.new_value,
+    post_submission: isSubmitted,
+  }));
+
+  (supabase as any).from('change_history').insert(rows).then(() => {});
+}
+
 export function useBuilderState() {
   const [profile, setProfile] = useState<CoupleProfile | null>(null);
   const [selections, setSelections] = useState<BuilderSelections>(defaultSelections);
   const [status, setStatus] = useState<string>('not_started');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const selectionsRef = useRef(selections);
+  const previousSelectionsRef = useRef(selections);
   const profileRef = useRef(profile);
   const statusRef = useRef(status);
 
@@ -36,15 +83,24 @@ export function useBuilderState() {
       const s = statusRef.current;
       if (!p) return;
       const statusToSave = s === 'not_started' ? 'in_progress' : s;
+      const prev = previousSelectionsRef.current;
+      const next = selectionsRef.current;
+
+      logChanges(p.id, prev, next, s === 'submitted');
+      previousSelectionsRef.current = next;
+
       (supabase as any)
         .from('builder_selections')
         .upsert({
           couple_id: p.id,
-          selections: selectionsRef.current,
+          selections: next,
           status: statusToSave,
           updated_at: new Date().toISOString(),
         }, { onConflict: 'couple_id' })
-        .then(() => { if (s === 'not_started') setStatus('in_progress'); });
+        .then(() => {
+          if (s === 'not_started') setStatus('in_progress');
+          setLastSavedAt(new Date());
+        });
     }, 2000);
     return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current); };
   }, [selections, loading]);
@@ -135,5 +191,5 @@ export function useBuilderState() {
     setProfile(null);
   };
 
-  return { profile, selections, setSelections, status, loading, saving, saveSelections, submitSelections, logout };
+  return { profile, selections, setSelections, status, loading, saving, lastSavedAt, saveSelections, submitSelections, logout };
 }
