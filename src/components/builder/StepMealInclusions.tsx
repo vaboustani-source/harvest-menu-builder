@@ -1,5 +1,6 @@
 import { BuilderSelections } from '@/data/builderMenuData';
 import { Switch } from '@/components/ui/switch';
+import { usePricingData } from '@/hooks/usePricingConfig';
 
 interface Props {
   selections: BuilderSelections;
