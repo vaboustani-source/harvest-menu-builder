@@ -63,13 +63,16 @@ function MealCard({ title, body, placeholder }: { title: string; body: string; p
   );
 }
 
-function ToggleUpgrade({ label, price, checked, onChange }: {
-  label: string; price: number; checked: boolean; onChange: (v: boolean) => void;
+function ToggleUpgrade({ label, subtitle, itemKey, fallbackPrice, checked, onChange }: {
+  label: string; subtitle?: string; itemKey: string; fallbackPrice: number; checked: boolean; onChange: (v: boolean) => void;
 }) {
+  const pricing = usePricingData();
+  const price = pricing.getPrice(itemKey) ?? fallbackPrice;
   return (
     <div className="flex items-center justify-between px-4 py-3 rounded-lg border" style={{ borderColor: '#E8E2D9' }}>
       <div>
         <p className="font-sans text-[12px] font-medium" style={{ color: '#1A1A1A' }}>{label}</p>
+        {subtitle && <p className="font-serif text-[11px] italic" style={{ color: '#6B6B6B' }}>{subtitle}</p>}
         <p className="font-sans text-[10px]" style={{ color: '#C9A84C' }}>+${price}pp</p>
       </div>
       <Switch checked={checked} onCheckedChange={onChange} />

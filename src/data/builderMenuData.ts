@@ -553,6 +553,10 @@ export function calculateTotal(sel: BuilderSelections, pricing: PricingData = de
     const price = pricing.getPrice('bloody_mary_bar') ?? 20;
     lineItems.push({ label: 'Bloody Mary Bar', amount: price, section: 'Meal Inclusions' });
   }
+  if (sel.mealInclusions.farewellBrunch) {
+    const price = pricing.getPrice('farewell_brunch') ?? 25;
+    lineItems.push({ label: 'Upgrade to Farewell Brunch', amount: price, section: 'Meal Inclusions' });
+  }
 
   const basePackage = pricing.getPrice('base_reception_pp') ?? 105;
   const totalUpcharges = lineItems.reduce((sum, li) => sum + li.amount, 0);
