@@ -60,8 +60,10 @@ export default function CoupleMenuBuilder() {
 
   const isReview = currentStep === STEPS.length - 1;
   const isFirst = currentStep === 0;
+  const isGuide = currentStep === 0;
 
   const stepComponents = [
+    <StepMenuGuide key="guide" coupleId={profile.id} builderStatus={status} onGoToStep={goToStep} />,
     <StepRehearsalDinner key="rehearsal" selections={selections} onChange={handleChange} />,
     <StepWelcomeHour key="welcome" selections={selections} onChange={handleChange} />,
     <StepCocktailHour key="cocktail" selections={selections} onChange={handleChange} />,
