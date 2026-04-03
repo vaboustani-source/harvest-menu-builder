@@ -104,6 +104,18 @@ export default function CoupleMenuBuilder() {
       {/* Content + Sidebar */}
       <div className="max-w-[1200px] mx-auto flex">
         <main className="flex-1 px-6 pt-8 pb-32 lg:pb-16">
+          {/* Saved indicator */}
+          {lastSavedAt && !saving && (
+            <div className="flex items-center gap-1.5 mb-4">
+              <Check size={12} style={{ color: '#7A9E7E' }} />
+              <span className="font-serif italic text-[12px]" style={{ color: '#7A9E7E' }}>Saved</span>
+            </div>
+          )}
+          {saving && (
+            <div className="mb-4">
+              <span className="font-serif italic text-[12px]" style={{ color: '#C9A84C' }}>Saving…</span>
+            </div>
+          )}
           {stepComponents[currentStep]}
 
           {/* Navigation */}
