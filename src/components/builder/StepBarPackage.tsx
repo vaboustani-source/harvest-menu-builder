@@ -1,5 +1,6 @@
 import { BuilderSelections } from '@/data/builderMenuData';
 import { Textarea } from '@/components/ui/textarea';
+import { StepNotes } from './StepNotes';
 
 interface Props {
   selections: BuilderSelections;
@@ -37,6 +38,9 @@ export function StepBarPackage({ selections, onChange }: Props) {
           className="border-[#E8E2D9] bg-white font-serif text-sm min-h-[100px] resize-none"
         />
       </div>
+
+      <StepNotes stepLabel="Bar Package" value={selections.stepNotes.barPackage}
+        onChange={v => onChange({ stepNotes: { ...selections.stepNotes, barPackage: v } })} />
     </div>
   );
 }

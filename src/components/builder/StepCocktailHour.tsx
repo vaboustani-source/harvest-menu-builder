@@ -129,6 +129,9 @@ export function StepCocktailHour({ selections, onChange }: Props) {
           );
         })}
       </div>
+
+      <StepNotes stepLabel="Cocktail Hour" value={selections.stepNotes.cocktailHour}
+        onChange={v => onChange({ stepNotes: { ...selections.stepNotes, cocktailHour: v } })} />
     </div>
   );
 }

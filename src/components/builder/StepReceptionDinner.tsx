@@ -196,6 +196,9 @@ export function StepReceptionDinner({ selections, onChange }: Props) {
           </div>
         );
       })}
+
+      <StepNotes stepLabel="Reception Dinner" value={selections.stepNotes.receptionDinner}
+        onChange={v => onChange({ stepNotes: { ...selections.stepNotes, receptionDinner: v } })} />
     </div>
   );
 }

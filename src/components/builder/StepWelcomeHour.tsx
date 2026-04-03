@@ -168,6 +168,9 @@ export function StepWelcomeHour({ selections, onChange }: Props) {
           </div>
         )}
       </div>
+
+      <StepNotes stepLabel="Welcome Hour" value={selections.stepNotes.welcomeHour}
+        onChange={v => onChange({ stepNotes: { ...selections.stepNotes, welcomeHour: v } })} />
     </div>
   );
 }

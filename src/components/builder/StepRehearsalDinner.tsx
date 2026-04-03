@@ -182,6 +182,9 @@ export function StepRehearsalDinner({ selections, onChange }: Props) {
           className="border-[#E8E2D9] bg-white font-serif text-sm min-h-[80px] resize-none"
         />
       </div>
+
+      <StepNotes stepLabel="Rehearsal Dinner" value={selections.stepNotes.rehearsalDinner}
+        onChange={v => onChange({ stepNotes: { ...selections.stepNotes, rehearsalDinner: v } })} />
     </div>
   );
 }

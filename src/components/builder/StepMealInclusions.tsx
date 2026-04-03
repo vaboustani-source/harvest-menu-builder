@@ -1,6 +1,7 @@
 import { BuilderSelections } from '@/data/builderMenuData';
 import { Switch } from '@/components/ui/switch';
 import { usePricingData } from '@/hooks/usePricingConfig';
+import { StepNotes } from './StepNotes';
 
 interface Props {
   selections: BuilderSelections;
@@ -49,6 +50,9 @@ export function StepMealInclusions({ selections, onChange }: Props) {
           </div>
         </div>
       </div>
+
+      <StepNotes stepLabel="Meal Inclusions" value={selections.stepNotes.mealInclusions}
+        onChange={v => onChange({ stepNotes: { ...selections.stepNotes, mealInclusions: v } })} />
     </div>
   );
 }
