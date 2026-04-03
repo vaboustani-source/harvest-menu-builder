@@ -309,6 +309,7 @@ export default function AdminDashboard() {
                 { key: 'menu' as const, label: 'Menu', icon: null },
                 { key: 'couples' as const, label: 'Couples', icon: <Users size={13} /> },
                 { key: 'pricing' as const, label: 'Pricing', icon: <Settings2 size={13} /> },
+                { key: 'guide-cards' as const, label: 'Guide Cards', icon: <Diamond size={13} /> },
               ]).map(tab => (
                 <button
                   key={tab.key}
