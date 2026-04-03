@@ -17,6 +17,15 @@ export function useBuilderState() {
   const [status, setStatus] = useState<string>('not_started');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const selectionsRef = useRef(selections);
+  const profileRef = useRef(profile);
+  const statusRef = useRef(status);
+
+  // Keep refs in sync
+  useEffect(() => { selectionsRef.current = selections; }, [selections]);
+  useEffect(() => { profileRef.current = profile; }, [profile]);
+  useEffect(() => { statusRef.current = status; }, [status]);
 
   useEffect(() => {
     loadProfile();
