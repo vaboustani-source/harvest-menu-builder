@@ -69,6 +69,48 @@ function SortableRow({ id, children }: { id: string; children: (dragHandle: Reac
   );
 }
 
+// ── Editable Guest Count ──────────────────────────────────────────────────────
+
+function EditableGuestCount({ coupleId, initialCount }: { coupleId: string; initialCount: number | null }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(initialCount?.toString() ?? '');
+  const qc = useQueryClient();
+
+  const save = async () => {
+    const num = value.trim() ? parseInt(value) : null;
+    await supabase.from('couples').update({ guest_count: num }).eq('id', coupleId);
+    qc.invalidateQueries({ queryKey: ['couples'] });
+    setEditing(false);
+  };
+
+  if (editing) {
+    return (
+      <span className="flex items-center gap-1">
+        <input
+          type="number"
+          value={value}
+          onChange={e => setValue(e.target.value)}
+          onBlur={save}
+          onKeyDown={e => e.key === 'Enter' && save()}
+          className="w-16 px-1.5 py-0.5 text-xs border border-border rounded font-sans"
+          autoFocus
+        />
+        <span className="font-sans text-xs text-muted-foreground">guests</span>
+      </span>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => { setValue(initialCount?.toString() ?? ''); setEditing(true); }}
+      className="font-sans text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+      title="Click to edit guest count"
+    >
+      {initialCount ? `${initialCount} guests ✎` : 'Set guest count ✎'}
+    </button>
+  );
+}
+
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 
 export default function AdminDashboard() {
