@@ -433,6 +433,7 @@ export default function AdminDashboard() {
                           coupleId={couple.id}
                           coupleName={`${couple.partner1_name} & ${couple.partner2_name}`}
                           guestCount={couple.guest_count}
+                          weddingDate={couple.wedding_date}
                         />
                         <CoupleHistoryViewer
                           coupleId={couple.id}
