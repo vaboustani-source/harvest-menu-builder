@@ -20,6 +20,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Pencil, Trash2, LogOut, ChevronDown, GripVertical, Diamond, Lock, LockOpen, Users, Settings2, Calendar, UserCheck } from 'lucide-react';
 import { CoupleSelectionsViewer } from '@/components/admin/CoupleSelectionsViewer';
 import { CoupleHistoryViewer } from '@/components/admin/CoupleHistoryViewer';
+import { CoupleGuideManager, GuideCardsEditor } from '@/components/admin/CoupleGuideManager';
 import { PricingManagement } from '@/components/admin/PricingManagement';
 import { useAllCoupleSelectionCounts } from '@/hooks/useAllCoupleSelectionCounts';
 import {
@@ -122,7 +123,7 @@ export default function AdminDashboard() {
   const { data: groupLimits } = useGroupLimits();
   const { data: selectionCounts } = useAllCoupleSelectionCounts();
   const [activeSectionId, setActiveSectionId] = useState<string>('');
-  const [adminView, setAdminView] = useState<'menu' | 'couples' | 'pricing'>('menu');
+  const [adminView, setAdminView] = useState<'menu' | 'couples' | 'pricing' | 'guide-cards'>('menu');
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Ownership lock for Basics tab
@@ -308,6 +309,7 @@ export default function AdminDashboard() {
                 { key: 'menu' as const, label: 'Menu', icon: null },
                 { key: 'couples' as const, label: 'Couples', icon: <Users size={13} /> },
                 { key: 'pricing' as const, label: 'Pricing', icon: <Settings2 size={13} /> },
+                { key: 'guide-cards' as const, label: 'Guide Cards', icon: <Diamond size={13} /> },
               ]).map(tab => (
                 <button
                   key={tab.key}
@@ -439,6 +441,10 @@ export default function AdminDashboard() {
                           coupleId={couple.id}
                           coupleName={`${couple.partner1_name} & ${couple.partner2_name}`}
                         />
+                        <CoupleGuideManager
+                          coupleId={couple.id}
+                          coupleName={`${couple.partner1_name} & ${couple.partner2_name}`}
+                        />
                       </div>
                     ))}
                   </div>
@@ -446,6 +452,8 @@ export default function AdminDashboard() {
               </div>
             ) : adminView === 'pricing' ? (
               <PricingManagement />
+            ) : adminView === 'guide-cards' ? (
+              <GuideCardsEditor />
             ) :
             activeSection && activeSectionId === 'basics' ? (
               /* ── Basics Card Editor ── */

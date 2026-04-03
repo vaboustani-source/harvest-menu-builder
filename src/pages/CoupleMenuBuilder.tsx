@@ -6,6 +6,7 @@ import { ProgressStepper } from '@/components/builder/ProgressStepper';
 import { BuilderSidebar } from '@/components/builder/BuilderSidebar';
 import { MobileProgressBar } from '@/components/builder/MobileProgressBar';
 import { MobileStickyTotal } from '@/components/builder/MobileTotalDrawer';
+import { StepMenuGuide } from '@/components/builder/StepMenuGuide';
 import { StepRehearsalDinner } from '@/components/builder/StepRehearsalDinner';
 import { StepWelcomeHour } from '@/components/builder/StepWelcomeHour';
 import { StepCocktailHour } from '@/components/builder/StepCocktailHour';
@@ -59,8 +60,10 @@ export default function CoupleMenuBuilder() {
 
   const isReview = currentStep === STEPS.length - 1;
   const isFirst = currentStep === 0;
+  const isGuide = currentStep === 0;
 
   const stepComponents = [
+    <StepMenuGuide key="guide" coupleId={profile.id} builderStatus={status} onGoToStep={goToStep} />,
     <StepRehearsalDinner key="rehearsal" selections={selections} onChange={handleChange} />,
     <StepWelcomeHour key="welcome" selections={selections} onChange={handleChange} />,
     <StepCocktailHour key="cocktail" selections={selections} onChange={handleChange} />,
@@ -140,8 +143,8 @@ export default function CoupleMenuBuilder() {
 
           {stepComponents[currentStep]}
 
-          {/* Navigation buttons */}
-          {!isReview && (
+          {/* Navigation buttons — hide on guide and review steps */}
+          {!isReview && !isGuide && (
             <div className="flex items-center justify-between mt-10 pt-6 border-t" style={{ borderColor: '#E8E2D9' }}>
               {!isFirst ? (
                 <Button variant="outline" onClick={() => goToStep(currentStep - 1)}

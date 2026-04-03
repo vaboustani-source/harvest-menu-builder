@@ -112,6 +112,7 @@ export const defaultSelections: BuilderSelections = {
 // === STEPS ===
 
 export const STEPS = [
+  { id: 'guide', label: 'Your Menu Guide' },
   { id: 'rehearsal', label: 'Rehearsal Dinner' },
   { id: 'welcome', label: 'Welcome Hour' },
   { id: 'cocktail', label: 'Cocktail Hour' },
