@@ -20,6 +20,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Pencil, Trash2, LogOut, ChevronDown, GripVertical, Diamond, Lock, LockOpen, Users, Settings2, Calendar, UserCheck } from 'lucide-react';
 import { CoupleSelectionsViewer } from '@/components/admin/CoupleSelectionsViewer';
 import { CoupleHistoryViewer } from '@/components/admin/CoupleHistoryViewer';
+import { CoupleGuideManager, GuideCardsEditor } from '@/components/admin/CoupleGuideManager';
 import { PricingManagement } from '@/components/admin/PricingManagement';
 import { useAllCoupleSelectionCounts } from '@/hooks/useAllCoupleSelectionCounts';
 import {
