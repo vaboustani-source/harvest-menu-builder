@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { BuilderSelections, rehearsalThemes } from '@/data/builderMenuData';
 import { Check } from 'lucide-react';
+import { StepNotes } from './StepNotes';
 import { Textarea } from '@/components/ui/textarea';
 import { usePricingConfig } from '@/hooks/usePricingConfig';
 import { BuilderFilterBar, type DietFilter, type SeasonFilter } from './BuilderFilterBar';
