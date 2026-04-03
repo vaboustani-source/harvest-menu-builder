@@ -29,7 +29,7 @@ export default function CoupleMenuBuilder() {
   }, [setSelections]);
 
   const goToStep = async (step: number) => {
-    await saveSelections(selections);
+    await saveSelections();
     setCurrentStep(step);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
