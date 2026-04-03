@@ -441,6 +441,10 @@ export default function AdminDashboard() {
                           coupleId={couple.id}
                           coupleName={`${couple.partner1_name} & ${couple.partner2_name}`}
                         />
+                        <CoupleGuideManager
+                          coupleId={couple.id}
+                          coupleName={`${couple.partner1_name} & ${couple.partner2_name}`}
+                        />
                       </div>
                     ))}
                   </div>
