@@ -1,4 +1,4 @@
-import { BuilderSelections, calculateTotal, rehearsalThemes, welcomeOptions, spritzerOptions, cocktailHourItems, receptionCategories, COCKTAIL_INCLUDED_COUNT } from '@/data/builderMenuData';
+import { BuilderSelections, calculateTotal, rehearsalThemes, welcomeOptions, spritzerOptions, cocktailHourItems, receptionCategories, COCKTAIL_INCLUDED_COUNT, barAddOnItems } from '@/data/builderMenuData';
 import { Button } from '@/components/ui/button';
 import { Check, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
