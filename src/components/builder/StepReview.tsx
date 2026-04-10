@@ -134,9 +134,21 @@ export function StepReview({ selections, guestCount, status, saving, onSaveDraft
 
       {/* Bar Package */}
       <ReviewSection title="Bar Package">
+        {(sel.barPackage.selectedAddOns?.length > 0) ? (
+          <ul className="space-y-1">
+            {sel.barPackage.selectedAddOns.map((id: string) => {
+              const item = barAddOnItems.find(a => a.id === id);
+              return item ? (
+                <li key={id} className="font-serif text-[13px]" style={{ color: '#2C3E2D' }}>
+                  {item.name}{item.priceLabel ? ` — ${item.priceLabel}` : ''}
+                </li>
+              ) : null;
+            })}
+          </ul>
+        ) : null}
         {sel.barPackage.notes ? (
-          <p className="font-serif text-[12px] italic" style={{ color: '#6B6B6B' }}>Bar notes: {sel.barPackage.notes}</p>
-        ) : <EmptyState />}
+          <p className="font-serif text-[12px] italic mt-2" style={{ color: '#6B6B6B' }}>Bar notes: {sel.barPackage.notes}</p>
+        ) : (!sel.barPackage.selectedAddOns?.length && <EmptyState />)}
         <NoteDisplay note={sel.stepNotes.barPackage} />
       </ReviewSection>
 
