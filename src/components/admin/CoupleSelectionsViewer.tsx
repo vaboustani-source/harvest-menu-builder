@@ -178,10 +178,10 @@ function buildPdfSections(sel: BuilderSelections, pricing: ReturnType<typeof use
   }
 
   // Bar Package
-  const barItems: { name: string; upcharge: string | null }[] = [];
+  const barItems: { name: string; upcharge: number | null; note?: string }[] = [];
   for (const id of (sel.barPackage.selectedAddOns ?? [])) {
     const item = barAddOnItems.find(a => a.id === id);
-    if (item) barItems.push({ name: item.name, upcharge: item.priceLabel || null });
+    if (item) barItems.push({ name: item.name, upcharge: item.price > 0 ? item.price : null });
   }
   if (sel.barPackage.notes) {
     barItems.push({ name: `Notes: ${sel.barPackage.notes}`, upcharge: null });
