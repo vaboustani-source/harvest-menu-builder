@@ -145,7 +145,7 @@ export function useBuilderState() {
           },
           mealInclusions: { ...defaultSelections.mealInclusions, ...saved.mealInclusions },
           desserts: { ...defaultSelections.desserts, ...saved.desserts },
-          barPackage: { selectedAddOns: Array.isArray(saved.barPackage?.selectedAddOns) ? saved.barPackage.selectedAddOns : defaultSelections.barPackage.selectedAddOns, ...defaultSelections.barPackage, ...saved.barPackage, selectedAddOns: Array.isArray(saved.barPackage?.selectedAddOns) ? saved.barPackage.selectedAddOns : defaultSelections.barPackage.selectedAddOns },
+          barPackage: { ...defaultSelections.barPackage, ...saved.barPackage, selectedAddOns: Array.isArray(saved.barPackage?.selectedAddOns) ? saved.barPackage.selectedAddOns : defaultSelections.barPackage.selectedAddOns },
           stepNotes: { ...defaultSelections.stepNotes, ...saved.stepNotes },
         };
         setSelections(merged);
