@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import {
   BuilderSelections, defaultSelections, calculateTotal,
   rehearsalThemes, welcomeOptions, spritzerOptions,
-  cocktailHourItems, receptionCategories, COCKTAIL_INCLUDED_COUNT,
+  cocktailHourItems, receptionCategories, COCKTAIL_INCLUDED_COUNT, barAddOnItems,
 } from '@/data/builderMenuData';
 import { usePricingData } from '@/hooks/usePricingConfig';
 
@@ -44,7 +44,7 @@ function useBuilderSelections(coupleId: string | null) {
         },
         mealInclusions: { ...defaultSelections.mealInclusions, ...saved.mealInclusions },
         desserts: { ...defaultSelections.desserts, ...saved.desserts },
-        barPackage: { ...defaultSelections.barPackage, ...saved.barPackage },
+        barPackage: { ...defaultSelections.barPackage, ...saved.barPackage, selectedAddOns: Array.isArray(saved.barPackage?.selectedAddOns) ? saved.barPackage.selectedAddOns : defaultSelections.barPackage.selectedAddOns },
         stepNotes: { ...defaultSelections.stepNotes, ...saved.stepNotes },
       };
       return merged;
@@ -178,8 +178,16 @@ function buildPdfSections(sel: BuilderSelections, pricing: ReturnType<typeof use
   }
 
   // Bar Package
+  const barItems: { name: string; upcharge: string | null }[] = [];
+  for (const id of (sel.barPackage.selectedAddOns ?? [])) {
+    const item = barAddOnItems.find(a => a.id === id);
+    if (item) barItems.push({ name: item.name, upcharge: item.priceLabel || null });
+  }
   if (sel.barPackage.notes) {
-    sections.push({ title: 'Bar Package', items: [{ name: sel.barPackage.notes, upcharge: null }], notes: sel.stepNotes.barPackage, subtotal: 0 });
+    barItems.push({ name: `Notes: ${sel.barPackage.notes}`, upcharge: null });
+  }
+  if (barItems.length > 0) {
+    sections.push({ title: 'Bar Package', items: barItems, notes: sel.stepNotes.barPackage, subtotal: 0 });
   }
 
   return sections;
@@ -290,7 +298,8 @@ export function CoupleSelectionsViewer({ coupleId, coupleName, guestCount, weddi
     selections.mealInclusions.bloodyMaryBar ||
     selections.mealInclusions.farewellBrunch ||
     selections.desserts.notes ||
-    selections.barPackage.notes
+    selections.barPackage.notes ||
+    (selections.barPackage.selectedAddOns?.length > 0)
   );
 
   const handleExportPdf = () => {
