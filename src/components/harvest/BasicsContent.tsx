@@ -71,8 +71,10 @@ export function BasicsContent() {
               </p>
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {group.cards.map((card) => (
-                <div key={card.id} className="bg-white rounded-lg p-7 shadow-card">
+              {group.cards.map((card) => {
+                const isFullWidth = group.cards.length > 2 && card.card_type === 'addon';
+                return (
+                <div key={card.id} className={`bg-white rounded-lg p-7 shadow-card ${isFullWidth ? 'md:col-span-2' : ''}`}>
                   <h4 className="font-serif text-[20px] font-light text-grove mb-4 leading-[1.3]">
                     {card.title}
                   </h4>
