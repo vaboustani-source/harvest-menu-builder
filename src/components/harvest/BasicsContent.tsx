@@ -89,7 +89,8 @@ export function BasicsContent() {
                     </p>
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         ))}
