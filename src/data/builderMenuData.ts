@@ -592,6 +592,15 @@ export function calculateTotal(sel: BuilderSelections, pricing: PricingData = de
     const price = pricing.getPrice('farewell_brunch') ?? 25;
     lineItems.push({ label: 'Upgrade to Farewell Brunch', amount: price, section: 'Meal Inclusions' });
   }
+  // Bar add-ons
+  const barAddOns = sel.barPackage.selectedAddOns ?? [];
+  for (const id of barAddOns) {
+    const item = barAddOnItems.find(a => a.id === id);
+    if (item && item.price > 0) {
+      const price = pricing.getPrice(id) ?? item.price;
+      lineItems.push({ label: item.name, amount: price, section: 'Bar Package' });
+    }
+  }
 
   const basePackage = pricing.getPrice('base_reception_pp') ?? 105;
   const totalUpcharges = lineItems.reduce((sum, li) => sum + li.amount, 0);
