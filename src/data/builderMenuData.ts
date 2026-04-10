@@ -49,6 +49,21 @@ export interface ReceptionCategory {
   items: ReceptionItem[];
 }
 
+export interface BarAddOn {
+  id: string;
+  name: string;
+  price: number;
+  priceLabel: string;
+}
+
+export const barAddOnItems: BarAddOn[] = [
+  { id: 'bar-extra-hour', name: 'Additional hour of service', price: 18, priceLabel: '+$18pp' },
+  { id: 'bar-satellite', name: 'Satellite bar', price: 750, priceLabel: '$750' },
+  { id: 'bar-table-wine', name: 'Table wine service', price: 350, priceLabel: '$350' },
+  { id: 'bar-after-party', name: 'After Party bar set up', price: 250, priceLabel: '$250' },
+  { id: 'bar-premium', name: 'Premium options — please see the Bar tab above', price: 0, priceLabel: '' },
+];
+
 export interface BuilderSelections {
   rehearsalDinner: {
     themeId: string | null;
@@ -77,6 +92,7 @@ export interface BuilderSelections {
     notes: string;
   };
   barPackage: {
+    selectedAddOns: string[];
     notes: string;
   };
   stepNotes: {
@@ -97,7 +113,7 @@ export const defaultSelections: BuilderSelections = {
   reception: { salads: [], pastasGrains: [], proteins: [], vegetablesStarches: [] },
   mealInclusions: { mimosaBar: false, bloodyMaryBar: false, farewellBrunch: false },
   desserts: { notes: '' },
-  barPackage: { notes: '' },
+  barPackage: { selectedAddOns: [], notes: '' },
   stepNotes: {
     rehearsalDinner: '',
     welcomeHour: '',
@@ -575,6 +591,15 @@ export function calculateTotal(sel: BuilderSelections, pricing: PricingData = de
   if (sel.mealInclusions.farewellBrunch) {
     const price = pricing.getPrice('farewell_brunch') ?? 25;
     lineItems.push({ label: 'Upgrade to Farewell Brunch', amount: price, section: 'Meal Inclusions' });
+  }
+  // Bar add-ons
+  const barAddOns = sel.barPackage.selectedAddOns ?? [];
+  for (const id of barAddOns) {
+    const item = barAddOnItems.find(a => a.id === id);
+    if (item && item.price > 0) {
+      const price = pricing.getPrice(id) ?? item.price;
+      lineItems.push({ label: item.name, amount: price, section: 'Bar Package' });
+    }
   }
 
   const basePackage = pricing.getPrice('base_reception_pp') ?? 105;
