@@ -1,74 +1,75 @@
-# Menu Builder ↔ Planning Hub — Integration Findings
+# Current Backend Wiring — Read-Only Findings
 
-Report only. No code or schema was changed.
+No files were modified. This is purely a map of how the app is connected today, so you can choose the safest re-point method.
 
-## 1. What gets written when a couple makes menu selections
+## 1. Backend connection
 
-**Single table: `public.builder_selections`** (one row per couple, upserted on `couple_id`).
+- **Type:** Lovable Cloud (Lovable-managed Supabase). Not an external self-managed project.
+- **Project ref:** `ggreatfaqiawxjpqpixy` — confirmed in two places:
+  - `supabase/config.toml` → `project_id = "ggreatfaqiawxjpqpixy"`
+  - `.env` → `VITE_SUPABASE_PROJECT_ID=ggreatfaqiawxjpqpixy`, `VITE_SUPABASE_URL=https://ggreatfaqiawxjpqpixy.supabase.co`
+- Edge functions present: `create-couple`, `create-admin` (deployed to this same project, use its `SUPABASE_SERVICE_ROLE_KEY`).
 
-Columns written by the builder:
-- `couple_id` (uuid) — FK to `public.couples.id`
-- `selections` (jsonb) — the entire nested `BuilderSelections` object: `rehearsalDinner`, `welcomeHour`, `cocktailHour`, `reception { salads, pastasGrains, proteins, vegetablesStarches }`, `mealInclusions`, `desserts`, `barPackage { …, selectedAddOns }`, `stepNotes`
-- `status` (text) — `not_started` → `in_progress` → `submitted`
-- `submitted_at` (timestamptz, nullable) — only set on submit
-- `updated_at` (timestamptz) — bumped on every write
+## 2. Client config (`src/integrations/supabase/client.ts`)
 
-When it writes (`src/hooks/useBuilderState.ts`):
-- **Autosave**: 2 seconds (debounced) after any selection change. Calls `upsert({ couple_id, selections, status, updated_at }, { onConflict: 'couple_id' })`. If status was `not_started` it flips to `in_progress`.
-- **Explicit save** (`saveSelections`): same upsert, cancels the pending debounce.
-- **Submit** (`submitSelections`): same upsert plus `status='submitted'` and `submitted_at = now()`.
+URL and key come from Vite env vars — no hardcoded literals:
 
-Side-effect writes (same flow, different tables):
-- `public.change_history` — INSERT per changed step on every save: `{ couple_id, step, previous_value, new_value, post_submission }`. This is an append-only audit log.
-- `public.menu_progress` and `public.couple_milestones` — submit auto-triggers milestones (`draft_submitted`, `first_revision_submitted`, `final_revision_submitted`) via `autoTriggerMilestone`.
+```ts
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+```
 
-**`public.couple_selections` is NOT written by the builder.** Despite the name, no insert/update/delete call to that table exists anywhere in `src/`. The hook `useCoupleSelections` only reads it. The table currently holds 19 rows (seed/legacy from an earlier per-item schema before the JSONB pivot). Treat it as dead/legacy storage. Live selection state lives entirely in `builder_selections.selections` JSONB.
+Env vars defined in `.env` (Lovable-managed, auto-generated):
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+- `VITE_SUPABASE_PROJECT_ID`
+- (also `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` for non-Vite contexts)
 
-## 2. Identity — and the Hub linkage gap
+The file header says "automatically generated. Do not edit it directly" — on Lovable Cloud, these are rewritten on every sync to whatever Cloud project is attached. Editing `.env` or `client.ts` by hand is not the supported re-point path.
 
-How a couple is identified when saving:
-1. `supabase.auth.getUser()` returns the auth user.
-2. App looks up `couples` by `couples.user_id = auth.users.id` and reads `couples.id` (a separate uuid).
-3. Every write to `builder_selections`, `change_history`, `menu_progress`, `couple_milestones` keys on **`couple_id` = `couples.id`** — NOT the auth user id, NOT the email.
+## 3. Couple authentication
 
-The `public.couples` table columns: `id, user_id, partner1_name, partner2_name, email, wedding_date, guest_count, status, created_at, updated_at`. There is **no `event_id`** column. RLS policies and joins are scoped by `user_id` / `couple_id` only.
+- **Method:** Email + password only. No magic link, no OAuth, no anonymous. Sign-ups are disabled at the project level — couples cannot self-register.
+- **Login UIs (two entry points, identical mechanism):**
+  - `src/components/builder/CoupleLogin.tsx` (full page)
+  - `src/components/harvest/CoupleLoginModal.tsx` (modal from public site)
+  - Both call `supabase.auth.signInWithPassword({ email, password })`.
+- **Account creation:** Admin-only, via edge function `supabase/functions/create-couple/index.ts`, invoked from `src/components/admin/CoupleFormModal.tsx` (`supabase.functions.invoke('create-couple', ...)`). The function uses the service role key to:
+  1. `auth.admin.createUser({ email, password, email_confirm: true })`
+  2. `insert` into `public.couples` with `user_id = authData.user.id`, `email`, `partner1_name`, `partner2_name`, optional `wedding_date`, `guest_count`.
+  If the couples insert fails, it deletes the auth user (rollback).
+- **Linking after login:** The couple is identified by `auth.uid()` mapped to `couples.user_id`. The canonical lookup is in `src/hooks/useBuilderState.ts`:
 
-**Hub linkage check** — searched the entire codebase, migrations, and `public` schema:
-- No column named `event_id` exists on `couples`, `builder_selections`, `couple_selections`, or any other public table in this project.
-- No table named `events` (or anything matching `%event%`) exists in this `public` schema. Only the basics-cards seed text mentions the word "events" in copy.
-- No foreign key, view, or RPC reaches a Hub `events` table.
+  ```ts
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: couple } = await supabase
+    .from('couples').select('*').eq('user_id', user.id).single();
+  ```
+  `useCoupleSelections.ts` (`useCoupleProfile`) does the same `eq('user_id', user.id)` lookup. `CoupleLoginModal` additionally guards by checking `couples.email == typed email` after sign-in to reject admin accounts.
+- **No on-first-login row creation.** If a `couples` row does not already exist for the `auth.users` id, the builder will silently fail to load a profile.
 
-**Bottom line for integration:** today a saved menu can only be tied back to a Hub event by `couples.email` or by manually matching `wedding_date` + names. There is no structural join. To make selections "flow into the Hub and post to financials," you'll need to add an `event_id` (e.g. on `couples`, nullable uuid referencing the Hub's events table in the shared DB) and populate it when a couple record is created/linked.
+## 4. Where the builder writes a couple's selections
 
-## 3. Login — auth surface
+The save target is the `builder_selections` table (singular row per couple, upserted on `couple_id`). The writes live entirely in `src/hooks/useBuilderState.ts`:
 
-`src/components/harvest/CoupleLoginModal.tsx`:
-- Calls `supabase.auth.signInWithPassword({ email, password })` against the **same Supabase project** the Hub uses (this app uses the shared `@/integrations/supabase/client`).
-- After auth succeeds, it requires a matching row in `public.couples` with the same email; otherwise it shows a "couple accounts only" error (admins log in elsewhere).
-- Sign-ups are **disabled** per project memory; couple users are provisioned by an admin (admin creates the `auth.users` row and the linked `couples` row — see `CoupleFormModal`).
-- The login is therefore **the same Supabase auth identity as the Hub** — same `auth.users.id` is available on both sides — provided the Hub also points at this Supabase project and the couple's auth user was created there. Today the join from a Hub event to a builder couple still has to happen via `auth.users.id` or email, because there is no `event_id` on `couples`.
+- **Auto-save (debounced 2s after any change):**
+  ```ts
+  supabase.from('builder_selections').upsert({
+    couple_id: profile.id,      // = couples.id (NOT auth user id)
+    selections: next,           // full JSONB blob
+    status: statusToSave,       // 'in_progress' | 'submitted' | ...
+    updated_at: new Date().toISOString(),
+  }, { onConflict: 'couple_id' });
+  ```
+- **Explicit save** (`saveSelections`) and **submit** (`submitSelections`) do the same upsert; submit additionally sets `status: 'submitted'` and `submitted_at`, then calls `autoTriggerMilestone` which writes to `menu_progress`.
+- **Change log:** every diff also inserts rows into `public.change_history` (`couple_id`, `step`, `previous_value`, `new_value`, `post_submission`).
+- **No `event_id`** is set anywhere — the only key tying selections to a couple is `couple_id` (FK to `couples.id`, which itself FKs to `auth.users.id` via `user_id`).
+- Other couple-keyed tables touched by the app: `menu_progress` (milestones) and `change_history` (audit). The admin dashboard also `update`s and `delete`s rows in `couples` directly.
 
-There is also an unrelated "Basics Gate" password (`"Boustani6"`) for the public Basics tab — that's a UI gate only, not real auth, and is separate from couple login.
+## Implications for re-pointing (informational, no action taken)
 
-## 4. Submit / finalize / lock
+- Because identity flows `auth.users.id` → `couples.user_id` → `couples.id` → `builder_selections.couple_id` / `change_history.couple_id` / `menu_progress.couple_id`, a re-point must preserve (or re-map) **auth user UUIDs** if you want existing couples to keep their saved selections. If only `couples.user_id` values change on the new backend, the existing `couples` rows will reattach automatically, but any cached `couple_id` in selections rows must match the new `couples.id`.
+- The Lovable-managed `client.ts` and `.env` are regenerated by Cloud; the supported re-point is via the Cloud/Connectors UI rather than hand-editing those files. Edge functions (`create-couple`, `create-admin`) and `SUPABASE_SERVICE_ROLE_KEY` are tied to the current Cloud project and will need to be redeployed/reconfigured against the shared project.
+- Sign-ups being disabled on the source project is a project-level setting on `ggreatfaqiawxjpqpixy` — verify the same is set on the shared target, otherwise the couple-only login guard in `CoupleLoginModal` becomes the only barrier.
 
-Yes, but only at the data level — there is no enforcement.
-
-- `builder_selections.status` is a text column with three observed values: `not_started`, `in_progress`, `submitted`.
-- `submitSelections()` sets `status='submitted'` and stamps `submitted_at`. It also fires the next pending milestone (`draft_submitted`, `first_revision_submitted`, or `final_revision_submitted` depending on prior progress) — supporting multiple submission rounds.
-- After submit, autosave keeps running and keeps writing — `change_history.post_submission` flips to `true` so post-submit edits are tracked, but the row is not frozen. There is no DB trigger, RLS policy, or app-level guard that prevents further mutation once `status='submitted'`.
-- There is no `approved_at`, `locked_at`, `version`, or `revision_number` column. Revisions are implicit — the JSONB is overwritten in place; history lives only in `change_history` deltas.
-
-For Hub financial posting you'll want an explicit lock (e.g. `status='approved'`, `approved_at`, `approved_total_cents`, possibly a snapshot row) and either a trigger or RLS policy that blocks UPDATE on `selections` once approved.
-
-## 5. Pricing — totals are computed, never stored
-
-- `src/data/builderMenuData.ts` exports `calculateTotal(selections, pricing)` which produces a `TotalBreakdown` (line items + grand total) at render time in the builder UI and in `CoupleSelectionsViewer` for admins.
-- Inputs come from `pricing_config` (read via `usePricingConfig`): per-person base values (`base_reception_pp`, `extra_nonalc_pp`, `extra_spritzer_pp`, `salads_included`/`salads_extra_pp`, `pastas_included`/`pastas_extra_pp`, `proteins_*`, `sides_*`, etc.) plus per-item upcharges. A handful of fallback constants are hardcoded (e.g. base reception = $105, additional-hour bar = $18pp).
-- Pricing source-of-truth is enforced as dynamic (project memory: "Prices strictly dynamic from `pricing_config`. Changes never retroactive for submitted menus.") — but **nothing in the database actually freezes prices on submit**. The "non-retroactive" rule is aspirational; today re-rendering a submitted menu with a new `pricing_config` would yield a new total.
-- No column anywhere stores a computed total. Searched: `total`, `grand_total`, `total_amount`, `total_price`, `estimated_total` — none exist on `builder_selections`, `couples`, or any other public table. No edge function / RPC computes or persists a total either. Guest count for per-person math comes from `couples.guest_count`.
-
-For Hub financials this means: (a) you'll need to compute the total at the moment of approval and store it (e.g. `builder_selections.approved_total_cents` plus a snapshot of the priced line items / pricing_config version used), and (b) any pricing edits made after approval must not change the posted financial amount.
-
----
-Read-only investigation — no code, schema, or data was modified.
+No code, env, database, or config was changed.
